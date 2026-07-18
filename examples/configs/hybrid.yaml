@@ -1,0 +1,32 @@
+version: 1
+product:
+  {
+    name: Hybrid Laravel,
+    slug: hybrid-laravel,
+    type: saas,
+    description: Profil CI FangaBase,
+    locale: fr,
+    timezone: Africa/Bamako,
+    country: ML,
+    default_currency: XOF,
+  }
+architecture: { target: hybrid, frontend: next, backend: laravel, ui: next }
+database: { engine: mysql, provider: mysql }
+email: { provider: smtp }
+storage: { provider: s3 }
+queue: { provider: database }
+cache: { provider: database }
+billing: { modes: [credits, subscription] }
+payments:
+  providers: [fedapay]
+  default_provider: fedapay
+design: { source: fangabase }
+features:
+  {
+    organizations: true,
+    marketplace: false,
+    admin: true,
+    audit_log: true,
+    notifications: true,
+    uploads: true,
+  }

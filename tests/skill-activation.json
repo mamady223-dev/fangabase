@@ -1,0 +1,43 @@
+{
+  "fangabase-init": {
+    "explicit": ["Utilise $fangabase-init"],
+    "implicit": [
+      "Initialise ce d?p?t FangaBase",
+      "G?n?re un profil depuis cloud.yaml"
+    ],
+    "negative": ["Corrige le CSS", "Ajoute un remboursement"]
+  },
+  "fangabase-architecture": {
+    "explicit": ["Utilise $fangabase-architecture"],
+    "implicit": [
+      "Quel profil choisir pour cPanel ?",
+      "Passe le backend en hybride"
+    ],
+    "negative": ["?cris un e-mail", "Audite une release"]
+  },
+  "fangabase-design": {
+    "explicit": ["Utilise $fangabase-design"],
+    "implicit": ["Int?gre cette maquette", "Rends le dashboard accessible"],
+    "negative": ["Ajoute Stripe", "Configure Nginx"]
+  },
+  "fangabase-payments": {
+    "explicit": ["Utilise $fangabase-payments"],
+    "implicit": ["Ajoute FedaPay", "S?curise ce webhook Stripe"],
+    "negative": ["Choisis une architecture", "Corrige le responsive"]
+  },
+  "fangabase-security": {
+    "explicit": ["Utilise $fangabase-security"],
+    "implicit": ["Audite le CSRF", "Teste la suspension OAuth"],
+    "negative": ["Cr?e la landing page", "G?n?re le profil mutualis?"]
+  },
+  "fangabase-deploy": {
+    "explicit": ["Utilise $fangabase-deploy"],
+    "implicit": ["Pr?pare Nginx et systemd", "D?ploie sur Vercel"],
+    "negative": ["Ajoute un ledger", "Change les couleurs"]
+  },
+  "fangabase-release-audit": {
+    "explicit": ["Utilise $fangabase-release-audit"],
+    "implicit": ["La release peut-elle partir ?", "V?rifie tous les gates"],
+    "negative": ["Impl?mente un provider", "Cr?e une organisation"]
+  }
+}

@@ -1,0 +1,32 @@
+version: 1
+product:
+  {
+    name: Sans Paiement,
+    slug: sans-paiement,
+    type: saas,
+    description: Profil CI FangaBase,
+    locale: fr,
+    timezone: Africa/Bamako,
+    country: ML,
+    default_currency: XOF,
+  }
+architecture: { target: cloud_vercel, frontend: next, backend: next, ui: next }
+database: { engine: postgres, provider: neon }
+email: { provider: local_log }
+storage: { provider: local_private }
+queue: { provider: database }
+cache: { provider: memory_dev }
+billing: { modes: [credits, subscription] }
+payments:
+  providers: []
+  default_provider: null
+design: { source: fangabase }
+features:
+  {
+    organizations: true,
+    marketplace: false,
+    admin: true,
+    audit_log: true,
+    notifications: true,
+    uploads: true,
+  }

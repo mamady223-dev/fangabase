@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fangabase.local/schemas/outbox-event.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "aggregate_id", "occurred_at", "payload"],
+  "properties": {
+    "id": { "type": "string", "format": "uuid" },
+    "type": { "type": "string", "pattern": "^[a-z]+(?:\\.[a-z_]+)+$" },
+    "aggregate_id": { "type": "string", "minLength": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "payload": { "type": "object" }
+  }
+}

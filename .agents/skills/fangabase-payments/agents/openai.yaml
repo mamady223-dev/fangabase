@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paiements FangaBase"
+  short_description: "Ajouter et auditer les paiements"
+  default_prompt: "Impl�mente ce fournisseur de paiement en s�curit�."

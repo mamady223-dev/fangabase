@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fangabase.local/schemas/webhook-event.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["provider", "external_event_id", "event_type", "received_at"],
+  "properties": {
+    "provider": { "type": "string", "minLength": 1 },
+    "external_event_id": { "type": "string", "minLength": 1 },
+    "event_type": { "type": "string", "minLength": 1 },
+    "received_at": { "type": "string", "format": "date-time" }
+  }
+}

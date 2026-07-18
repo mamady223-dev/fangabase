@@ -1,0 +1,21 @@
+[Unit]
+Description=FangaBase Next.js
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=fangabase
+Group=fangabase
+WorkingDirectory=/srv/fangabase/current
+EnvironmentFile=/etc/fangabase/web.env
+ExecStart=/usr/bin/node apps/web/server.js
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/srv/fangabase/shared
+
+[Install]
+WantedBy=multi-user.target

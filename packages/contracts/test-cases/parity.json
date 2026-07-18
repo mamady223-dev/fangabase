@@ -1,0 +1,19 @@
+{
+  "roles": ["USER", "ADMIN", "SUPERADMIN"],
+  "payment_statuses": [
+    "CREATED",
+    "PENDING",
+    "SUCCEEDED",
+    "FAILED",
+    "CANCELLED",
+    "REFUNDED"
+  ],
+  "withdrawal_statuses": [
+    "PENDING",
+    "APPROVED",
+    "PROCESSING",
+    "COMPLETED",
+    "FAILED",
+    "CANCELLED"
+  ]
+}

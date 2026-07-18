@@ -1,0 +1,4 @@
+interface:
+  display_name: "S�curit� FangaBase"
+  short_description: "Auditer les invariants de s�curit�"
+  default_prompt: "Audite la s�curit� de ce module FangaBase."

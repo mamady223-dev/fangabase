@@ -1,0 +1,4 @@
+interface:
+  display_name: "Audit de release FangaBase"
+  short_description: "Bloquer ou valider une release"
+  default_prompt: "Ex�cute l audit de release FangaBase."

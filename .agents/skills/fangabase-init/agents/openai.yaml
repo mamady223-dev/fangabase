@@ -1,0 +1,4 @@
+interface:
+  display_name: "Initialiser FangaBase"
+  short_description: "Auditer et initialiser un profil FangaBase"
+  default_prompt: "Initialise ce projet avec FangaBase."

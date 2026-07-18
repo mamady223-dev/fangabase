@@ -1,0 +1,4 @@
+interface:
+  display_name: "D�ployer FangaBase"
+  short_description: "Pr�parer un profil de d�ploiement"
+  default_prompt: "Pr�pare le d�ploiement FangaBase cibl�."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Architecture FangaBase"
+  short_description: "Choisir et v�rifier une architecture"
+  default_prompt: "Analyse l architecture FangaBase adapt�e."

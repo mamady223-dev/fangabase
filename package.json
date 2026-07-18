@@ -1,0 +1,35 @@
+{
+  "name": "fangabase",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "fangabase:init": "pnpm --filter @fangabase/cli start",
+    "doctor": "pnpm --filter @fangabase/cli doctor",
+    "dev": "pnpm -r --parallel --if-present dev",
+    "dev:web": "pnpm --filter @fangabase/web dev",
+    "dev:server": "composer --working-dir=apps/server run dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:unit": "pnpm -r --if-present test:unit",
+    "test:integration": "pnpm -r --if-present test:integration",
+    "test:e2e": "pnpm --filter @fangabase/web test:e2e",
+    "test:contracts": "pnpm --filter @fangabase/contracts test",
+    "test:parity": "pnpm --filter @fangabase/contracts test:parity",
+    "build": "pnpm -r --if-present build",
+    "audit": "pnpm audit --audit-level high",
+    "release:check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.32",
+    "prettier": "3.6.2",
+    "typescript": "5.8.3",
+    "vitest": "3.2.6"
+  }
+}

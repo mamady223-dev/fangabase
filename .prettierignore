@@ -1,0 +1,9 @@
+node_modules
+vendor
+.next
+dist
+coverage
+tmp
+pnpm-lock.yaml
+apps/server/storage
+apps/server/bootstrap/cache

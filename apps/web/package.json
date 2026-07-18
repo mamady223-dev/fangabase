@@ -1,0 +1,30 @@
+{
+  "name": "@fangabase/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run src/**/*.integration.test.ts",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@fangabase/contracts": "workspace:*",
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.32",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "eslint": "9.30.0",
+    "eslint-config-next": "16.2.10"
+  }
+}

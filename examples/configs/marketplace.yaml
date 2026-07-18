@@ -1,0 +1,33 @@
+version: 1
+product:
+  {
+    name: Fanga Market,
+    slug: fanga-market,
+    type: marketplace,
+    description: Profil CI FangaBase,
+    locale: fr,
+    timezone: Africa/Bamako,
+    country: ML,
+    default_currency: XOF,
+  }
+architecture:
+  { target: vps_laravel, frontend: inertia, backend: laravel, ui: inertia }
+database: { engine: postgres, provider: postgres }
+email: { provider: smtp }
+storage: { provider: s3 }
+queue: { provider: redis }
+cache: { provider: redis }
+billing: { modes: [credits, subscription, commission] }
+payments:
+  providers: [fedapay, paydunya]
+  default_provider: fedapay
+design: { source: fangabase }
+features:
+  {
+    organizations: true,
+    marketplace: true,
+    admin: true,
+    audit_log: true,
+    notifications: true,
+    uploads: true,
+  }

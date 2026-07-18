@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm --filter @fangabase/web build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/internal/cron/outbox", "schedule": "*/5 * * * *" },
+    { "path": "/api/internal/cron/reconcile", "schedule": "17 * * * *" }
+  ]
+}

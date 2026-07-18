@@ -1,0 +1,9 @@
+{
+  "name": "fangabase/monorepo",
+  "description": "Commandes Composer racine de FangaBase",
+  "type": "project",
+  "scripts": {
+    "test": "composer --working-dir=apps/server test",
+    "lint": "composer --working-dir=apps/server lint"
+  }
+}

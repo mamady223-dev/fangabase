@@ -1,0 +1,17 @@
+[Unit]
+Description=FangaBase Laravel queue
+After=network-online.target
+
+[Service]
+User=fangabase
+Group=fangabase
+WorkingDirectory=/srv/fangabase/current/apps/server
+EnvironmentFile=/etc/fangabase/server.env
+ExecStart=/usr/bin/php artisan queue:work --sleep=2 --tries=5 --max-time=3600
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

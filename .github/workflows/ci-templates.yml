@@ -1,0 +1,32 @@
+name: ci-templates
+on: [push, pull_request]
+permissions: { contents: read }
+jobs:
+  templates:
+    runs-on: ubuntu-latest
+    strategy:
+      {
+        matrix:
+          {
+            config:
+              [
+                cloud,
+                cloud-supabase,
+                vps-next,
+                vps-laravel,
+                shared,
+                hybrid,
+                no-payments,
+                billing,
+                marketplace,
+              ],
+          },
+      }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.9.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm fangabase:init --config examples/configs/${{ matrix.config }}.yaml --output /tmp/resolved.yaml --json

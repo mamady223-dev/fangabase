@@ -1,0 +1,37 @@
+{
+  "name": "fangabase/server",
+  "description": "Backend Laravel original de FangaBase",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "google/apiclient": "2.15",
+    "laravel/framework": "^12.0",
+    "laravel/tinker": "^2.10"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "FangaBase\\": "app/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "FangaBase\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "php vendor/bin/phpunit",
+    "lint": "php -l routes/api.php",
+    "dev": "php artisan serve"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": false
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

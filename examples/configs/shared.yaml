@@ -1,0 +1,33 @@
+version: 1
+product:
+  {
+    name: Shared Laravel,
+    slug: shared-laravel,
+    type: saas,
+    description: Profil CI FangaBase,
+    locale: fr,
+    timezone: Africa/Bamako,
+    country: ML,
+    default_currency: XOF,
+  }
+architecture:
+  { target: shared_laravel, frontend: blade, backend: laravel, ui: blade }
+database: { engine: mysql, provider: mysql }
+email: { provider: smtp }
+storage: { provider: local_private }
+queue: { provider: database }
+cache: { provider: database }
+billing: { modes: [credits, subscription] }
+payments:
+  providers: [paydunya]
+  default_provider: paydunya
+design: { source: fangabase }
+features:
+  {
+    organizations: true,
+    marketplace: false,
+    admin: true,
+    audit_log: true,
+    notifications: true,
+    uploads: true,
+  }
