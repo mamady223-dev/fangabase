@@ -15,3 +15,12 @@ Les montants sont entiers, les ledgers immuables et l?idempotence est scop?e. Le
 ## UAT Google
 
 Renseigner `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` et `GOOGLE_REDIRECT_URI` avec un client Google reel uniquement dans le coffre de l'environnement cible. Valider ensuite consentement, callback, rotation des cookies et refus d'un compte suspendu. Aucun secret Google n'est fourni dans le depot et cette recette live reste une UAT humaine.
+
+## Isolation tenant et administration
+
+- Les roles globaux restent `USER`, `ADMIN`, `SUPERADMIN`; les roles d'organisation restent `OWNER`, `ADMIN`, `MEMBER`. Un role tenant ne donne aucun droit plateforme.
+- Chaque UUID d'organisation est resolu avec une adhesion `ACTIVE`; un UUID etranger ou devine renvoie `NOT_FOUND`. Le corps HTTP ne peut pas remplacer l'organisation de la route.
+- Les invitations sont aleatoires sur 256 bits, hachees, expirees apres 24 heures, remplacees par une nouvelle invitation et consommees atomiquement.
+- Le retrait ou la suspension d'une adhesion coupe immediatement tout acces. Une organisation suspendue reste lisible par ses membres actifs pour consultation et audit, mais aucune mutation tenant n'est autorisee.
+- Seul un `SUPERADMIN` global peut suspendre ou changer les roles globaux. La suspension incremente la version de session et revoque tous les refresh tokens sans supprimer les historiques.
+- Le dernier `SUPERADMIN` actif est protege dans une transaction avec verrouillage avant comptage. SQLite valide l'invariant sequentiel; une course reelle a deux transactions reste une UAT PostgreSQL obligatoire.
