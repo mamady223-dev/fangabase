@@ -12,6 +12,14 @@ return [
     'verification_minutes' => (int) env('VERIFICATION_MINUTES', 15),
     'password_reset_minutes' => (int) env('PASSWORD_RESET_MINUTES', 15),
     'mail_provider' => env('MAIL_PROVIDER', 'local'),
+    'mail' => [
+        'sender' => env('MAIL_FROM_ADDRESS', 'noreply@localhost'),
+        'resend_api_key' => env('RESEND_API_KEY'),
+        'brevo_api_key' => env('BREVO_API_KEY'),
+        'smtp_dsn' => env('SMTP_DSN'),
+        'max_attempts' => (int) env('MAIL_MAX_ATTEMPTS', 8),
+        'lease_seconds' => (int) env('MAIL_LEASE_SECONDS', 60),
+    ],
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
