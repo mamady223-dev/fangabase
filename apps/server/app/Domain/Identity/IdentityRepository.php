@@ -44,4 +44,23 @@ final class IdentityRepository
 
         return ['id' => $id, 'email' => $email];
     }
+
+    /** @return array{id: string, email: string} */
+    public function createOAuthUser(string $email): array
+    {
+        $id = (string) Str::uuid();
+        $now = now();
+        DB::table('users')->insert([
+            'id' => $id,
+            'email' => strtolower($email),
+            'role' => 'USER',
+            'status' => 'ACTIVE',
+            'session_version' => 1,
+            'email_verified_at' => $now,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+
+        return ['id' => $id, 'email' => strtolower($email)];
+    }
 }

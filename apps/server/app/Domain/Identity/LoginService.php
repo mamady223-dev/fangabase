@@ -15,7 +15,7 @@ final class LoginService
         private readonly RefreshSessionIssuer $sessions,
     ) {}
 
-    /** @return array{user: array{id: string, email: string}, refresh_token: string} */
+    /** @return array{user: array{id: string, email: string}, credentials: SessionCredentials} */
     public function login(string $email, string $password): array
     {
         $normalizedEmail = strtolower(trim($email));
@@ -35,7 +35,7 @@ final class LoginService
 
         return [
             'user' => ['id' => (string) $identity->id, 'email' => (string) $identity->email],
-            'refresh_token' => $this->sessions->issue((string) $identity->id, (int) $identity->session_version),
+            'credentials' => $this->sessions->issue((string) $identity->id, (int) $identity->session_version),
         ];
     }
 }

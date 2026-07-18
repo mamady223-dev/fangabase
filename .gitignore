@@ -4,6 +4,7 @@ dist/
 coverage/
 vendor/
 *.tsbuildinfo
+*.sqlite
 .phpunit.cache/
 .env
 .env.*

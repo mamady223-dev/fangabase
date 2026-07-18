@@ -45,7 +45,8 @@ final class IdentityPersistenceTest extends TestCase
             'password' => 'LongPassword42',
         ]);
 
-        $login->assertOk()->assertJsonStructure(['user' => ['id', 'email'], 'refresh_token']);
+        $login->assertOk()->assertJsonStructure(['user' => ['id', 'email']]);
+        $login->assertCookie('fangabase_refresh')->assertCookie('fangabase_csrf');
         $this->assertDatabaseCount('refresh_sessions', 1);
     }
 
