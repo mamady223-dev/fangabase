@@ -11,6 +11,9 @@ export default function DashboardPage() {
         <Link className="button small" href="/">
           Retour au site
         </Link>
+        <Link className="button small" href="/billing">
+          Facturation
+        </Link>
       </header>
       <section className="metrics">
         <article>
