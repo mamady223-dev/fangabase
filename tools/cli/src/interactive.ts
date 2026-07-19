@@ -43,6 +43,10 @@ export async function promptConfigYaml(): Promise<string> {
           "Facturation 1=Credits+abonnement 2=Abonnement 3=Paiement unique [1]: ",
         )
       ).trim() || "1";
+    const designChoice =
+      (
+        await ask("Design 1=Headless 2=Banani 3=Maquettes fournies [1]: ")
+      ).trim() || "1";
     const architectures = {
       "1": {
         target: "cloud_vercel",
@@ -151,7 +155,14 @@ export async function promptConfigYaml(): Promise<string> {
         providers: selectedPayment ? [selectedPayment] : [],
         default_provider: selectedPayment,
       },
-      design: { source: "fangabase" },
+      design: {
+        source:
+          designChoice === "2"
+            ? "banani"
+            : designChoice === "3"
+              ? "provided_mockups"
+              : "headless",
+      },
       features: {
         organizations: true,
         marketplace: typeChoice === "2",

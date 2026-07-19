@@ -21,7 +21,7 @@ billing: { modes: [credits, subscription, commission] }
 payments:
   providers: [fedapay, paydunya]
   default_provider: fedapay
-design: { source: fangabase }
+design: { source: headless }
 features:
   {
     organizations: true,

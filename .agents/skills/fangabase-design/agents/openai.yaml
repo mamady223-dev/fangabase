@@ -1,4 +1,4 @@
 interface:
-  display_name: "Design FangaBase"
-  short_description: "Int�grer un design accessible et responsive"
-  default_prompt: "Int�gre ce design dans FangaBase."
+  display_name: "FangaBase Design"
+  short_description: "Intégrer explicitement un design fourni"
+  default_prompt: "Utilise $fangabase-design pour intégrer le design que je fournis dans ce projet headless."

@@ -21,7 +21,7 @@ billing: { modes: [credits, subscription] }
 payments:
   providers: [paydunya]
   default_provider: paydunya
-design: { source: fangabase }
+design: { source: headless }
 features:
   {
     organizations: true,

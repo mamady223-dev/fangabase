@@ -71,7 +71,12 @@ export const configSchema = z
       default_provider: z.enum(paymentProviders).nullable(),
     }),
     design: z.object({
-      source: z.enum(["fangabase", "banani", "provided_mockups"]),
+      source: z.enum([
+        "headless",
+        "banani",
+        "provided_mockups",
+        "ai_generated",
+      ]),
     }),
     features: z.object({
       organizations: z.boolean(),

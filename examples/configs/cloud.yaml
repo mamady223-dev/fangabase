@@ -20,7 +20,7 @@ billing: { modes: [credits, subscription] }
 payments:
   providers: [stripe]
   default_provider: stripe
-design: { source: fangabase }
+design: { source: headless }
 features:
   {
     organizations: true,

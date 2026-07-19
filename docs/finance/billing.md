@@ -25,7 +25,7 @@ Les plans fournissent fonctionnalités et quotas ; les crédits couvrent l’usa
 - CSRF strict : achat de crédits, création en attente, annulation ;
 - administration : catalogue, archivage, attributions et événements paginés.
 
-Next.js expose `/pricing`, `/billing` et `/admin/billing`. Les états chargement, vide, erreur et succès sont explicites. `FANGABASE_API_ORIGIN` configure le backend fixe du proxy ; aucune URL fournie par un utilisateur n’est appelée.
+Les démonstrations Next.js de tarification et facturation sont conservées dans `examples/frontend-pages`. Elles illustrent les états chargement, vide, erreur et succès sans constituer une interface officielle. Les proxies fonctionnels restent disponibles. `FANGABASE_API_ORIGIN` configure leur backend fixe ; aucune URL fournie par un utilisateur n’est appelée.
 
 ## Limites UAT
 

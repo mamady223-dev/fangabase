@@ -14,3 +14,9 @@ Construire et maintenir une base applicative originale pour les profils Cloud, V
 - Les migrations sont additives, réversibles quand possible, testées sur la base concernée et ne suppriment jamais une preuve financière par cascade.
 - Aucun TODO ou placeholder dans un flux obligatoire.
 - TypeScript et Laravel partagent contrats et cas de test, jamais leur code métier.
+- FangaBase est headless par défaut.
+- Aucun thème ou design visuel officiel ne doit être créé.
+- Les jalons backend ne doivent pas ajouter de pages graphiques.
+- Les interfaces de démonstration restent dans `examples`.
+- Un design n’est implémenté que sur demande explicite ou depuis une maquette fournie.
+- Chaque projet généré doit pouvoir avoir une identité visuelle totalement différente.

@@ -30,7 +30,7 @@ payments:
   providers: [fedapay]
   default_provider: fedapay
 design:
-  source: fangabase
+  source: headless
 features:
   organizations: true
   marketplace: false

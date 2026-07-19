@@ -1,15 +1,15 @@
 import Link from "next/link";
 
-export default function DashboardPage() {
+export default function ExampleDashboardPage() {
   return (
     <main className="dashboard">
       <header>
         <div>
-          <p className="eyebrow">ESPACE DE D?MONSTRATION</p>
+          <p className="eyebrow">EXEMPLE FACULTATIF</p>
           <h1>Bonjour, Awa</h1>
         </div>
         <Link className="button small" href="/">
-          Retour au site
+          Retour
         </Link>
         <Link className="button small" href="/billing">
           Facturation
@@ -17,14 +17,14 @@ export default function DashboardPage() {
       </header>
       <section className="metrics">
         <article>
-          <p>Cr?dits disponibles</p>
+          <p>Crédits disponibles</p>
           <strong>12 500</strong>
-          <small>XOF de valeur d?usage</small>
+          <small>valeur de démonstration</small>
         </article>
         <article>
           <p>Abonnement</p>
           <strong>Essentiel</strong>
-          <small>Actif jusqu?au 31 ao?t</small>
+          <small>Actif jusqu’au 31 août</small>
         </article>
         <article>
           <p>Organisation</p>
@@ -33,37 +33,25 @@ export default function DashboardPage() {
         </article>
       </section>
       <section className="panel">
-        <div>
-          <p className="eyebrow">ACTIVIT?</p>
-          <h2>Derni?res op?rations</h2>
-        </div>
+        <h2>Dernières opérations</h2>
         <table>
           <thead>
             <tr>
-              <th>Op?ration</th>
+              <th>Opération</th>
               <th>Statut</th>
               <th>Montant</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Achat de cr?dits</td>
-              <td>
-                <span className="success">R?ussi</span>
-              </td>
+              <td>Achat de crédits</td>
+              <td>Réussi</td>
               <td>10 000 XOF</td>
             </tr>
             <tr>
-              <td>Abonnement Essentiel</td>
-              <td>
-                <span className="success">Actif</span>
-              </td>
+              <td>Abonnement</td>
+              <td>Actif</td>
               <td>5 000 XOF</td>
-            </tr>
-            <tr>
-              <td>Invitation membre</td>
-              <td>En attente</td>
-              <td>?</td>
             </tr>
           </tbody>
         </table>

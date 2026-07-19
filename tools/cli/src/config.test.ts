@@ -26,7 +26,7 @@ const valid = {
   cache: { provider: "memory_dev" },
   billing: { modes: ["credits", "subscription"] },
   payments: { providers: ["fedapay"], default_provider: "fedapay" },
-  design: { source: "fangabase" },
+  design: { source: "headless" },
   features: {
     organizations: true,
     marketplace: false,
@@ -53,5 +53,17 @@ describe("configSchema", () => {
         ...valid,
         payments: { providers: ["stripe"], default_provider: "fedapay" },
       }).success,
+    ).toBe(false));
+  it.each(["headless", "banani", "provided_mockups", "ai_generated"])(
+    "accepte la source visuelle %s",
+    (source) =>
+      expect(
+        configSchema.safeParse({ ...valid, design: { source } }).success,
+      ).toBe(true),
+  );
+  it("refuse l'ancien thème FangaBase", () =>
+    expect(
+      configSchema.safeParse({ ...valid, design: { source: "fangabase" } })
+        .success,
     ).toBe(false));
 });

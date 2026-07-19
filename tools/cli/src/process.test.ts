@@ -52,11 +52,12 @@ it("accepte le questionnaire interactif minimal", async () => {
     ],
     {
       encoding: "utf8",
-      input: "Fanga Interactif\nProfil test\n1\n1\n1\n3\n1\n",
+      input: "Fanga Interactif\nProfil test\n1\n1\n1\n3\n1\n1\n",
     },
   );
   expect(result.status, result.stderr).toBe(0);
   const manifest = await readFile(output, "utf8");
   expect(manifest).toContain("name: Fanga Interactif");
   expect(manifest).toContain("providers: []");
+  expect(manifest).toContain("source: headless");
 });

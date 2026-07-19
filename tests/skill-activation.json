@@ -18,7 +18,12 @@
   "fangabase-design": {
     "explicit": ["Utilise $fangabase-design"],
     "implicit": ["Int?gre cette maquette", "Rends le dashboard accessible"],
-    "negative": ["Ajoute Stripe", "Configure Nginx"]
+    "negative": [
+      "Ajoute Stripe",
+      "Configure Nginx",
+      "Implémente un webhook",
+      "Ajoute une migration backend"
+    ]
   },
   "fangabase-payments": {
     "explicit": ["Utilise $fangabase-payments"],
