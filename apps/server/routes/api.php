@@ -13,6 +13,8 @@ use FangaBase\Http\Controllers\BillingAdminController;
 use FangaBase\Http\Controllers\BillingController;
 use FangaBase\Http\Controllers\PaymentController;
 use FangaBase\Http\Controllers\CatalogController;
+use FangaBase\Http\Controllers\WithdrawalController;
+use FangaBase\Http\Controllers\WithdrawalAdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function (): void {
@@ -33,6 +35,7 @@ Route::get('/oauth/google/start', [GoogleOAuthController::class, 'start']);
 Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'callback']);
 Route::get('/catalog', [CatalogController::class, 'index']);
 Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook']);
+Route::post('/webhooks/payouts/{provider}', [WithdrawalController::class, 'callback']);
 
 Route::middleware('session.auth')->group(function (): void {
     Route::get('/organizations', [OrganizationController::class, 'index']);
@@ -42,10 +45,15 @@ Route::middleware('session.auth')->group(function (): void {
     Route::get('/billing/credits', [BillingController::class, 'credits']);
     Route::get('/billing/subscription', [BillingController::class, 'subscription']);
     Route::get('/billing/entitlements', [BillingController::class, 'entitlements']);
+    Route::get('/withdrawals', [WithdrawalController::class, 'index']);
+    Route::get('/withdrawals/balance', [WithdrawalController::class, 'balance']);
 
     Route::middleware('strict.csrf')->group(function (): void {
         Route::post('/payments/checkouts', [PaymentController::class, 'checkout']);
         Route::post('/payments/orders/{order}/refunds', [PaymentController::class, 'refund']);
+        Route::post('/payout-accounts', [WithdrawalController::class, 'account']);
+        Route::post('/withdrawals', [WithdrawalController::class, 'request']);
+        Route::post('/withdrawals/{withdrawal}/cancel', [WithdrawalController::class, 'cancel']);
         Route::post('/organizations', [OrganizationController::class, 'store']);
         Route::patch('/organizations/{organization}', [OrganizationController::class, 'update']);
         Route::post('/organizations/{organization}/invitations', [OrganizationInvitationController::class, 'store']);
@@ -63,12 +71,17 @@ Route::middleware('session.auth')->group(function (): void {
         Route::get('/users', [PlatformAdminController::class, 'users']);
         Route::get('/organizations', [PlatformAdminController::class, 'organizations']);
         Route::get('/billing/events', [BillingAdminController::class, 'events']);
+        Route::get('/withdrawals', [WithdrawalAdminController::class, 'index']);
         Route::middleware('strict.csrf')->group(function (): void {
             Route::patch('/users/{user}', [PlatformAdminController::class, 'updateUser']);
             Route::patch('/organizations/{organization}', [PlatformAdminController::class, 'updateOrganization']);
             Route::post('/catalog', [CatalogController::class, 'store']);
             Route::post('/catalog/prices/{price}/archive', [CatalogController::class, 'archive']);
             Route::post('/billing/credits/grant', [BillingAdminController::class, 'grant']);
+            Route::post('/withdrawals/{withdrawal}/verify', [WithdrawalAdminController::class, 'verify']);
+            Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalAdminController::class, 'approve']);
+            Route::patch('/payout-accounts/{account}', [WithdrawalAdminController::class, 'account']);
+            Route::post('/reconciliation/withdrawals', [WithdrawalAdminController::class, 'reconcile']);
         });
     });
 });

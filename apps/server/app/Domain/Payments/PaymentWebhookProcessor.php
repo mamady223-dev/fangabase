@@ -34,7 +34,7 @@ final readonly class PaymentWebhookProcessor
                 DB::table('orders')->where('id', $order->id)->update(['status' => 'SUCCEEDED', 'paid_at' => now(), 'updated_at' => now()]);
                 DB::table('payment_attempts')->where(['order_id' => $order->id, 'provider' => $event->provider])->update(['status' => 'SUCCEEDED',
                     'provider_reference' => $event->providerReference, 'confirmed_at' => now(), 'updated_at' => now()]);
-                DB::table('money_ledger_entries')->insert(['id' => (string) Str::uuid(), 'owner_id' => $order->owner_id, 'amount_minor' => $order->amount_minor,
+                DB::table('money_ledger_entries')->insert(['id' => (string) Str::uuid(), 'owner_id' => $order->owner_id, 'owner_type' => $order->owner_type, 'amount_minor' => $order->amount_minor,
                     'currency' => $order->currency, 'kind' => 'PAYMENT', 'reference_type' => 'order', 'reference_id' => $order->id, 'occurred_at' => now()]);
                 $owner = new BillingScope($order->owner_type, $order->owner_id);
                 if ($order->purpose === 'CREDITS' && $order->price_id !== null) $this->credits->grantPaidOrder($owner, $order->price_id, $order->id, $event->provider);

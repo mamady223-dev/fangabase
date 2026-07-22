@@ -65,7 +65,7 @@ final readonly class RefundService
             DB::table('refunds')->where('id', $refund->id)->update(['status' => 'CONFIRMED', 'confirmed_at' => now(), 'updated_at' => now()]);
             $total = (int) $order->refunded_amount_minor + (int) $refund->amount_minor;
             DB::table('orders')->where('id', $order->id)->update(['refunded_amount_minor' => $total, 'status' => $total === (int) $order->amount_minor ? 'REFUNDED' : 'PARTIALLY_REFUNDED', 'updated_at' => now()]);
-            DB::table('money_ledger_entries')->insert(['id' => (string) Str::uuid(), 'owner_id' => $order->owner_id, 'amount_minor' => $refund->amount_minor,
+            DB::table('money_ledger_entries')->insert(['id' => (string) Str::uuid(), 'owner_id' => $order->owner_id, 'owner_type' => $order->owner_type, 'amount_minor' => $refund->amount_minor,
                 'currency' => $refund->currency, 'kind' => 'REFUND', 'reference_type' => 'refund', 'reference_id' => $refund->id, 'occurred_at' => now()]);
             if ($refund->credit_reservation_id !== null) $this->credits->settle($owner, $refund->credit_reservation_id, true);
             if ($order->purpose === 'SUBSCRIPTION' && $total === (int) $order->amount_minor) {

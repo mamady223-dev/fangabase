@@ -23,7 +23,7 @@ describe("retraits", () => {
     service.approve(item.id);
     await service.process(item.id);
     expect(calls).toBe(1);
-    expect(item.status).toBe("COMPLETED");
+    expect(item.status).toBe("PAID");
   });
   it("lib?re la r?serve apr?s ?chec fournisseur", async () => {
     const ledger = new ImmutableLedger();

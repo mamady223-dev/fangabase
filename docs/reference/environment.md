@@ -26,3 +26,14 @@ Les cl?s fournisseurs restent absentes des exemples. Apr?s rotation : mettre ? j
 | `MONERO_WALLET_RPC_URL`, `MONERO_MINIMUM_CONFIRMATIONS` | Wallet RPC prive et confirmations exigees; module bloque sans wallet. |
 
 Les statuts `IMPLEMENTED_NEEDS_SANDBOX_UAT`, `NEEDS_PROVIDER_CONTRACT`, `DISABLED` et `UNSUPPORTED` sont les seuls statuts autorises. Une configuration presente ne vaut jamais validation de production.
+
+## Retraits
+
+| Variable                                               | Effet                                             |
+| ------------------------------------------------------ | ------------------------------------------------- |
+| `WITHDRAWAL_MINIMUM_MINOR`, `WITHDRAWAL_MAXIMUM_MINOR` | Bornes entieres serveur.                          |
+| `WITHDRAWAL_CURRENCIES`                                | Devises explicitement autorisees.                 |
+| `WITHDRAWAL_RATE_LIMIT`                                | Demandes maximales par proprietaire et par heure. |
+| `WITHDRAWAL_LEASE_SECONDS`, `WITHDRAWAL_MAX_ATTEMPTS`  | Bail recuperable et limite de retry du worker.    |
+
+Les secrets de callback et credentials payout restent absents des exemples tant qu'un contrat fournisseur officiel n'est pas active.

@@ -2,12 +2,15 @@ import { randomUUID } from "node:crypto";
 import { ImmutableLedger } from "./finance.js";
 
 export type WithdrawalStatus =
-  | "PENDING"
+  | "REQUESTED"
+  | "VERIFYING"
   | "APPROVED"
-  | "PROCESSING"
-  | "COMPLETED"
+  | "SENT"
+  | "PENDING"
+  | "PAID"
   | "FAILED"
-  | "CANCELLED";
+  | "CANCELLED"
+  | "RECONCILED";
 export type Withdrawal = {
   id: string;
   ownerId: string;
@@ -57,7 +60,7 @@ export class WithdrawalService {
         ownerId,
         amountMinor,
         currency: "XOF",
-        status: "PENDING",
+        status: "REQUESTED",
         providerReference: null,
         createdAt: new Date(),
       };
@@ -69,12 +72,18 @@ export class WithdrawalService {
   }
   approve(id: string): void {
     const item = this.require(id);
-    if (item.status !== "PENDING") throw new Error("CONFLICT");
+    if (item.status !== "REQUESTED") throw new Error("CONFLICT");
+    item.status = "VERIFYING";
     item.status = "APPROVED";
   }
   cancel(id: string): void {
     const item = this.require(id);
-    if (item.status !== "PENDING") throw new Error("CONFLICT");
+    if (
+      item.status !== "REQUESTED" &&
+      item.status !== "VERIFYING" &&
+      item.status !== "APPROVED"
+    )
+      throw new Error("CONFLICT");
     item.status = "CANCELLED";
     this.ledger.append({
       ownerId: item.ownerId,
@@ -86,15 +95,20 @@ export class WithdrawalService {
   }
   async process(id: string): Promise<void> {
     const item = this.require(id);
-    if (item.status !== "APPROVED" && item.status !== "PROCESSING")
+    if (item.status !== "APPROVED" && item.status !== "SENT")
       throw new Error("CONFLICT");
-    item.status = "PROCESSING";
+    item.status = "SENT";
     const result = await this.payout.createPayout(
       item,
       `withdrawal:${item.id}`,
     );
     item.providerReference = result.reference;
-    item.status = result.status;
+    item.status =
+      result.status === "COMPLETED"
+        ? "PAID"
+        : result.status === "PROCESSING"
+          ? "PENDING"
+          : result.status;
     if (result.status === "FAILED")
       this.ledger.append({
         ownerId: item.ownerId,

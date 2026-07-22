@@ -27,6 +27,10 @@ use FangaBase\Infrastructure\Payments\MoneroWalletRpc;
 use FangaBase\Infrastructure\Payments\StripePaymentProvider;
 use FangaBase\Infrastructure\Payments\StripeWebhookVerifier;
 use FangaBase\Infrastructure\Payments\UnavailablePaymentProvider;
+use FangaBase\Domain\Withdrawals\PayoutCallbackVerifier;
+use FangaBase\Domain\Withdrawals\PayoutProviderRegistry;
+use FangaBase\Infrastructure\Withdrawals\ConfiguredHmacPayoutCallbackVerifier;
+use FangaBase\Infrastructure\Withdrawals\UnavailablePayoutProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -52,6 +56,11 @@ final class AppServiceProvider extends ServiceProvider
             if (! config('fangabase.payments.monero.enabled') || ! is_string($url) || $url === '') throw new \RuntimeException('MONERO_DISABLED');
             return new MoneroWalletRpc($url, config('fangabase.payments.monero.wallet_rpc_username'), config('fangabase.payments.monero.wallet_rpc_password'));
         });
+        $this->app->singleton(PayoutProviderRegistry::class, fn (): PayoutProviderRegistry => new PayoutProviderRegistry([
+            new UnavailablePayoutProvider('fedapay'), new UnavailablePayoutProvider('cinetpay'), new UnavailablePayoutProvider('paydunya'),
+            new UnavailablePayoutProvider('orange_money'), new UnavailablePayoutProvider('bictorys'), new UnavailablePayoutProvider('paytech'), new UnavailablePayoutProvider('moneroo'),
+        ]));
+        $this->app->bind(PayoutCallbackVerifier::class, ConfiguredHmacPayoutCallbackVerifier::class);
         $this->app->singleton(LaravelProviderHttpClient::class);
         $this->app->singleton(MailProviderRegistry::class, function ($app): MailProviderRegistry {
             $http = $app->make(LaravelProviderHttpClient::class);

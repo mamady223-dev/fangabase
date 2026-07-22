@@ -36,4 +36,10 @@ return [
             'wallet_rpc_username' => env('MONERO_WALLET_RPC_USERNAME'), 'wallet_rpc_password' => env('MONERO_WALLET_RPC_PASSWORD'),
             'minimum_confirmations' => (int) env('MONERO_MINIMUM_CONFIRMATIONS', 10)],
     ],
+    'withdrawals' => [
+        'minimum_minor' => (int) env('WITHDRAWAL_MINIMUM_MINOR', 1000), 'maximum_minor' => (int) env('WITHDRAWAL_MAXIMUM_MINOR', 1000000),
+        'currencies' => array_values(array_filter(explode(',', (string) env('WITHDRAWAL_CURRENCIES', 'XOF')))), 'rate_limit' => (int) env('WITHDRAWAL_RATE_LIMIT', 5),
+        'lease_seconds' => (int) env('WITHDRAWAL_LEASE_SECONDS', 60), 'max_attempts' => (int) env('WITHDRAWAL_MAX_ATTEMPTS', 8),
+        'callback_secrets' => [],
+    ],
 ];
