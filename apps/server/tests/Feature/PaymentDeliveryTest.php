@@ -90,10 +90,10 @@ final class PaymentDeliveryTest extends TestCase
         $event = new VerifiedPaymentEvent('test', 'evt-ok', 'payment.completed', $checkout['order_id'], 'pay-1', 'SUCCEEDED', 2500, 'XOF', 2);
         self::assertSame('PROCESSED', app(PaymentWebhookProcessor::class)->process($event)); self::assertSame('DUPLICATE', app(PaymentWebhookProcessor::class)->process($event));
         self::assertSame(1, DB::table('money_ledger_entries')->count()); self::assertSame(1, DB::table('outbox_events')->where('type', 'PAYMENT_SUCCEEDED')->count());
-        self::assertSame(100, DB::table('credit_ledger_entries')->sum('quantity_fixed'));
+        self::assertSame(100, (int) DB::table('credit_ledger_entries')->sum('quantity_fixed'));
         $refund = app(RefundService::class)->request($this->scope(), $checkout['order_id'], 1000, 'partial credits refund', 'refund-credit-0001');
-        self::assertSame('PROCESSING', $refund['status']); self::assertSame(60, DB::table('credit_ledger_entries')->sum('quantity_fixed'));
-        self::assertSame('CONFIRMED', app(RefundService::class)->confirm('test', 'refund-1', true)); self::assertSame(60, DB::table('credit_ledger_entries')->sum('quantity_fixed'));
+        self::assertSame('PROCESSING', $refund['status']); self::assertSame(60, (int) DB::table('credit_ledger_entries')->sum('quantity_fixed'));
+        self::assertSame('CONFIRMED', app(RefundService::class)->confirm('test', 'refund-1', true)); self::assertSame(60, (int) DB::table('credit_ledger_entries')->sum('quantity_fixed'));
     }
 
     public function test_refund_never_confirms_early_and_forbids_over_refund(): void
