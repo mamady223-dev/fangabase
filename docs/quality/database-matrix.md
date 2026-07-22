@@ -1,9 +1,11 @@
 # Matrice des bases
 
-| Base          | Local        | CI                      | Preuve visée                                                                             | Limite                                |
-| ------------- | ------------ | ----------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------- |
-| SQLite        | exécutée     | exécutée                | migrations vides, invariants et E2E API                                                  | ne prouve pas les verrous concurrents |
-| PostgreSQL 17 | indisponible | workflow `ci-databases` | migrations, contraintes, transactions, idempotence, dernier SUPERADMIN, ledgers/retraits | résultat CI requis avant release      |
-| MySQL 8.4     | indisponible | workflow `ci-databases` | mêmes suites avec PDO MySQL                                                              | résultat CI requis avant release      |
+| Base          | Local        | CI       | Preuve                                             | Limite                                          |
+| ------------- | ------------ | -------- | -------------------------------------------------- | ----------------------------------------------- |
+| SQLite        | executee     | executee | 94 tests, 620 assertions, migrations et invariants | ne prouve pas seule les verrous multi-processus |
+| PostgreSQL 17 | indisponible | succes   | `migrate:fresh` puis 94 tests dans `ci-databases`  | charge multi-worker reste UAT                   |
+| MySQL 8.4     | indisponible | succes   | `migrate:fresh` puis 94 tests dans `ci-databases`  | charge multi-worker reste UAT                   |
 
-Le workflow utilise uniquement des mots de passe éphémères `ci-only`. Ce ne sont pas des secrets de production. Tant que le workflow n'a pas été observé vert sur GitHub, PostgreSQL/MySQL restent « configurés et validés statiquement », jamais « testés avec succès ».
+Preuve CI : workflow `ci-databases` run `29946653278`, termine avec succes le 22 juillet 2026. Les deux jobs utilisent uniquement les identifiants ephemeres `ci-only`, sans secret de production.
+
+La matrice a revele et fait corriger les noms d index MySQL superieurs a 64 caracteres, la taille de la charge chiffree des comptes payout et la stabilite des reponses idempotentes face au reordonnancement JSON MySQL.

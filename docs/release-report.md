@@ -1,10 +1,10 @@
-﻿# Rapport de release - 2026-07-22
+# Rapport de release - 2026-07-22
 
 Statut : **FAIL**. Le socle compile et ses tests actuels passent, mais la definition de termine du cahier n'est pas encore satisfaite.
 
 - Construit : monorepo, CLI, contrats, noyau securite/finance/infrastructure, migrations, applications Next/Laravel minimales, profils headless, documentation, sept skills et six workflows CI.
 - Profils : neuf configurations validees; quatre familles debutant generent uniquement les fichiers compatibles, avec protection des personnalisations et dry-run.
-- Tests : 79 tests JS/TS, 94 tests PHP et 620 assertions, plus 2 E2E Chrome headless passes. Migrations SQLite exercees par les suites Laravel.
+- Tests : 79 tests JS/TS, 94 tests PHP et 620 assertions sur SQLite, PostgreSQL 17 et MySQL 8.4, plus 2 E2E Chrome headless passes. Les trois moteurs executent les migrations et invariants Laravel.
 - Builds : CLI, contrats, core et Next.js passes. Laravel s'execute via Composer/PHPUnit.
 - Fournisseurs : contrat commun de capacites et statuts honnetes; checkout central a prix serveur; Stripe checkout/statut/refund/webhook signe; FedaPay transaction/token/statut; autres bloques sans contrat; Monero isole et desactive sans wallet RPC. Stripe/FedaPay restent `IMPLEMENTED_NEEDS_SANDBOX_UAT`, jamais presentes comme valides live.
 - Identite Laravel : inscription/login persistants; verification e-mail et reset one-shot haches; demandes non enumerables et limitees; Outbox chiffree avec fournisseur local; rotation atomique, familles, replay, logout, suspension et CSRF double-submit; Google OAuth PKCE S256 injectable avec state/nonce et claims valides.
@@ -16,13 +16,13 @@ Statut : **FAIL**. Le socle compile et ses tests actuels passent, mais la defini
 - Frontend : application active reduite a un statut technique neutre; landing, dashboard, tarification et facturation de demonstration deplaces dans `examples/frontend-pages`; aucun theme, palette ou design officiel.
 - Integration frontend : configuration neutre rattachee au schema CLI, client type avec cookies/CSRF et erreurs stables, inventaire des routes reelles, matrice same-origin/cross-origin, CORS explicite sans wildcard et skill design a activation uniquement explicite. Stitch et Banani restent externes et facultatifs; leurs deux fichiers d'assistance sont presents, audites et marques a activation explicite.
 - Deploiement : Cloud/Vercel, VPS, mutualise et hybride avec variables non secretes, runbooks, health, worker/scheduler, proxy, cron ou Vercel selon compatibilite; Docker strictement facultatif et absent du mutualise. Smoke read-only cible frontend/API/health/readiness/liveness avec timeout et detection de fuite. Sauvegarde/restauration utilise cible explicite, dry-run, manifeste SHA-256, confirmation et test temporaire isole.
-- Securite : corps brut, limite, signature, timestamp, replay, montant/devise/proprietaire, transitions monotones, idempotence, redirections et erreurs expurgees testes. `sharp` est force en 0.35.0 pour corriger les avis libvips eleves; audit npm sans haute/critique, deux avis moderes. Format, lint, typecheck, tests et builds verts. Le cache Composer signale uniquement l'avis faible `firebase/php-jwt` (CVE-2025-45769), sans avis haut/critique; Packagist a expire pendant la verification distante.
-- UAT : PostgreSQL/MySQL indisponibles localement et seulement configures en CI; CodeQL/Gitleaks configures mais resultats distants non observes; Docker/scan, fournisseurs reels, charge multi-worker et restauration live restent externes.
+- Securite : corps brut, signature, timestamp, replay, montant/devise/proprietaire, transitions, idempotence, redirections et erreurs expurgees testes. Audits sans avis haut/critique; deux avis npm moderes et un avis Composer faible documentes. CodeQL, Gitleaks et ci-security sont verts sur GitHub.
+- UAT : Docker/scan, fournisseurs reels, charge multi-worker et restauration live restent externes. PostgreSQL/MySQL et SAST ne sont plus en attente : ils sont valides en CI.
 - Skills : `.agents/skills`; documentation : `docs` et `templates`.
 - Actions humaines : fournir comptes sandbox et contrats marchands; installer Docker pour UAT; choisir une licence; retirer l'ACL CodexSandboxUsers avec la commande de `docs/progress.md` apres fin des travaux.
-- Git : jalons 8 `079174e` et 9 `982c844` publies; jalon 11 prepare localement.
+- Git : jalon 11 publie a partir de `2a7d47e`; correctifs CI et portabilite SQL publies jusqu a `1486e0c`.
 
 - E2E headless : Chrome systeme, 2 scenarios passes en 10,8 s; page technique, health expurge, backend absent, exemples non reactives et absence de secrets client. Les 20 flux critiques API sont couverts par les tests Feature Laravel avec SQLite/adaptateurs locaux.
 - Performance : 25 health + 25 readiness en 0,501 s, 51 assertions, Windows/PHP 8.2/SQLite mono-processus; budget diagnostic 2,5 s respecte sans promesse de capacite production.
-- SAST : recherches locales commandes/deserialisation/secrets sans nouvelle alerte; CodeQL JavaScript/TypeScript et Gitleaks ajoutes en CI. Deux avis npm moderes et CVE Composer faible connus restent documentes.
+- SAST : recherches locales commandes/deserialisation/secrets sans nouvelle alerte; CodeQL JavaScript/TypeScript, Gitleaks et audits de dependances verts en CI selon leurs seuils documentes.
 - Workflows design : Stitch preserve et marque teste par l'utilisateur mais externe; Banani MCP/abonnement non valide. Les deux assistants sont facultatifs, a activation explicite et sans autorite sur le backend.
