@@ -23,9 +23,11 @@ final class PersistentIdempotency
             if (! hash_equals((string) $existing->body_hash, $hash)) throw ApiProblem::conflict('IDEMPOTENCY_BODY_MISMATCH');
             $result = json_decode((string) $existing->result, true, flags: JSON_THROW_ON_ERROR);
             if (is_array($result) && ($result['__pending'] ?? false) === true) throw ApiProblem::conflict('IDEMPOTENCY_IN_PROGRESS');
+            if (is_array($result)) ksort($result);
             return $result;
         }
         $result = $action();
+        if (is_array($result)) ksort($result);
         DB::table('idempotency_keys')->where($identity)->update(['result' => json_encode($result, JSON_THROW_ON_ERROR), 'updated_at' => now()]);
         return $result;
     }
