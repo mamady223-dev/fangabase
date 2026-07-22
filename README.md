@@ -23,3 +23,5 @@ Consultez `docs/progress.md` pour l??tat factuel et `docs/getting-started/quicks
 ## Exploitation headless
 
 Le choix Cloud/Vercel, VPS, mutualisé ou hybride génère uniquement les artefacts compatibles dans `deployment/`. Consultez `docs/architecture/profiles.md`, `docs/operations/smoke-tests.md` et `docs/operations/backup-restore.md`. Les valeurs `example.invalid` sont volontairement non fonctionnelles : injectez les domaines et secrets au runtime sans les enregistrer dans Git.
+
+Pour raccorder le frontend choisi par l'étudiant sans adopter de thème commun, consultez `docs/frontend/integration.md` et `docs/frontend/origin-matrix.md`. Stitch, Banani, les maquettes, l'IA explicitement demandée et les frontends personnalisés restent des workflows facultatifs.

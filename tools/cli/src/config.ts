@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { designSources, frontendIntegrationSchema } from "./frontend.js";
 
 const architectureTargets = [
   "cloud_vercel",
@@ -84,13 +85,9 @@ export const configSchema = z
       default_provider: z.enum(paymentProviders).nullable(),
     }),
     design: z.object({
-      source: z.enum([
-        "headless",
-        "banani",
-        "provided_mockups",
-        "ai_generated",
-      ]),
+      source: z.enum(designSources),
     }),
+    frontend_connection: frontendIntegrationSchema.optional(),
     features: z.object({
       organizations: z.boolean(),
       marketplace: z.boolean(),
@@ -101,6 +98,17 @@ export const configSchema = z
     }),
   })
   .superRefine((value, context) => {
+    if (
+      value.frontend_connection &&
+      value.frontend_connection.source !== value.design.source
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["frontend_connection", "source"],
+        message:
+          "la source frontend doit correspondre au workflow design selectionne",
+      });
+    }
     const expectedFamily =
       value.architecture.target === "cloud_vercel"
         ? "cloud"

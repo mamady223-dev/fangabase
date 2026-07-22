@@ -17,7 +17,13 @@
   },
   "fangabase-design": {
     "explicit": ["Utilise $fangabase-design"],
-    "implicit": ["Int?gre cette maquette", "Rends le dashboard accessible"],
+    "implicit": [
+      "Int?gre cette maquette",
+      "Rends le dashboard accessible",
+      "Intègre ces écrans Stitch",
+      "Raccorde ce frontend personnalisé",
+      "Utilise la source Banani réellement connectée"
+    ],
     "negative": [
       "Ajoute Stripe",
       "Configure Nginx",

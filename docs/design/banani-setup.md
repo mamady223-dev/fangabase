@@ -1,14 +1,18 @@
-# Intégration facultative d’un design
+# Intégration facultative d'un frontend
 
-FangaBase est headless et ne fournit aucun thème, aucune palette et aucune identité visuelle officielle. Le choix par défaut est `design.source: headless`.
+FangaBase est headless et ne fournit aucun thème, palette ou identité visuelle. La valeur par défaut est `design.source: headless`.
 
 Sources autorisées :
 
-- `headless` : aucun design n’est généré ;
-- `banani` : uniquement si une véritable source Banani est accessible ;
-- `provided_mockups` : lorsqu’un étudiant fournit ses propres maquettes ;
-- `ai_generated` : uniquement sur demande explicite de l’utilisateur.
+- `headless` : aucun design généré ;
+- `stitch` : références Stitch externes réellement fournies, sans dépendance runtime ;
+- `banani` : uniquement avec une véritable source ou instruction Banani ;
+- `provided_mockups` : maquettes fournies par l'étudiant ;
+- `ai_generated` : uniquement sur demande explicite ;
+- `custom_frontend` : frontend entièrement choisi par l'étudiant.
 
-Banani reste facultatif. Aucun serveur Banani n’est configuré dans cet environnement et aucune URL ou clé fictive ne doit être ajoutée. Les anciennes pages fonctionnelles sont conservées dans `examples/frontend-pages` comme exemples remplaçables, jamais comme interface officielle.
+Banani reste facultatif. Aucun serveur Banani n'est configuré et aucune URL, clé ou commande fictive ne doit être ajoutée. Les pages de `examples/frontend-pages` sont remplaçables et non officielles.
 
-Lorsqu’un design est choisi, suivre `$fangabase-design` et appliquer responsive, accessibilité et tests à ce design uniquement.
+Les assistants `Fanga_design_stitch.md` et `Fanga_design_Banani.md` ne sont actuellement pas présents. S'ils sont fournis, les ajouter à la racine pour audit sans les réinventer. Stitch est déclaré testé par l'utilisateur ; Banani MCP/abonnement reste UAT.
+
+Lorsqu'un design réel est choisi, suivre `$fangabase-design` et appliquer responsive, accessibilité, validation visuelle et tests fonctionnels à ce design uniquement.

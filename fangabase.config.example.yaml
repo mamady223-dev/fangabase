@@ -36,6 +36,15 @@ payments:
   default_provider: fedapay
 design:
   source: headless
+frontend_connection:
+  source: headless
+  frontend_origin: http://localhost:3000
+  backend_url: http://localhost:8000/api/
+  authentication: cookie_session
+  cors:
+    origins: [http://localhost:3000]
+    credentials: true
+  cookie_mode: same_origin_lax
 features:
   organizations: true
   marketplace: false

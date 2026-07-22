@@ -66,12 +66,17 @@ describe("configSchema", () => {
         payments: { providers: ["stripe"], default_provider: "fedapay" },
       }).success,
     ).toBe(false));
-  it.each(["headless", "banani", "provided_mockups", "ai_generated"])(
-    "accepte la source visuelle %s",
-    (source) =>
-      expect(
-        configSchema.safeParse({ ...valid, design: { source } }).success,
-      ).toBe(true),
+  it.each([
+    "headless",
+    "stitch",
+    "banani",
+    "provided_mockups",
+    "ai_generated",
+    "custom_frontend",
+  ])("accepte la source visuelle %s", (source) =>
+    expect(
+      configSchema.safeParse({ ...valid, design: { source } }).success,
+    ).toBe(true),
   );
   it("refuse l'ancien thème FangaBase", () =>
     expect(

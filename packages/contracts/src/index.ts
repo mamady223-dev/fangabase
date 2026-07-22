@@ -79,3 +79,5 @@ export function stableError(code: ErrorCode, requestId: string): ApiError {
   };
   return { error: { code, message: publicMessages[code], requestId } };
 }
+
+export { createFrontendClient, FrontendApiError } from "./frontend-client.js";

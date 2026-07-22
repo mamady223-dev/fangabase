@@ -45,7 +45,9 @@ export async function promptConfigYaml(): Promise<string> {
       ).trim() || "1";
     const designChoice =
       (
-        await ask("Design 1=Headless 2=Banani 3=Maquettes fournies [1]: ")
+        await ask(
+          "Frontend 1=Headless 2=Stitch 3=Banani 4=Maquettes 5=Personnalise [1]: ",
+        )
       ).trim() || "1";
     const architectures = {
       "1": {
@@ -90,6 +92,16 @@ export async function promptConfigYaml(): Promise<string> {
         : paymentChoice === "3"
           ? null
           : "fedapay";
+    const designSource =
+      designChoice === "2"
+        ? "stitch"
+        : designChoice === "3"
+          ? "banani"
+          : designChoice === "4"
+            ? "provided_mockups"
+            : designChoice === "5"
+              ? "custom_frontend"
+              : "headless";
     const config: FangaBaseConfig = {
       version: 1,
       product: {
@@ -161,12 +173,15 @@ export async function promptConfigYaml(): Promise<string> {
         default_provider: selectedPayment,
       },
       design: {
-        source:
-          designChoice === "2"
-            ? "banani"
-            : designChoice === "3"
-              ? "provided_mockups"
-              : "headless",
+        source: designSource,
+      },
+      frontend_connection: {
+        source: designSource,
+        frontend_origin: "http://localhost:3000",
+        backend_url: "http://localhost:8000/api/",
+        authentication: "cookie_session",
+        cors: { origins: ["http://localhost:3000"], credentials: true },
+        cookie_mode: "same_origin_lax",
       },
       features: {
         organizations: true,
