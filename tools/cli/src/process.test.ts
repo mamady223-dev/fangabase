@@ -62,7 +62,12 @@ describe("CLI FangaBase", () => {
   });
   it("creates the parent directory for a nested output", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-nested-"));
-    const output = join(directory, "profiles", "cloud", "fangabase.config.yaml");
+    const output = join(
+      directory,
+      "profiles",
+      "cloud",
+      "fangabase.config.yaml",
+    );
     const result = spawnSync(
       process.execPath,
       [
