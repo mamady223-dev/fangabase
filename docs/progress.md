@@ -1,39 +1,45 @@
 # Progression FangaBase
 
-Derniere mise a jour : 2026-07-22
+Dernière mise à jour : 2026-07-22
 
-| Jalon                               | Etat               | Preuves                                                                                                                                                                     | Reste obligatoire                                                                         |
-| ----------------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 0 - Audit initial                   | Termine            | Depot et outils audites, ADR 0001                                                                                                                                           | Docker absent, UAT uniquement                                                             |
-| 1 - Fondation                       | Termine            | Monorepo, CLI interactif/fichier/dry-run/idempotent, contrats, Next/Laravel, health, CI                                                                                     | SDK genere a automatiser                                                                  |
-| 2 - Identite et securite            | Termine            | Auth persistante, verification/reset one-shot, Outbox locale chiffree, familles de sessions, replay/CSRF, Google PKCE et suspension testes                                  | UAT Google reelle avec compte externe                                                     |
-| 3 - Organisations et administration | Termine            | Organisations, adhesions, invitations one-shot, policies, anti-IDOR, administration globale, audit et dernier SUPERADMIN testes                                             | Interface back-office suivie au jalon 9                                                   |
-| 4 - Infrastructure                  | Termine localement | Contrat mail commun, Resend/Brevo/SMTP/local injectables, worker SQL avec bail/retry/DEAD/historique, stockage prive local et port distant                                  | UAT fournisseurs, multi-worker PostgreSQL/MySQL et clients officiels de stockage          |
-| 5 - Finance commune                 | Termine localement | Catalogue versionne, credits append-only et lots FEFO, abonnements neutres, entitlements, API et interfaces utilisateur/admin                                               | Courses PostgreSQL/MySQL et fournisseurs reels au jalon 6                                 |
-| 6 - Fournisseurs                    | Termine localement | Registre de capacites, checkout serveur, Stripe checkout/statut/refund/webhook, FedaPay transaction/token/statut, reconciliation, refunds, Monero isole, 11 tests cibles    | UAT sandbox Stripe/FedaPay; contrats officiels des autres fournisseurs; wallet RPC Monero |
-| 7 - Retraits et rapprochement       | Termine localement | Persistence transactionnelle, ledger reserve/disponible/paye, approbation, suspension, worker a bail, retry, polling, callback, API headless, audit et rapprochement testes | UAT payout/callback officiels et concurrence PostgreSQL/MySQL                             |
-| 8 - Profils de deploiement          | Termine localement | Quatre familles CLI, artefacts selectifs et proteges, 9 configs, smoke read-only, manifeste SHA-256 et restauration temporaire; 33 tests CLI                                | Docker build/scan, PostgreSQL/MySQL et restauration live en UAT                           |
-| 9 - Workflow design                 | Termine localement | Connexion frontend neutre, client type, contrats/routes verifies, matrice CORS/CSRF/cookies, sources Stitch/Banani/maquettes/IA/custom explicites et skill facultative      | Validation visuelle uniquement lorsqu'un design reel est fourni; Banani MCP reste UAT     |
-| 10 - Skills                         | Termine            | 7 skills, references, metadata, 7 validations quick_validate, cas activation                                                                                                | Forward-test facultatif non execute                                                       |
-| 11 - Durcissement                   | Termine            | 79 tests JS/TS, 94 PHP/620 assertions sur SQLite, PostgreSQL 17 et MySQL 8.4, 2 E2E Chrome, budget health/readiness 0,501 s, CodeQL/Gitleaks verts                          | Charge multi-worker et fournisseurs reels restent UAT                                     |
-| 12 - Release candidate              | FAIL               | Build Next et 3 packages TS; migrations SQLite vertes; aucun avis haut/critique                                                                                             | Tous les restes ci-dessus et clone propre                                                 |
+| Jalon                               | État               | Preuves                                                                                                                                                        | Reste obligatoire                                                      |
+| ----------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 0 - Audit initial                   | Terminé            | Dépôt et outils audités, ADR 0001                                                                                                                              | Docker local absent, couvert en CI lorsqu'il est compatible            |
+| 1 - Fondation                       | Terminé            | Monorepo, CLI, contrats, Next/Laravel, health et CI                                                                                                            | Aucun                                                                  |
+| 2 - Identité et sécurité            | Terminé            | Auth persistante, vérification/reset one-shot, Outbox, sessions, replay/CSRF et Google PKCE testés                                                             | UAT Google réelle                                                      |
+| 3 - Organisations et administration | Terminé            | Organisations, invitations, policies, anti-IDOR, administration globale et audit testés                                                                        | Aucun contrôle local restant                                           |
+| 4 - Infrastructure                  | Terminé localement | E-mail injectable, Outbox SQL, workers à bail et stockage privé                                                                                                | UAT fournisseurs et stockage distant                                   |
+| 5 - Finance commune                 | Terminé localement | Catalogue, crédits append-only/FEFO, abonnements et entitlements                                                                                               | UAT fournisseurs réels                                                 |
+| 6 - Fournisseurs                    | Terminé localement | Checkout serveur, Stripe, FedaPay, rapprochement, remboursements et Monero isolé                                                                               | UAT sandbox Stripe/FedaPay et contrats externes                        |
+| 7 - Retraits et rapprochement       | Terminé localement | Ledger, approbation, worker, polling/callback et rapprochement testés                                                                                          | UAT payout/callback officiels                                          |
+| 8 - Profils de déploiement          | Terminé localement | Quatre familles CLI, artefacts sélectifs, smoke, manifeste et restauration isolée                                                                              | Restauration live en UAT                                               |
+| 9 - Workflow design                 | Terminé localement | Workflow explicite et facultatif, sans thème FangaBase                                                                                                         | Validation uniquement avec un design réellement fourni                 |
+| 10 - Skills                         | Terminé            | Sept skills validées par `quick_validate.py`                                                                                                                   | Aucun                                                                  |
+| 11 - Durcissement                   | Terminé            | SQLite, PostgreSQL 17, MySQL 8.4, E2E, CodeQL et Gitleaks                                                                                                      | Fournisseurs réels en UAT                                              |
+| 12 - Release candidate              | FAIL               | RC `0.1.0-rc.1`, clone propre JS/TS et E2E, 80 tests JS/TS, 95 tests PHP/625 assertions, 11 workflows verts, package reproductible avec SHA-256/manifeste/SBOM | Identifier juridiquement le titulaire et adopter la licence définitive |
 
-## Limites UAT
+## État du jalon 12
 
-Docker reste absent localement. PostgreSQL 17 et MySQL 8.4 ont execute migrate:fresh puis 94 tests en CI avec succes. CodeQL et Gitleaks sont verts. Les fournisseurs reels, la charge multi-worker et la restauration live restent UAT.
+- Le parcours étudiant génère réellement les profils Cloud, VPS, mutualisé et hybride dans des dossiers imbriqués.
+- Le clone propre passe `pnpm install --frozen-lockfile --ignore-scripts`, `pnpm release:check`, les 80 tests JS/TS, les quatre builds et les deux scénarios Playwright.
+- Une installation Composer locale totalement neuve n'a pas abouti à cause de téléchargements Packagist nuls/corrompus et de délais réseau. Ce résultat est un échec externe documenté, pas un PASS masqué. Les workflows GitHub propres `ci-laravel` et `ci-databases` passent sur SQLite, PostgreSQL 17 et MySQL 8.4.
+- Les 11 workflows du commit `bba3196` sont verts, y compris `ci-release`, `ci-docker`, `ci-security` et `ci-sast`.
+- Le package RC est déterministe, exclut secrets et artefacts locaux, puis produit manifeste, SBOM CycloneDX et somme SHA-256 vérifiés.
+- Docker reste facultatif et absent de ce poste. L'image Next compatible est construite et testée par `ci-docker`; aucun Docker n'est imposé au profil mutualisé.
+- Les fournisseurs réels, comptes sandbox, transactions et restauration live restent des UAT externes explicitement signalées.
+
+## Blocage obligatoire
+
+Le dépôt ne contient pas l'identité juridique exacte du titulaire des droits. `LICENSE-COMMERCIAL-DRAFT.md` est donc volontairement non effectif et conserve le marqueur `[TITULAIRE LEGAL A COMPLETER]`. Aucun tag de release ne peut être créé avant fourniture du nom légal exact, adoption de la licence et, idéalement, validation par un professionnel du droit.
 
 ## Checkpoint Git
 
-Les jalons 8 `079174e`, 9 `982c844` et 11 `2a7d47e` sont publies sur `origin/main`, avec correctifs CI jusqu a `1486e0c`. L identite Git reste configuree uniquement dans ce depot.
+Le jalon 11 est validé au commit `6b06521`. La préparation RC, la portabilité des fins de ligne et les corrections du parcours CLI sont publiées jusqu'au commit `bba3196` sur `origin/main`.
 
-## Prochain lot exact
+## Prochain bloc exact
 
-Jalon 12 : release candidate, clone propre, UAT Docker/charge multi-worker/fournisseurs, decision de licence et durcissement supply chain.
+Fournir l'identité juridique exacte du titulaire des droits, finaliser la licence commerciale, relancer les gates obligatoires, puis seulement créer le tag RC/stable autorisé.
 
-## Definition du jalon 9
+## Règle durable du jalon 9
 
-Le jalon 9 ne construit aucun design FangaBase. Il fournit uniquement le workflow d'integration du design choisi par l'etudiant. Banani et les exemples frontend restent facultatifs. Responsive, accessibilite et tests s'appliquent seulement au design effectivement choisi ou fourni.
-
-## Environnement Windows
-
-L ACL explicite temporaire CodexSandboxUsers a ete retiree. Le helper sandbox conserve une erreur deny-read sur les fichiers existants ; les modifications ciblees ont donc ete appliquees avec commandes approuvees apres echec de apply_patch natif.
+Le jalon 9 ne construit aucun design FangaBase. Il fournit uniquement le workflow d'intégration du design choisi par l'étudiant. Banani et les exemples frontend restent facultatifs. Responsive, accessibilité et tests s'appliquent seulement au design effectivement choisi ou fourni.

@@ -1,28 +1,41 @@
-# Rapport de release - 2026-07-22
+# Rapport de release candidate - 2026-07-22
 
-Statut : **FAIL**. Le socle compile et ses tests actuels passent, mais la definition de termine du cahier n'est pas encore satisfaite.
+Statut global : **FAIL**.
 
-- Construit : monorepo, CLI, contrats, noyau securite/finance/infrastructure, migrations, applications Next/Laravel minimales, profils headless, documentation, sept skills et six workflows CI.
-- Profils : neuf configurations validees; quatre familles debutant generent uniquement les fichiers compatibles, avec protection des personnalisations et dry-run.
-- Tests : 79 tests JS/TS, 94 tests PHP et 620 assertions sur SQLite, PostgreSQL 17 et MySQL 8.4, plus 2 E2E Chrome headless passes. Les trois moteurs executent les migrations et invariants Laravel.
-- Builds : CLI, contrats, core et Next.js passes. Laravel s'execute via Composer/PHPUnit.
-- Fournisseurs : contrat commun de capacites et statuts honnetes; checkout central a prix serveur; Stripe checkout/statut/refund/webhook signe; FedaPay transaction/token/statut; autres bloques sans contrat; Monero isole et desactive sans wallet RPC. Stripe/FedaPay restent `IMPLEMENTED_NEEDS_SANDBOX_UAT`, jamais presentes comme valides live.
-- Identite Laravel : inscription/login persistants; verification e-mail et reset one-shot haches; demandes non enumerables et limitees; Outbox chiffree avec fournisseur local; rotation atomique, familles, replay, logout, suspension et CSRF double-submit; Google OAuth PKCE S256 injectable avec state/nonce et claims valides.
-- Multi-tenant Laravel : organisations, adhesions et invitations persistantes; roles tenant separes des roles globaux; scoping systematique, policies et erreurs anti-enumeration; retrait/suspension immediats; mutations bloquees sur organisation suspendue.
-- Administration : pagination bornee, suspension/reactivation utilisateurs et organisations, revocation des sessions, audit append-only et dernier SUPERADMIN actif protege sous transaction et verrouillage.
-- Infrastructure : contrat transactionnel commun; fournisseurs local, Resend, Brevo et SMTP injectables; configuration incomplete sans reseau; Outbox SQL avec lots, baux recuperables, backoff avec jitter, historique, `SENT`/`DEAD` et replay audite; commande continue ou one-shot et ordonnanceur; stockage prive local durci et port distant commun pour S3/R2/Cloudinary/Supabase avec matrice de capacites.
-- Finance commune : catalogue persistant et prix serveur versionnes; ledger de credits append-only, lots FEFO, reservations, expiration, remboursements, idempotence et audit; abonnements neutres avec transitions monotones et historique; entitlements sources et suspension; API anti-IDOR; interfaces fonctionnelles conservees comme exemples facultatifs.
-- Retraits : comptes payout chiffres et scoping tenant; ledger append-only disponible/reserve/paye; idempotence et verrous; verification et approbation manuelles; suspension; worker SQL avec bail/retry/backoff; polling et callback idempotents; rapprochement et anomalies auditables; API Laravel headless. Tous les fournisseurs payout reels restent `NEEDS_PROVIDER_CONTRACT`.
-- Frontend : application active reduite a un statut technique neutre; landing, dashboard, tarification et facturation de demonstration deplaces dans `examples/frontend-pages`; aucun theme, palette ou design officiel.
-- Integration frontend : configuration neutre rattachee au schema CLI, client type avec cookies/CSRF et erreurs stables, inventaire des routes reelles, matrice same-origin/cross-origin, CORS explicite sans wildcard et skill design a activation uniquement explicite. Stitch et Banani restent externes et facultatifs; leurs deux fichiers d'assistance sont presents, audites et marques a activation explicite.
-- Deploiement : Cloud/Vercel, VPS, mutualise et hybride avec variables non secretes, runbooks, health, worker/scheduler, proxy, cron ou Vercel selon compatibilite; Docker strictement facultatif et absent du mutualise. Smoke read-only cible frontend/API/health/readiness/liveness avec timeout et detection de fuite. Sauvegarde/restauration utilise cible explicite, dry-run, manifeste SHA-256, confirmation et test temporaire isole.
-- Securite : corps brut, signature, timestamp, replay, montant/devise/proprietaire, transitions, idempotence, redirections et erreurs expurgees testes. Audits sans avis haut/critique; deux avis npm moderes et un avis Composer faible documentes. CodeQL, Gitleaks et ci-security sont verts sur GitHub.
-- UAT : Docker/scan, fournisseurs reels, charge multi-worker et restauration live restent externes. PostgreSQL/MySQL et SAST ne sont plus en attente : ils sont valides en CI.
-- Skills : `.agents/skills`; documentation : `docs` et `templates`.
-- Actions humaines : fournir comptes sandbox et contrats marchands; installer Docker pour UAT; choisir une licence; retirer l'ACL CodexSandboxUsers avec la commande de `docs/progress.md` apres fin des travaux.
-- Git : jalon 11 publie a partir de `2a7d47e`; correctifs CI et portabilite SQL publies jusqu a `1486e0c`.
+La release candidate `0.1.0-rc.1` est techniquement reproductible et toutes les gates automatisées exécutables sont vertes. La gate juridique obligatoire reste ouverte : l'identité légale exacte du titulaire des droits n'est présente nulle part dans le dépôt. La licence commerciale demeure donc un brouillon non effectif et aucun tag n'est créé.
 
-- E2E headless : Chrome systeme, 2 scenarios passes en 10,8 s; page technique, health expurge, backend absent, exemples non reactives et absence de secrets client. Les 20 flux critiques API sont couverts par les tests Feature Laravel avec SQLite/adaptateurs locaux.
-- Performance : 25 health + 25 readiness en 0,501 s, 51 assertions, Windows/PHP 8.2/SQLite mono-processus; budget diagnostic 2,5 s respecte sans promesse de capacite production.
-- SAST : recherches locales commandes/deserialisation/secrets sans nouvelle alerte; CodeQL JavaScript/TypeScript, Gitleaks et audits de dependances verts en CI selon leurs seuils documentes.
-- Workflows design : Stitch preserve et marque teste par l'utilisateur mais externe; Banani MCP/abonnement non valide. Les deux assistants sont facultatifs, a activation explicite et sans autorite sur le backend.
+## Résultats vérifiés
+
+| Gate                                         | Résultat      | Preuve                                                                             |
+| -------------------------------------------- | ------------- | ---------------------------------------------------------------------------------- |
+| Installation JS figée en clone propre        | PASS          | `pnpm install --frozen-lockfile --ignore-scripts`                                  |
+| Format, lint, typecheck, tests et builds     | PASS          | `pnpm release:check`; 80 tests JS/TS; quatre builds                                |
+| Laravel local SQLite                         | PASS          | 95 tests, 625 assertions; `migrate:fresh` sur SQLite mémoire                       |
+| Laravel CI multi-base                        | PASS          | `ci-laravel` et `ci-databases`; SQLite, PostgreSQL 17 et MySQL 8.4                 |
+| E2E headless                                 | PASS          | 2 scénarios Playwright localement en clone propre et `ci-e2e`                      |
+| Charge worker bornée                         | PASS local    | 101 messages traités une fois par deux workers alternés; 1 test, 5 assertions      |
+| Contrats et parité                           | PASS          | 8 tests de contrats et 1 test de parité                                            |
+| Skills                                       | PASS          | sept validations `quick_validate.py`                                               |
+| Secrets/SAST                                 | PASS          | scan dépôt/archive, Gitleaks, CodeQL et `ci-security`                              |
+| Dépendances hautes/critiques                 | PASS au seuil | aucune alerte haute/critique; deux npm modérées et une Composer faible documentées |
+| Package RC                                   | PASS          | archive déterministe, SHA-256, manifeste et SBOM CycloneDX; `ci-release` vert      |
+| Docker compatible                            | PASS CI       | image Next construite, exécutée sans root et health-checkée par `ci-docker`        |
+| Fournisseurs réels                           | UAT EXTERNE   | aucun secret, compte ou paiement réel utilisé; matrice dédiée                      |
+| Installation Composer locale en clone propre | UAT EXTERNE   | échec réseau Packagist avec archives nulles/corrompues; CI propre verte            |
+| Licence définitive                           | **FAIL**      | titulaire juridique exact absent; brouillon explicitement non effectif             |
+
+## Packaging et parcours étudiant
+
+Le CLI génère sans erreur les quatre familles Cloud, VPS, mutualisé et hybride, y compris vers une destination imbriquée. Chaque sortie conserve le profil headless et uniquement les artefacts compatibles. Le script de release trie les chemins, fixe les métadonnées ZIP, exclut les fichiers locaux/interdits, recherche les motifs de secrets et vérifie l'archive indépendamment. Les assistants Stitch et Banani restent présents comme sources facultatives à activation explicite; aucun design n'a été lancé ou inventé.
+
+## Sécurité et chaîne d'approvisionnement
+
+Les actions GitHub sont épinglées par SHA. Le workflow release utilise une installation figée sans scripts, publie le package vérifié et produit une attestation de provenance. Les invariants auth, OAuth, sessions, CSRF, organisations, uploads, webhooks, finance, payouts, Outbox et PII restent couverts. Aucun secret réel n'a été ajouté.
+
+## UAT externes
+
+Les comptes sandbox Stripe/FedaPay, les contrats payout, le wallet RPC Monero, les fournisseurs e-mail/stockage réels et une restauration live exigent une infrastructure ou des comptes humains externes. Ils restent visibles et ne sont pas présentés comme validés. Docker n'est jamais requis pour l'hébergement mutualisé.
+
+## Décision
+
+Le code peut rester publié sur `origin/main` comme préparation RC, mais la release n'est pas juridiquement publiable. Pour lever le **FAIL**, il faut fournir le nom légal exact du titulaire des droits, remplacer le marqueur du brouillon, faire adopter la licence définitive, puis relancer les gates. Aucun tag RC ou stable n'est autorisé avant cela.
