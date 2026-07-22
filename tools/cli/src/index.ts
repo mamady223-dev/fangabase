@@ -57,6 +57,7 @@ async function initialize(
   const generated = deploymentFiles(parsed.data);
   const conflicts: string[] = [];
   if (!dryRun && changed) {
+    await mkdir(dirname(target), { recursive: true });
     if (current !== null) await copyFile(target, `${target}.bak`);
     await writeFile(target, serialized, { encoding: "utf8", flag: "w" });
   }

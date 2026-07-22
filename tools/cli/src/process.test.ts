@@ -60,6 +60,26 @@ describe("CLI FangaBase", () => {
     );
     await expect(readFile(output, "utf8")).rejects.toThrow();
   });
+  it("creates the parent directory for a nested output", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-nested-"));
+    const output = join(directory, "profiles", "cloud", "fangabase.config.yaml");
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve(import.meta.dirname, "index.ts"),
+        "--config",
+        example,
+        "--output",
+        output,
+        "--json",
+      ],
+      { encoding: "utf8" },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(await readFile(output, "utf8")).toContain("source: headless");
+  });
   it("preserves a customized generated-path file", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-conflict-"));
     const output = join(directory, "fangabase.config.yaml");
