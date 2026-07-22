@@ -15,17 +15,17 @@
   },
   "dependencies": {
     "@fangabase/contracts": "workspace:*",
-    "next": "16.2.10",
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "next": "16.2.11",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
     "zod": "3.25.76"
   },
   "devDependencies": {
-    "@playwright/test": "1.55.1",
+    "@playwright/test": "1.61.1",
     "@types/node": "22.15.32",
-    "@types/react": "19.1.8",
-    "@types/react-dom": "19.1.6",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
     "eslint": "9.30.0",
-    "eslint-config-next": "16.2.10"
+    "eslint-config-next": "16.2.11"
   }
 }
