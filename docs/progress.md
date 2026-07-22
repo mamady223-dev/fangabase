@@ -1,4 +1,4 @@
-# Progression FangaBase
+﻿# Progression FangaBase
 
 Derniere mise a jour : 2026-07-22
 
@@ -15,20 +15,20 @@ Derniere mise a jour : 2026-07-22
 | 8 - Profils de deploiement          | Termine localement | Quatre familles CLI, artefacts selectifs et proteges, 9 configs, smoke read-only, manifeste SHA-256 et restauration temporaire; 33 tests CLI                                | Docker build/scan, PostgreSQL/MySQL et restauration live en UAT                           |
 | 9 - Workflow design                 | Termine localement | Connexion frontend neutre, client type, contrats/routes verifies, matrice CORS/CSRF/cookies, sources Stitch/Banani/maquettes/IA/custom explicites et skill facultative      | Validation visuelle uniquement lorsqu'un design reel est fourni; Banani MCP reste UAT     |
 | 10 - Skills                         | Termine            | 7 skills, references, metadata, 7 validations quick_validate, cas activation                                                                                                | Forward-test facultatif non execute                                                       |
-| 11 - Durcissement                   | Partiel            | Lint, format, typecheck, 79 tests JS/TS et 93 tests PHP; CORS exact, cookies et CSRF couverts; audits                                                                       | E2E navigateur, vraie base PostgreSQL/MySQL, performance, SAST/image scan executes        |
+| 11 - Durcissement                   | Termine localement | 79 tests JS/TS, 94 PHP/620 assertions, 2 E2E Chrome, budget health/readiness 0,501 s; CI PostgreSQL/MySQL, CodeQL et Gitleaks configurée                                    | PostgreSQL/MySQL, CodeQL/Gitleaks distants et charge multi-worker à observer en CI/UAT    |
 | 12 - Release candidate              | FAIL               | Build Next et 3 packages TS; migrations SQLite vertes; aucun avis haut/critique                                                                                             | Tous les restes ci-dessus et clone propre                                                 |
 
 ## Limites UAT
 
-Docker est absent : PostgreSQL/MySQL conteneurises, scan d'image et recettes Docker sont UAT en attente. Aucun compte fournisseur n'est configure : sandbox/live non executes. Les mocks ne prouvent pas la production.
+Docker, PostgreSQL et MySQL sont absents localement : leurs migrations, verrous et concurrences restent à valider dans `ci-databases`. CodeQL et Gitleaks sont configurés mais non exécutés localement. Les fournisseurs réels restent UAT.
 
 ## Checkpoint Git
 
-Les checkpoints jusqu'au jalon 7, dont `a21c3d8`, sont publies sur `origin/main`. Le jalon 8 `079174e` reste local tant que GitHub:443 est inaccessible. L'identite Git reste configuree uniquement dans ce depot.
+Les jalons 8 `079174e` et 9 `982c844` sont publies sur `origin/main`. Le jalon 11 est prepare localement. L'identite Git reste configuree uniquement dans ce depot.
 
 ## Prochain lot exact
 
-Jalon 11 : durcissement restant avec E2E navigateur headless, PostgreSQL/MySQL reels, performance et SAST. Le jalon 10 Skills est deja termine; les UAT externes ne sont pas presentees comme reussies.
+Jalon 12 : release candidate, observation des nouveaux workflows GitHub, clone propre, UAT PostgreSQL/MySQL/Docker et décision de licence.
 
 ## Definition du jalon 9
 

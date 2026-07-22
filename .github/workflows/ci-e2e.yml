@@ -1,0 +1,16 @@
+﻿name: ci-e2e
+on: [push, pull_request]
+permissions: { contents: read }
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 11.9.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22.17.0", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @fangabase/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @fangabase/web build
+      - run: pnpm --filter @fangabase/web test:e2e

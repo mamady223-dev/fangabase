@@ -1,0 +1,74 @@
+﻿name: ci-databases
+on: [push, pull_request]
+permissions: { contents: read }
+jobs:
+  relational:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - connection: pgsql
+            port: 5432
+          - connection: mysql
+            port: 3306
+    services:
+      postgres:
+        image: postgres:17.6-alpine
+        env:
+          {
+            POSTGRES_DB: fangabase,
+            POSTGRES_USER: fangabase,
+            POSTGRES_PASSWORD: ci-only,
+          }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U fangabase" --health-interval 10s
+          --health-timeout 5s --health-retries 5
+      mysql:
+        image: mysql:8.4.6
+        env:
+          {
+            MYSQL_DATABASE: fangabase,
+            MYSQL_USER: fangabase,
+            MYSQL_PASSWORD: ci-only,
+            MYSQL_ROOT_PASSWORD: ci-root-only,
+          }
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -pci-root-only" --health-interval 10s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          {
+            php-version: "8.2",
+            extensions: "pdo_pgsql,pdo_mysql",
+            coverage: none,
+          }
+      - run: composer install --working-dir=apps/server --no-interaction --prefer-dist
+      - run: php apps/server/artisan migrate:fresh --force
+        env:
+          {
+            APP_ENV: testing,
+            APP_KEY: "base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            DB_CONNECTION: "${{ matrix.connection }}",
+            DB_HOST: "127.0.0.1",
+            DB_PORT: "${{ matrix.port }}",
+            DB_DATABASE: fangabase,
+            DB_USERNAME: fangabase,
+            DB_PASSWORD: ci-only,
+          }
+      - run: php apps/server/vendor/bin/phpunit --configuration apps/server/phpunit.xml
+        env:
+          {
+            APP_ENV: testing,
+            APP_KEY: "base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+            DB_CONNECTION: "${{ matrix.connection }}",
+            DB_HOST: "127.0.0.1",
+            DB_PORT: "${{ matrix.port }}",
+            DB_DATABASE: fangabase,
+            DB_USERNAME: fangabase,
+            DB_PASSWORD: ci-only,
+          }
