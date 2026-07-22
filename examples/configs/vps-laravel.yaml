@@ -12,6 +12,8 @@ product:
   }
 architecture:
   { target: vps_laravel, frontend: blade, backend: laravel, ui: blade }
+deployment:
+  { family: vps, docker: false, database: postgres, vps_variant: laravel }
 database: { engine: postgres, provider: postgres }
 email: { provider: smtp }
 storage: { provider: local_private }

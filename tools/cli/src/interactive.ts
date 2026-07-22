@@ -28,7 +28,7 @@ export async function promptConfigYaml(): Promise<string> {
     const architectureChoice =
       (
         await ask(
-          "Architecture 1=Cloud Vercel 2=VPS Next 3=VPS Laravel 4=Mutualise 5=Hybride [1]: ",
+          "Deploiement 1=Cloud/Vercel 2=VPS 3=Mutualise 4=Hybride [1]: ",
         )
       ).trim() || "1";
     const emailChoice =
@@ -65,14 +65,6 @@ export async function promptConfigYaml(): Promise<string> {
         provider: "postgres",
       },
       "3": {
-        target: "vps_laravel",
-        frontend: "blade",
-        backend: "laravel",
-        ui: "blade",
-        engine: "postgres",
-        provider: "postgres",
-      },
-      "4": {
         target: "shared_laravel",
         frontend: "blade",
         backend: "laravel",
@@ -80,7 +72,7 @@ export async function promptConfigYaml(): Promise<string> {
         engine: "mysql",
         provider: "mysql",
       },
-      "5": {
+      "4": {
         target: "hybrid",
         frontend: "next",
         backend: "laravel",
@@ -124,6 +116,19 @@ export async function promptConfigYaml(): Promise<string> {
         frontend: architecture.frontend,
         backend: architecture.backend,
         ui: architecture.ui,
+      },
+      deployment: {
+        family:
+          architecture.target === "cloud_vercel"
+            ? "cloud"
+            : architecture.target === "shared_laravel"
+              ? "shared"
+              : architecture.target === "hybrid"
+                ? "hybrid"
+                : "vps",
+        docker: false,
+        database: architecture.engine,
+        vps_variant: architecture.target === "vps_next" ? "next" : null,
       },
       database: {
         engine: architecture.engine,

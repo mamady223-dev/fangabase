@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { readdir, readFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { parse } from "yaml";
 import { configSchema } from "./config.js";
 
 const valid = {
@@ -38,6 +41,15 @@ const valid = {
 };
 
 describe("configSchema", () => {
+  it("valide tous les exemples YAML", async () => {
+    const directory = resolve(import.meta.dirname, "../../../examples/configs");
+    for (const file of await readdir(directory)) {
+      const result = configSchema.safeParse(
+        parse(await readFile(resolve(directory, file), "utf8")),
+      );
+      expect(result.success, file).toBe(true);
+    }
+  });
   it("accepte le profil cloud par défaut", () =>
     expect(configSchema.safeParse(valid).success).toBe(true));
   it("refuse MySQL sur cloud Vercel", () =>

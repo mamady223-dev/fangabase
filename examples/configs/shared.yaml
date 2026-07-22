@@ -12,6 +12,8 @@ product:
   }
 architecture:
   { target: shared_laravel, frontend: blade, backend: laravel, ui: blade }
+deployment:
+  { family: shared, docker: false, database: mysql, vps_variant: null }
 database: { engine: mysql, provider: mysql }
 email: { provider: smtp }
 storage: { provider: local_private }

@@ -12,10 +12,10 @@ Derniere mise a jour : 2026-07-22
 | 5 - Finance commune                 | Termine localement | Catalogue versionne, credits append-only et lots FEFO, abonnements neutres, entitlements, API et interfaces utilisateur/admin                                               | Courses PostgreSQL/MySQL et fournisseurs reels au jalon 6                                        |
 | 6 - Fournisseurs                    | Termine localement | Registre de capacites, checkout serveur, Stripe checkout/statut/refund/webhook, FedaPay transaction/token/statut, reconciliation, refunds, Monero isole, 11 tests cibles    | UAT sandbox Stripe/FedaPay; contrats officiels des autres fournisseurs; wallet RPC Monero        |
 | 7 - Retraits et rapprochement       | Termine localement | Persistence transactionnelle, ledger reserve/disponible/paye, approbation, suspension, worker a bail, retry, polling, callback, API headless, audit et rapprochement testes | UAT payout/callback officiels et concurrence PostgreSQL/MySQL                                    |
-| 8 - Profils de deploiement          | Partiel            | Vercel, VPS Next/Laravel, mutualise et hybride documentes; 9 configs validees                                                                                               | Smoke deploiement, Docker image scan et restauration live                                        |
+| 8 - Profils de deploiement          | Termine localement | Quatre familles CLI, artefacts selectifs et proteges, 9 configs, smoke read-only, manifeste SHA-256 et restauration temporaire; 33 tests CLI                                | Docker build/scan, PostgreSQL/MySQL et restauration live en UAT                                  |
 | 9 - Workflow design                 | Defini             | Headless par defaut, exemples facultatifs isoles, sources headless/Banani/maquettes/IA explicite                                                                            | Integrer uniquement le design choisi par l'etudiant; responsive, accessibilite et tests associes |
 | 10 - Skills                         | Termine            | 7 skills, references, metadata, 7 validations quick_validate, cas activation                                                                                                | Forward-test facultatif non execute                                                              |
-| 11 - Durcissement                   | Partiel            | Lint, format, typecheck, 34 tests JS/TS, 91 tests PHP/558 assertions, audits                                                                                                | E2E navigateur, vraie base PostgreSQL/MySQL, performance, SAST/image scan executes               |
+| 11 - Durcissement                   | Partiel            | Lint, format, typecheck, 56 tests JS/TS, 91 tests PHP/558 assertions, audits                                                                                                | E2E navigateur, vraie base PostgreSQL/MySQL, performance, SAST/image scan executes               |
 | 12 - Release candidate              | FAIL               | Build Next et 3 packages TS; migrations SQLite vertes; aucun avis haut/critique                                                                                             | Tous les restes ci-dessus et clone propre                                                        |
 
 ## Limites UAT
@@ -24,11 +24,11 @@ Docker est absent : PostgreSQL/MySQL conteneurises, scan d'image et recettes Doc
 
 ## Checkpoint Git
 
-Les checkpoints `b67d885`, `9e54c11`, `0187cb0`, `7860e15`, `2be77f5`, `5f45714` et `931fcce` sont publies sur `origin/main`. L'identite Git reste configuree uniquement dans ce depot.
+Les checkpoints jusqu'au jalon 7, dont `a21c3d8`, sont publies sur `origin/main`. L'identite Git reste configuree uniquement dans ce depot.
 
 ## Prochain lot exact
 
-Jalon 8 : terminer les profils de deploiement, smoke tests, images et restauration. Docker, fournisseurs payout reels, Stripe/FedaPay sandbox, wallet RPC Monero, clients de stockage distant et concurrence PostgreSQL/MySQL restent des UAT externes.
+Jalon 9 : fournir uniquement le workflow d'integration du design choisi par l'etudiant. Docker, restauration live, fournisseurs reels et concurrence PostgreSQL/MySQL restent des UAT externes et ne bloquent pas ce prochain lot.
 
 ## Definition du jalon 9
 

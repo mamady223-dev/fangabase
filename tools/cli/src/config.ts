@@ -19,6 +19,8 @@ const paymentProviders = [
   "monero",
 ] as const;
 
+const deploymentFamilies = ["cloud", "vps", "shared", "hybrid"] as const;
+
 export const configSchema = z
   .object({
     version: z.literal(1),
@@ -45,6 +47,17 @@ export const configSchema = z
       backend: z.enum(["next", "laravel"]),
       ui: z.enum(["next", "blade", "inertia"]),
     }),
+    deployment: z
+      .object({
+        family: z.enum(deploymentFamilies),
+        docker: z.boolean().default(false),
+        database: z.enum(["postgres", "mysql"]),
+        vps_variant: z
+          .enum(["next", "laravel", "laravel_api_next"])
+          .nullable()
+          .default(null),
+      })
+      .optional(),
     database: z.object({
       engine: z.enum(["postgres", "mysql"]),
       provider: z.string().min(1),
@@ -88,6 +101,45 @@ export const configSchema = z
     }),
   })
   .superRefine((value, context) => {
+    const expectedFamily =
+      value.architecture.target === "cloud_vercel"
+        ? "cloud"
+        : value.architecture.target === "shared_laravel"
+          ? "shared"
+          : value.architecture.target === "hybrid"
+            ? "hybrid"
+            : "vps";
+    if (value.deployment && value.deployment.family !== expectedFamily) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["deployment", "family"],
+        message: `la famille doit etre ${expectedFamily} pour cette architecture`,
+      });
+    }
+    if (
+      value.deployment &&
+      value.deployment.database !== value.database.engine
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["deployment", "database"],
+        message: "le moteur de deploiement doit correspondre a database.engine",
+      });
+    }
+    if (value.deployment?.family === "shared" && value.deployment.docker) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["deployment", "docker"],
+        message: "l'hebergement mutualise ne genere pas Docker",
+      });
+    }
+    if (value.deployment?.family === "vps" && !value.deployment.vps_variant) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["deployment", "vps_variant"],
+        message: "une variante VPS est obligatoire",
+      });
+    }
     if (
       value.architecture.target === "cloud_vercel" &&
       (value.architecture.backend !== "next" ||

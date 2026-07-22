@@ -11,6 +11,8 @@ product:
     default_currency: XOF,
   }
 architecture: { target: vps_next, frontend: next, backend: next, ui: next }
+deployment:
+  { family: vps, docker: false, database: postgres, vps_variant: next }
 database: { engine: postgres, provider: postgres }
 email: { provider: smtp }
 storage: { provider: local_private }

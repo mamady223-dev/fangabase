@@ -11,6 +11,8 @@ product:
     default_currency: XOF,
   }
 architecture: { target: hybrid, frontend: next, backend: laravel, ui: next }
+deployment:
+  { family: hybrid, docker: false, database: mysql, vps_variant: null }
 database: { engine: mysql, provider: mysql }
 email: { provider: smtp }
 storage: { provider: s3 }

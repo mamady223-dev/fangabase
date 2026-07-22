@@ -11,6 +11,8 @@ product:
     default_currency: XOF,
   }
 architecture: { target: cloud_vercel, frontend: next, backend: next, ui: next }
+deployment:
+  { family: cloud, docker: false, database: postgres, vps_variant: null }
 database: { engine: postgres, provider: neon }
 email: { provider: resend }
 storage: { provider: cloudinary }

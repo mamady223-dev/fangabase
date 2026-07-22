@@ -1,13 +1,24 @@
 #!/usr/bin/env node
-import { readFile, writeFile, copyFile, access, rm } from "node:fs/promises";
+import {
+  readFile,
+  writeFile,
+  copyFile,
+  access,
+  rm,
+  mkdir,
+} from "node:fs/promises";
 import { constants } from "node:fs";
 import { resolve, join } from "node:path";
+import { dirname } from "node:path";
 import { tmpdir } from "node:os";
 import { randomUUID } from "node:crypto";
 import { parse, stringify } from "yaml";
 import { Command } from "commander";
 import { configSchema } from "./config.js";
 import { promptConfigYaml } from "./interactive.js";
+import { deploymentFiles } from "./deployment.js";
+import { runSmoke } from "./smoke.js";
+import { backup, restore } from "./recovery.js";
 
 const generatorVersion = "0.1.0";
 
@@ -41,10 +52,27 @@ async function initialize(
   const current = (await exists(target))
     ? await readFile(target, "utf8")
     : null;
-  const changed = current !== serialized;
+  let changed = current !== serialized;
+  const deploymentRoot = join(dirname(target), "deployment");
+  const generated = deploymentFiles(parsed.data);
+  const conflicts: string[] = [];
   if (!dryRun && changed) {
     if (current !== null) await copyFile(target, `${target}.bak`);
     await writeFile(target, serialized, { encoding: "utf8", flag: "w" });
+  }
+  for (const file of generated) {
+    const path = join(deploymentRoot, file.path);
+    const existing = (await exists(path)) ? await readFile(path, "utf8") : null;
+    if (existing === file.content) continue;
+    if (existing !== null) {
+      conflicts.push(path);
+      continue;
+    }
+    changed = true;
+    if (!dryRun) {
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, file.content, { encoding: "utf8", flag: "wx" });
+    }
   }
   const result = {
     ok: true,
@@ -53,6 +81,8 @@ async function initialize(
     output: target,
     generator_version: generatorVersion,
     manifest,
+    deployment_files: generated.map((file) => join(deploymentRoot, file.path)),
+    conflicts,
   };
   process.stdout.write(
     json
@@ -96,6 +126,41 @@ program.command("doctor").action(() => {
     }) + "\n",
   );
 });
+program
+  .command("smoke")
+  .requiredOption("--url <url>")
+  .option("--frontend <url>")
+  .option("--timeout <milliseconds>", "request timeout", "5000")
+  .action(async (options) => {
+    const result = await runSmoke({
+      url: options.url,
+      frontend: options.frontend,
+      timeoutMs: Number(options.timeout),
+    });
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    if (!result.ok) process.exitCode = 1;
+  });
+program
+  .command("backup")
+  .requiredOption("--source <file>")
+  .requiredOption("--target <directory>")
+  .requiredOption("--database <engine>")
+  .option("--dry-run", "plan only", false)
+  .action(async (options) => {
+    if (!["postgres", "mysql", "sqlite"].includes(options.database))
+      throw new Error("database must be postgres, mysql or sqlite");
+    process.stdout.write(
+      `${JSON.stringify(await backup({ source: options.source, target: options.target, database: options.database, dryRun: options.dryRun }), null, 2)}\n`,
+    );
+  });
+program
+  .command("restore")
+  .requiredOption("--backup <directory>")
+  .requiredOption("--target <file>")
+  .requiredOption("--environment <name>")
+  .option("--confirm", "confirm destructive restore", false)
+  .option("--dry-run", "verify only", false)
+  .action((options) => restore(options));
 program.parseAsync().catch((error: unknown) => {
   process.stderr.write(
     `${error instanceof Error ? error.message : String(error)}\n`,
