@@ -39,7 +39,7 @@ return new class extends Migration {
         Schema::create('withdrawal_transitions', function (Blueprint $t): void {
             $t->uuid('id')->primary(); $t->uuid('withdrawal_id')->index(); $t->string('from_status', 30)->nullable(); $t->string('to_status', 30);
             $t->string('source', 30); $t->uuid('actor_id')->nullable(); $t->string('external_event_id')->nullable(); $t->json('safe_metadata'); $t->timestampTz('occurred_at')->index();
-            $t->unique(['withdrawal_id', 'external_event_id', 'to_status']);
+            $t->unique(['withdrawal_id', 'external_event_id', 'to_status'], 'withdrawal_event_status_unique');
         });
         Schema::create('payout_callbacks', function (Blueprint $t): void {
             $t->uuid('id')->primary(); $t->string('provider', 40); $t->string('external_event_id'); $t->string('event_type'); $t->string('status', 20);

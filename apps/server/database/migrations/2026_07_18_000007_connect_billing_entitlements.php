@@ -83,7 +83,7 @@ return new class extends Migration {
             $t->json('safe_metadata');
             $t->timestampTz('occurred_at')->index();
             $t->foreign('subscription_id')->references('id')->on('subscriptions');
-            $t->unique(['subscription_id', 'external_event_id']);
+            $t->unique(['subscription_id', 'external_event_id'], 'subscription_event_unique');
         });
         Schema::create('entitlement_grants', function (Blueprint $t): void {
             $t->uuid('id')->primary();
