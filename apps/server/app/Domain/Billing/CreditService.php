@@ -76,6 +76,32 @@ final readonly class CreditService
         return DB::transaction(fn (): array => $this->idempotency->execute($owner, 'credit_refund', 'internal', $key, ['quantity' => $quantity, 'reference' => $reference], fn (): array => ['entry_id' => $this->grant($owner, $quantity, 'REFUND', $reference), 'quantity' => $quantity]));
     }
 
+    public function grantPaidOrder(BillingScope $owner, string $priceId, string $orderId, string $provider): array
+    {
+        $price = $this->catalog->serverPrice($priceId);
+        $plan = $price->plan_id ? DB::table('plans')->where('id', $price->plan_id)->first() : null;
+        $quantity = (int) ($plan->included_credits ?? 0);
+        if ($quantity <= 0) throw ApiProblem::validation();
+        return $this->idempotency->execute($owner, 'credit_paid_order', $provider, 'paid-order-'.$orderId, ['price_id' => $priceId, 'order_id' => $orderId],
+            fn (): array => ['entry_id' => $this->grant($owner, $quantity, 'PURCHASE', 'order:'.$orderId, null,
+                ['amount_minor' => (int) $price->amount_minor, 'currency' => $price->currency]), 'quantity' => $quantity]);
+    }
+
+    public function reservePaidOrderRefund(BillingScope $owner, string $orderId, int $quantity, string $refundId): ?string
+    {
+        if ($quantity <= 0) return null;
+        $wallet = $this->wallet($owner, true);
+        $entry = DB::table('credit_ledger_entries')->where(['wallet_id' => $wallet->id, 'reference' => 'order:'.$orderId, 'kind' => 'PURCHASE'])->first();
+        $lot = $entry ? DB::table('credit_lots')->where('source_entry_id', $entry->id)->lockForUpdate()->first() : null;
+        if ($lot === null || (int) $lot->quantity_remaining < $quantity) throw ApiProblem::conflict('REFUND_CREDITS_ALREADY_USED');
+        DB::table('credit_lots')->where('id', $lot->id)->update(['quantity_remaining' => (int) $lot->quantity_remaining - $quantity, 'quantity_reserved' => (int) $lot->quantity_reserved + $quantity, 'updated_at' => now()]);
+        $id = (string) Str::uuid();
+        DB::table('credit_reservations')->insert(['id' => $id, 'wallet_id' => $wallet->id, 'quantity' => $quantity, 'status' => 'RESERVED', 'reference' => 'refund:'.$refundId,
+            'allocations' => json_encode([['lot_id' => $lot->id, 'quantity' => $quantity]], JSON_THROW_ON_ERROR), 'created_at' => now(), 'updated_at' => now()]);
+        $this->entry($wallet->id, -$quantity, 'PURCHASE_REFUND_RESERVE', 'refund:'.$refundId, 'refund:'.$refundId, 'credit_purchase_refund');
+        return $id;
+    }
+
     public function summary(BillingScope $owner, int $page = 1, int $perPage = 25): array
     {
         $wallet = $this->wallet($owner); $this->expire($wallet->id); $perPage = max(1, min(100, $perPage)); $page = max(1, $page);

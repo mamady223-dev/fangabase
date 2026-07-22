@@ -27,4 +27,13 @@ return [
         'state_minutes' => (int) env('GOOGLE_STATE_MINUTES', 10),
         'allowed_return_paths' => array_values(array_filter(explode(',', (string) env('GOOGLE_ALLOWED_RETURN_PATHS', '/,/dashboard')))),
     ],
+    'payments' => [
+        'checkout_minutes' => (int) env('PAYMENT_CHECKOUT_MINUTES', 30),
+        'allowed_return_paths' => array_values(array_filter(explode(',', (string) env('PAYMENT_ALLOWED_RETURN_PATHS', '/billing,/checkout/complete')))),
+        'stripe' => ['enabled' => filter_var(env('STRIPE_ENABLED', false), FILTER_VALIDATE_BOOL), 'secret_key' => env('STRIPE_SECRET_KEY'), 'webhook_secret' => env('STRIPE_WEBHOOK_SECRET')],
+        'fedapay' => ['enabled' => filter_var(env('FEDAPAY_ENABLED', false), FILTER_VALIDATE_BOOL), 'secret_key' => env('FEDAPAY_SECRET_KEY'), 'base_url' => env('FEDAPAY_BASE_URL', 'https://sandbox-api.fedapay.com')],
+        'monero' => ['enabled' => filter_var(env('MONERO_ENABLED', false), FILTER_VALIDATE_BOOL), 'wallet_rpc_url' => env('MONERO_WALLET_RPC_URL'),
+            'wallet_rpc_username' => env('MONERO_WALLET_RPC_USERNAME'), 'wallet_rpc_password' => env('MONERO_WALLET_RPC_PASSWORD'),
+            'minimum_confirmations' => (int) env('MONERO_MINIMUM_CONFIRMATIONS', 10)],
+    ],
 ];

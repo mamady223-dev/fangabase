@@ -3,6 +3,9 @@ packages:
   - packages/*
   - tools/*
 
+overrides:
+  sharp: 0.35.0
+
 allowBuilds:
   esbuild: true
   sharp: false

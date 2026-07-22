@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use FangaBase\Domain\Infrastructure\Mail\EmailOutboxWorker;
 use FangaBase\Domain\Identity\RefreshSessionService;
+use FangaBase\Domain\Payments\PaymentMaintenanceService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
@@ -29,5 +30,11 @@ Artisan::command('fangabase:sessions:cleanup', function (RefreshSessionService $
     return self::SUCCESS;
 })->purpose('Supprime les sessions de rafraichissement expirees');
 
+Artisan::command('fangabase:payments:cleanup', function (PaymentMaintenanceService $payments): int {
+    $this->line(json_encode(['expired' => $payments->expirePending()], JSON_THROW_ON_ERROR));
+    return self::SUCCESS;
+})->purpose('Expire les ordres et tentatives de paiement arrives a echeance');
+
 Schedule::command('fangabase:sessions:cleanup')->daily()->withoutOverlapping();
+Schedule::command('fangabase:payments:cleanup')->hourly()->withoutOverlapping();
 Schedule::command('fangabase:mail-worker --once --limit=25')->everyMinute()->withoutOverlapping();

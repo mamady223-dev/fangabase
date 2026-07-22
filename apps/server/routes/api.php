@@ -11,6 +11,7 @@ use FangaBase\Http\Controllers\OrganizationMembershipController;
 use FangaBase\Http\Controllers\PlatformAdminController;
 use FangaBase\Http\Controllers\BillingAdminController;
 use FangaBase\Http\Controllers\BillingController;
+use FangaBase\Http\Controllers\PaymentController;
 use FangaBase\Http\Controllers\CatalogController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +32,7 @@ Route::prefix('auth')->group(function (): void {
 Route::get('/oauth/google/start', [GoogleOAuthController::class, 'start']);
 Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'callback']);
 Route::get('/catalog', [CatalogController::class, 'index']);
+Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook']);
 
 Route::middleware('session.auth')->group(function (): void {
     Route::get('/organizations', [OrganizationController::class, 'index']);
@@ -42,6 +44,8 @@ Route::middleware('session.auth')->group(function (): void {
     Route::get('/billing/entitlements', [BillingController::class, 'entitlements']);
 
     Route::middleware('strict.csrf')->group(function (): void {
+        Route::post('/payments/checkouts', [PaymentController::class, 'checkout']);
+        Route::post('/payments/orders/{order}/refunds', [PaymentController::class, 'refund']);
         Route::post('/organizations', [OrganizationController::class, 'store']);
         Route::patch('/organizations/{organization}', [OrganizationController::class, 'update']);
         Route::post('/organizations/{organization}/invitations', [OrganizationInvitationController::class, 'store']);
