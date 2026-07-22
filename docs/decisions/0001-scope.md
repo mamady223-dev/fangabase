@@ -38,4 +38,4 @@ Node.js 22.17.0, pnpm 11.9.0, PHP 8.2.12, Composer 2.8.9 et Git 2.49.0 sont disp
 
 ## Licence
 
-Aucune licence n'ayant été choisie par le propriétaire, le dépôt contient `LICENSE-DECISION-REQUIRED.md` et ne prétend à aucune licence par défaut.
+Une licence commerciale propriétaire a été choisie. Son projet original est dans `LICENSE-COMMERCIAL-DRAFT.md`, mais il ne devient effectif qu’après ajout de l’identité juridique exacte du titulaire et adoption explicite. `LICENSE-DECISION-REQUIRED.md` conserve cette gate.

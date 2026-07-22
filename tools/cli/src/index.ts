@@ -20,7 +20,7 @@ import { deploymentFiles } from "./deployment.js";
 import { runSmoke } from "./smoke.js";
 import { backup, restore } from "./recovery.js";
 
-const generatorVersion = "0.1.0";
+const generatorVersion = "0.1.0-rc.1";
 
 async function exists(path: string): Promise<boolean> {
   try {

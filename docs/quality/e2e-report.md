@@ -9,4 +9,4 @@ Statuts possibles :
 - local Laravel : exÃ©cutÃ© avec SQLite et fournisseurs locaux ;
 - navigateur Chromium : exÃ©cutÃ© seulement si le binaire Playwright est installÃ© ;
 - fournisseurs rÃ©els : jamais appelÃ©s ;
-- PostgreSQL/MySQL : CI prÃ©vue, non exÃ©cutÃ©e localement sans moteurs.
+- PostgreSQL 17/MySQL 8.4 : migrations et 94 tests exÃ©cutÃ©s avec succÃ¨s dans `ci-databases`; moteurs indisponibles localement.

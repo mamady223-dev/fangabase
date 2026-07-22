@@ -18,3 +18,5 @@ Sources contractuelles consultees le 22 juillet 2026 : [Stripe Checkout](https:/
 | Monero                                                       | requete, taux verrouille, expiration, polling, confirmations, sous/sur-paiement           | `DISABLED`; wallet RPC et UAT requis                               |
 
 Aucun payout n'est annonce par les adaptateurs du jalon 6. Le port `PayoutProvider` reste separe et une implementation ne pourra annoncer cette capacite qu'apres preuve contractuelle et UAT.
+
+La matrice consolidée paiements, e-mail et stockage pour la release candidate se trouve dans `docs/quality/provider-matrix.md`.
