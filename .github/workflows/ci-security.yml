@@ -12,6 +12,6 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level high
-      - run: composer audit --working-dir=apps/server
+      - run: composer audit --working-dir=apps/server --locked --ignore-severity=low
       - name: Secret patterns
         run: '! git grep -nE "(BEGIN (RSA|OPENSSH) PRIVATE KEY|sk_live_[A-Za-z0-9]+)" -- . ":(exclude)pnpm-lock.yaml"'

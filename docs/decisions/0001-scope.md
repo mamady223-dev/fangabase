@@ -29,7 +29,7 @@ Les valeurs par défaut sont : français, XOF, `Africa/Bamako`, Mali, Next.js Ap
 - L'idempotence est scopée par propriétaire, opération et fournisseur.
 - Les webhooks sont vérifiés sur leur corps brut avant traitement.
 - Les secrets, PII et erreurs brutes de fournisseurs ne sont jamais exposés.
-- Aucun flux obligatoire ne peut rester un placeholder ou un TODO.
+- Tout flux obligatoire doit etre completement implemente et verifie.
 - La parité TypeScript/Laravel est vérifiée par contrats et cas partagés.
 
 ## Contraintes d'environnement constatées
