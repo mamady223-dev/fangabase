@@ -1,6 +1,6 @@
 # Journal des changements
 
-## 0.1.0-rc.1 - 2026-07-22
+## 0.1.0-rc.1 - 2026-07-26
 
 ### Fonctionnalités
 
@@ -13,6 +13,7 @@
 - Sessions à rotation et familles révocables, CSRF double-submit, CORS exact, OAuth Google PKCE et protections anti-IDOR.
 - Webhooks signés sur corps brut, idempotence scopée, ledgers append-only et erreurs fournisseurs expurgées.
 - CodeQL, Gitleaks, audits de dépendances et actions GitHub épinglées par SHA.
+- Next.js 16.2.11, PostCSS 8.5.18 et une résolution sûre de Minimatch corrigent les avis hauts détectés avant le tag RC.
 
 ### Paiements et fournisseurs
 
@@ -26,7 +27,9 @@
 
 ### Limites de la release candidate
 
-- Licence commerciale en brouillon tant que l'identité juridique du titulaire n'est pas fournie.
+- Licence commerciale propriétaire finalisée au nom de Mamady Traoré, auteur et titulaire légal des droits, en qualité de CEO de Motechnova.
+- Les Applications étudiantes peuvent être commercialisées ; FangaBase lui-même ne peut être revendu, partagé ou redistribué.
+- Les dépendances tierces conservent leurs propres licences et avis.
 - Docker local indisponible ; image VPS Next vérifiée en CI. Docker n'est jamais requis en mutualisé.
 - Comptes fournisseurs, wallet Monero, stockage distant, restauration live et charge réellement concurrente restent des UAT externes.
 

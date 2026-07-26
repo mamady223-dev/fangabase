@@ -38,4 +38,4 @@ Node.js 22.17.0, pnpm 11.9.0, PHP 8.2.12, Composer 2.8.9 et Git 2.49.0 sont disp
 
 ## Licence
 
-Une licence commerciale propriétaire a été choisie. Son projet original est dans `LICENSE-COMMERCIAL-DRAFT.md`, mais il ne devient effectif qu’après ajout de l’identité juridique exacte du titulaire et adoption explicite. `LICENSE-DECISION-REQUIRED.md` conserve cette gate.
+Une licence commerciale propriétaire a été choisie et adoptée dans `LICENSE`. Mamady Traoré en est l'auteur et le titulaire légal des droits, en qualité de CEO de Motechnova. Elle autorise les étudiants à commercialiser leurs applications, mais interdit la revente ou la redistribution de FangaBase. Les composants tiers conservent leurs propres licences.

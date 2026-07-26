@@ -50,8 +50,7 @@ for (const path of tracked) {
 for (const required of [
   "Fanga_design_stitch.md",
   "Fanga_design_Banani.md",
-  "LICENSE-COMMERCIAL-DRAFT.md",
-  "LICENSE-DECISION-REQUIRED.md",
+  "LICENSE",
   "THIRD_PARTY_NOTICES.md",
   "CHANGELOG.md",
   "README.md",
@@ -67,7 +66,8 @@ const manifest = {
   schema: 1,
   product: "FangaBase",
   version,
-  licenseStatus: "DRAFT_PENDING_LEGAL_HOLDER",
+  licenseStatus: "PROPRIETARY_COMMERCIAL",
+  copyrightHolder: "Mamady Traoré",
   reproducibleTimestamp: "1980-01-01T00:00:00.000Z",
   files: sourceEntries.map(({ path, data }) => ({
     path,

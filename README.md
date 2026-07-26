@@ -24,7 +24,9 @@ Consultez `docs/progress.md` pour l'état factuel et `docs/getting-started/quick
 
 ## Release candidate et licence
 
-La version préparée est `0.1.0-rc.1`. Le texte commercial reste un brouillon dans `LICENSE-COMMERCIAL-DRAFT.md` tant que l'identité juridique exacte du titulaire n'est pas fournie. Aucun droit nouveau n'est accordé par ce brouillon ; `LICENSE-DECISION-REQUIRED.md` reste applicable. Le texte doit idéalement être vérifié par un professionnel du droit avant commercialisation à grande échelle.
+La version préparée est `0.1.0-rc.1`. FangaBase est distribué sous la [licence commerciale propriétaire](LICENSE), dont Mamady Traoré est l'auteur et le titulaire légal des droits, en qualité de CEO de Motechnova. Cette qualité professionnelle ne fait pas de Motechnova un titulaire juridique distinct.
+
+Les étudiants autorisés peuvent utiliser et modifier FangaBase afin de créer et commercialiser leurs propres applications. Ils ne peuvent pas vendre, revendre, partager ou redistribuer FangaBase, ni l'intégrer à un template, kit, générateur ou produit concurrent destiné à des tiers. Les dépendances tierces conservent leurs propres licences. La licence du dépôt ne constitue pas un avis juridique professionnel.
 
 Créer et vérifier l'archive autorisée :
 

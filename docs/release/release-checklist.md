@@ -14,7 +14,7 @@
 | Docker compatible                        | PASS CI                        | `ci-docker`                                     |
 | Fournisseurs réels                       | UAT EXTERNE                    | matrice fournisseurs                            |
 | Composer local depuis réseau neuf        | UAT EXTERNE                    | incident Packagist; Laravel propre validé en CI |
-| Licence définitive                       | **FAIL obligatoire**           | identité légale du titulaire absente            |
+| Licence définitive                       | PASS documentaire              | `LICENSE`, Mamady Traoré                        |
 | Git propre et synchronisé                | À vérifier après rapport final | `git status -sb`                                |
 
-La décision globale est `FAIL` si une gate obligatoire échoue, `UAT EXTERNE` pour une dépendance réellement extérieure non masquée, et `PASS` seulement lorsque toutes les gates obligatoires sont closes. Aucun tag n'est créé avec une licence en brouillon.
+La décision globale est `FAIL` si une gate obligatoire échoue, `PASS_WITH_WARNINGS` lorsque seules des UAT réellement externes restent explicitement identifiées, et `PASS` seulement lorsque toutes les portes, y compris les UAT requises, sont closes. Aucun tag n'est créé tant qu'une gate obligatoire échoue.

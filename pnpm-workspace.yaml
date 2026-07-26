@@ -4,6 +4,8 @@ packages:
   - tools/*
 
 overrides:
+  minimatch@3.1.5: 10.2.5
+  postcss: 8.5.18
   sharp: 0.35.0
 
 allowBuilds:

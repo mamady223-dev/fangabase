@@ -21,7 +21,7 @@ const required = [
   "release/sbom.cdx.json",
   "Fanga_design_stitch.md",
   "Fanga_design_Banani.md",
-  "LICENSE-COMMERCIAL-DRAFT.md",
+  "LICENSE",
   "THIRD_PARTY_NOTICES.md",
 ];
 for (const name of entries.keys()) {
@@ -35,6 +35,21 @@ for (const name of required)
 const manifest = JSON.parse(
   entries.get("release/manifest.json").toString("utf8"),
 );
+if (
+  manifest.licenseStatus !== "PROPRIETARY_COMMERCIAL" ||
+  manifest.copyrightHolder !== "Mamady Traoré"
+)
+  throw new Error("RELEASE_LICENSE_METADATA_INVALID");
+const license = entries.get("LICENSE").toString("utf8");
+for (const statement of [
+  "Copyright © 2026 Mamady Traoré",
+  "vendre commercialement ses Applications étudiantes",
+  "vendre, revendre",
+  "Composants tiers restent soumis à leurs propres licences",
+  "ne constitue pas un avis juridique professionnel",
+])
+  if (!license.includes(statement))
+    throw new Error(`RELEASE_LICENSE_STATEMENT_MISSING: ${statement}`);
 for (const file of manifest.files) {
   const data = entries.get(file.path);
   if (

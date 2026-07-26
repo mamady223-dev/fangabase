@@ -1,0 +1,81 @@
+# Licence commerciale propriétaire FangaBase
+
+Version 1.0 — 26 juillet 2026
+
+Copyright © 2026 Mamady Traoré. Tous droits réservés.
+
+Mamady Traoré est l'auteur et le titulaire légal des droits sur FangaBase. La mention « CEO de Motechnova » indique uniquement sa qualité professionnelle. Elle ne désigne pas Motechnova comme titulaire juridique distinct des droits accordés ou réservés par la présente licence.
+
+Ce document constitue les conditions de licence de FangaBase. Il a été rédigé pour le projet et ne constitue pas un avis juridique professionnel. Une vérification par un professionnel du droit reste recommandée avant une exploitation commerciale à grande échelle.
+
+## 1. Définitions
+
+« Titulaire » désigne Mamady Traoré, auteur et titulaire légal des droits sur FangaBase, agissant notamment en qualité de CEO de Motechnova.
+
+« FangaBase » désigne le noyau logiciel propriétaire, ses outils, contrats, migrations, documentation, exemples et fichiers associés distribués par le Titulaire, à l'exclusion des Composants tiers.
+
+« Étudiant autorisé » désigne une personne physique à laquelle le Titulaire a accordé personnellement un accès valide à FangaBase.
+
+« Application étudiante » désigne une application ou un produit distinct créé par un Étudiant autorisé à l'aide de FangaBase, et dont la valeur principale ne consiste pas à fournir FangaBase ou un substitut de FangaBase à des tiers.
+
+« Composant tiers » désigne tout logiciel, bibliothèque, outil, contenu ou autre élément dont les droits appartiennent à une personne autre que le Titulaire.
+
+## 2. Licence accordée
+
+Sous réserve du respect de la présente licence, le Titulaire accorde à chaque Étudiant autorisé un droit personnel, limité, non exclusif, non transférable et non sous-licenciable :
+
+- d'utiliser FangaBase pour concevoir ses propres Applications étudiantes ;
+- de modifier FangaBase pour les besoins internes de ces Applications étudiantes ;
+- d'exploiter, facturer, concéder l'accès à et vendre commercialement ses Applications étudiantes ;
+- de déployer les parties nécessaires de FangaBase uniquement comme composants intégrés de ces Applications étudiantes.
+
+L'Étudiant autorisé peut remettre ou héberger une Application étudiante pour un client uniquement lorsque FangaBase demeure un composant intégré non proposé séparément, que son code source n'est pas rendu extractible ou redistribuable comme socle, et que le client ne reçoit aucun droit autonome sur FangaBase.
+
+La vente, la licence ou le transfert d'une Application étudiante ne transfère aucun droit de propriété sur FangaBase au client ou à un tiers.
+
+## 3. Droits sur les créations de l'étudiant
+
+L'Étudiant autorisé conserve les droits qu'il détient sur ses créations originales distinctes, notamment ses contenus, données, marques, identité visuelle, règles métier et code propre. La présente licence ne revendique aucun droit sur ces éléments, sous réserve des droits du Titulaire sur FangaBase et des droits applicables aux Composants tiers.
+
+## 4. Restrictions
+
+Sans autorisation écrite distincte du Titulaire, il est interdit de :
+
+- vendre, revendre, louer, céder, donner, partager, publier, distribuer ou redistribuer FangaBase, son code source ou une partie substantielle de son noyau, gratuitement ou contre paiement ;
+- fournir FangaBase sous forme autonome, extractible, téléchargeable ou réutilisable par un tiers ;
+- partager un accès, des identifiants, une archive ou une copie avec une personne non autorisée ;
+- inclure FangaBase dans un template, kit, boilerplate, générateur, bibliothèque, produit de démarrage, marketplace de code ou produit concurrent destiné à des tiers ;
+- utiliser FangaBase pour une formation, un cours ou un accompagnement qui distribue, partage ou expose son noyau à des personnes non autorisées ;
+- sous-licencier FangaBase ou prétendre accorder à un tiers des droits sur son noyau ;
+- contourner les contrôles d'accès, retirer ou altérer les mentions de propriété applicables à FangaBase ;
+- présenter FangaBase ou ses composants propriétaires comme sa propre création autonome.
+
+Les copies de sauvegarde strictement nécessaires à l'usage autorisé sont permises si elles restent confidentielles, protégées et sous le contrôle de l'Étudiant autorisé.
+
+## 5. Composants tiers
+
+Les Composants tiers restent soumis à leurs propres licences et avis. La présente licence ne modifie pas, ne remplace pas et ne prétend pas transférer les droits de leurs titulaires. Les restrictions propriétaires de la présente licence s'appliquent uniquement aux éléments sur lesquels le Titulaire détient effectivement des droits.
+
+Les principaux avis figurent dans `THIRD_PARTY_NOTICES.md`. Les versions résolues et dépendances transitives figurent dans les lockfiles et dans le SBOM CycloneDX inclus avec le package de release.
+
+## 6. Sécurité, confidentialité et conformité
+
+L'Étudiant autorisé est responsable de la sécurité de ses accès, secrets, déploiements et données. Il doit protéger les informations confidentielles et respecter les lois applicables, les droits des personnes, les obligations de protection des données ainsi que les conditions des fournisseurs externes. FangaBase ne doit pas être utilisé pour une activité illégale, abusive ou portant atteinte aux droits d'autrui.
+
+## 7. Durée et résiliation
+
+La licence demeure valable tant que l'Étudiant autorisé respecte ses conditions. Elle prend fin automatiquement en cas de redistribution interdite, de partage d'accès non autorisé ou de violation substantielle non corrigée après notification raisonnable lorsque la correction est possible.
+
+À la résiliation, l'utilisateur doit cesser toute nouvelle utilisation de FangaBase et supprimer les copies qu'il contrôle, sous réserve des obligations légales de conservation. Les droits sur ses contenus, marques et données propres subsistent, mais aucune nouvelle exploitation du noyau FangaBase n'est autorisée.
+
+## 8. Absence de garantie
+
+Dans la mesure permise par la loi applicable, FangaBase est fourni « en l'état » et « selon disponibilité », sans garantie expresse ou implicite, notamment de qualité marchande, d'adéquation à un usage particulier, d'absence d'erreur ou de disponibilité continue. L'Étudiant autorisé reste responsable de ses tests, sauvegardes, configurations, obligations réglementaires et décisions de mise en production.
+
+## 9. Limitation de responsabilité
+
+Dans la mesure permise par la loi applicable, le Titulaire ne répond pas des dommages indirects, pertes de revenus, données, clientèle ou opportunités résultant de l'utilisation de FangaBase. Cette limitation ne couvre aucune responsabilité qui ne peut légalement être exclue ou limitée.
+
+## 10. Dispositions finales
+
+Tout droit non expressément accordé est réservé au Titulaire. Toute dérogation, redistribution ou sous-licence exige un accord écrit distinct signé par le Titulaire. Si une disposition est déclarée inapplicable, les autres demeurent en vigueur dans la mesure permise. La présente licence constitue l'accord relatif aux droits d'utilisation de FangaBase, sans préjudice de conditions commerciales particulières écrites acceptées par le Titulaire.
