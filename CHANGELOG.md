@@ -1,6 +1,12 @@
 # Journal des changements
 
-## 0.2.0-rc.2 - en préparation
+## 0.3.0-rc.1 - en préparation
+
+- Transformation du CLI en générateur atomique de projets indépendants avec
+  `pnpm create:project`, dry-run JSON, manifeste SHA-256, registre déclaratif,
+  doctor ciblé et matrice Cloud, VPS, mutualisée et hybride.
+
+## 0.2.0-rc.2 - 2026-07-26
 
 - Ajout de l'intégration générique Orange Money Mali `orange_money_ml` pour
   Laravel et Next.js, avec simulateur local, secrets chiffrés, callbacks non

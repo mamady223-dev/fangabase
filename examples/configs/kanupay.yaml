@@ -1,0 +1,45 @@
+version: 1
+product:
+  name: KanuPay
+  slug: kanupay
+  type: services
+  description: Plateforme de services construite sur un socle headless
+  locale: fr
+  timezone: Africa/Bamako
+  country: ML
+  default_currency: XOF
+architecture:
+  target: cloud_vercel
+  frontend: next
+  backend: next
+  ui: next
+deployment:
+  family: cloud
+  docker: false
+  database: postgres
+  vps_variant: null
+database:
+  engine: postgres
+  provider: neon
+email:
+  provider: resend
+storage:
+  provider: local_private
+queue:
+  provider: database
+cache:
+  provider: memory_dev
+billing:
+  modes: [one_time]
+payments:
+  providers: []
+  default_provider: null
+design:
+  source: headless
+features:
+  organizations: true
+  marketplace: false
+  admin: true
+  audit_log: true
+  notifications: true
+  uploads: true

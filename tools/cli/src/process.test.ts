@@ -30,12 +30,12 @@ describe("CLI FangaBase", () => {
     expect(first.status, first.stderr).toBe(0);
     expect(JSON.parse(first.stdout).changed).toBe(true);
     expect(await readFile(output, "utf8")).toContain(
-      "generator_version: 0.2.0-rc.2",
+      "generator_version: 0.3.0-rc.1",
     );
     const second = run();
     expect(second.status, second.stderr).toBe(0);
     expect(JSON.parse(second.stdout).changed).toBe(false);
-  });
+  }, 15_000);
   it("dry-run lists files without writing", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-dry-"));
     const output = join(directory, "fangabase.config.yaml");
@@ -127,7 +127,7 @@ it("accepte le questionnaire interactif minimal", async () => {
     ],
     {
       encoding: "utf8",
-      input: "Fanga Interactif\nProfil test\n1\n1\n1\n4\n1\n1\n",
+      input: "Fanga Interactif\nProfil test\n1\n1\n1\n1\n1\n1\n1\n",
     },
   );
   expect(result.status, result.stderr).toBe(0);

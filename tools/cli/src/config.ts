@@ -75,9 +75,9 @@ export const configSchema = z
       provider: z.enum(["upstash", "redis", "database", "memory_dev"]),
     }),
     billing: z.object({
-      modes: z
-        .array(z.enum(["credits", "subscription", "one_time", "commission"]))
-        .min(1),
+      modes: z.array(
+        z.enum(["credits", "subscription", "one_time", "commission"]),
+      ),
     }),
     payments: z.object({
       providers: z.array(z.enum(paymentProviders)),

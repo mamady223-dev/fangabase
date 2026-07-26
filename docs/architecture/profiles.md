@@ -1,6 +1,9 @@
 # Profils de déploiement
 
-FangaBase propose quatre choix simples. Le CLI écrit le manifeste résolu et uniquement les fichiers compatibles dans `deployment/`. Une seconde exécution est idempotente. Un fichier existant différent est signalé dans `conflicts` et n'est jamais remplacé.
+FangaBase propose quatre familles. `pnpm create:project` résout un registre
+déclaratif de composants, construit un nouveau projet hors du dépôt source,
+vérifie ses exclusions puis le déplace atomiquement. Le manifeste de génération
+contient les choix, les fichiers produits et leurs SHA-256.
 
 | Famille      | Application                                            | Automatisé                                             | Action humaine ou limite                                                                                                |
 | ------------ | ------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
@@ -9,7 +12,10 @@ FangaBase propose quatre choix simples. Le CLI écrit le manifeste résolu et un
 | Mutualisé    | Laravel, MySQL/PostgreSQL selon l'offre                | cron borné, public root, migrations/cache              | Aucun Docker, root, systemd ou daemon. Outbox et queues tournent par petits lots cron.                                  |
 | Hybride      | Next hébergé + API Laravel ailleurs                    | Vercel frontend et services Laravel                    | HTTPS, CORS/CSRF exacts et cookies Secure/HttpOnly/SameSite adaptés sont obligatoires.                                  |
 
-Le choix ne change jamais les contrats, règles financières ni l'autorité Laravel de l'ADR 0002. `deployment.database` correspond à `database.engine`. Docker n'est généré que pour un VPS avec `deployment.docker: true`.
+Une seule autorité backend est incluse. Cloud et VPS Next n'embarquent ni PHP,
+ni Composer, ni Laravel. Les profils Laravel n'embarquent pas le backend Next
+autonome. Hybride garde Laravel comme autorité et sépare le frontend. Le choix
+du produit reste descriptif et n'impose aucun métier ou design.
 
 ## Déploiement sûr
 

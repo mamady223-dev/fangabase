@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import { createFrontendClient, FrontendApiError } from "./frontend-client.js";
+import { backendContractRoutes } from "./index.js";
 
 describe("neutral frontend client", () => {
   it("sends cookies and CSRF on a sensitive existing route", async () => {
@@ -54,20 +53,17 @@ describe("neutral frontend client", () => {
     await client.entitlements();
     expect(headers.has("X-CSRF-TOKEN")).toBe(false);
   });
-  it("uses only routes declared by Laravel", async () => {
-    const routes = await readFile(
-      resolve(import.meta.dirname, "../../../apps/server/routes/api.php"),
-      "utf8",
-    );
+  it("uses only routes declared by the shared backend contract", () => {
+    const routes = new Set(backendContractRoutes.map((route) => route.path));
     for (const path of [
-      "/register",
-      "/login",
-      "/refresh",
-      "/logout",
+      "/auth/register",
+      "/auth/login",
+      "/auth/refresh",
+      "/auth/logout",
       "/organizations",
       "/billing/summary",
       "/billing/entitlements",
     ])
-      expect(routes).toContain(`'${path}'`);
+      expect(routes.has(path)).toBe(true);
   });
 });

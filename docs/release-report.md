@@ -1,5 +1,30 @@
 # Rapport de release candidate - 2026-07-26
 
+## Préparation de `0.3.0-rc.1` — générateur ciblé
+
+Décision provisoire : **PASS_WITH_WARNINGS, CI requise**.
+
+Le dépôt FangaBase reste la source complète. `pnpm create:project` produit un
+nouveau dossier indépendant contenant une seule autorité backend et les seuls
+frontends, déploiements, variables et adaptateurs sélectionnés. Les sorties
+sont préparées temporairement, inventoriées avec SHA-256 et déplacées
+atomiquement. `.git`, dépendances installées, artefacts, `.env` locaux et
+secrets sont exclus.
+
+La matrice automatisée couvre sept profils et 70 tests CLI. Les graphes
+distincts ont aussi été installés proprement : Next autonome avec lockfile
+figé, Laravel/Blade avec Composer et migrations, frontend Next séparé et
+frontend React séparé. KanuPay Cloud passe typecheck, 43 tests générés et build
+Next. Le mutualisé sans paiement passe 95 tests Laravel et 636 assertions; les
+adaptateurs Stripe, FedaPay et Orange Money Mali ainsi que leurs routes sont
+absents, tandis que la migration historique reste conservée. React passe son
+lint, typecheck, test technique et build Vite.
+
+Les UAT externes ne changent pas : comptes et contrats fournisseurs, bases
+managées, déploiements, callbacks HTTPS et restauration live. Moneroo reste
+`NEEDS_PROVIDER_CONTRACT`; Orange Money Mali reste désactivé sans identifiants
+et contrat officiels.
+
 ## Préparation de `0.2.0-rc.2` — Orange Money Mali
 
 Décision locale : **PASS_WITH_WARNINGS, CI REQUISE AVANT TAG**.

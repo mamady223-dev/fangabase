@@ -1,6 +1,6 @@
 {
   "name": "fangabase",
-  "version": "0.2.0-rc.2",
+  "version": "0.3.0-rc.1",
   "private": true,
   "packageManager": "pnpm@11.9.0",
   "engines": {
@@ -9,7 +9,11 @@
   "scripts": {
     "setup": "pnpm install --frozen-lockfile && composer install --working-dir=apps/server --no-interaction --prefer-dist",
     "fangabase:init": "pnpm --filter @fangabase/cli start",
+    "create:project": "pnpm --filter @fangabase/cli start create",
     "doctor": "pnpm --filter @fangabase/cli doctor",
+    "setup:cloud": "pnpm install --frozen-lockfile",
+    "setup:laravel": "composer install --working-dir=apps/server --no-interaction --prefer-dist",
+    "setup:hybrid": "pnpm install --frozen-lockfile && composer install --working-dir=apps/server --no-interaction --prefer-dist",
     "dev": "pnpm -r --parallel --if-present dev",
     "dev:web": "pnpm --filter @fangabase/web dev",
     "dev:server": "composer --working-dir=apps/server run dev",

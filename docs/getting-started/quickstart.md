@@ -11,16 +11,30 @@ Node 22, pnpm 11, PHP 8.2 et Composer 2.8. Docker n’est pas requis pour ce par
 ## Commandes
 
 ```sh
-pnpm setup
-pnpm doctor
-pnpm fangabase:init --config fangabase.config.example.yaml --dry-run
-pnpm fangabase:init --config fangabase.config.example.yaml
-php apps/server/artisan migrate --force
-pnpm release:check
-pnpm dev:web
+git clone https://github.com/mamady223-dev/fangabase.git
+cd FangaBase
+pnpm install
+pnpm create:project
 ```
 
-Le CLI écrit `fangabase.config.yaml` et les fichiers compatibles sous `deployment/`. Le dry-run permet de les inspecter avant écriture. Le manifeste résolu conserve `design.source: headless`. Le site répond sur `http://localhost:3000` par une page de statut technique et `/api/health` renvoie `status: ok`.
+Le CLI demande le projet, la destination, le déploiement, l'architecture, la
+base, l'e-mail, le paiement, la facturation, la source frontend et les
+fonctionnalités communes. Le type indicatif ne crée aucun modèle métier. Un
+récapitulatif des composants inclus et exclus précède toute écriture.
+
+En non interactif :
+
+```sh
+pnpm create:project --config fangabase.config.example.yaml --destination ../mon-projet --dry-run --json
+pnpm create:project --config fangabase.config.example.yaml --destination ../mon-projet --yes
+cd ../mon-projet
+pnpm doctor --config fangabase.config.yaml
+```
+
+Le projet est construit temporairement, vérifié puis déplacé atomiquement. Le
+dépôt source, `.git`, `node_modules`, `vendor`, `dist`, les `.env` locaux et
+les secrets ne sont jamais copiés. Les mises à jour utilisent des versions et
+guides de migration, jamais une recopie destructive.
 
 Pour démarrer Laravel localement, copiez `apps/server/.env.example` vers `apps/server/.env`, exécutez `php apps/server/artisan key:generate`, puis `pnpm dev:server`. Le `.env` local ne doit jamais être ajouté à Git. Dans un second terminal, lancez le smoke en remplaçant l’URL par le port réellement affiché :
 

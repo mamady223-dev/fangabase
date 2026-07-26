@@ -1,6 +1,6 @@
 # FangaBase
 
-> Version en préparation : `0.2.0-rc.2`.
+> Version en préparation : `0.3.0-rc.1`.
 
 Orange Money Mali est disponible comme intégration facultative
 `orange_money_ml`. Elle reste désactivée sans sélection et exige un contrat
@@ -25,14 +25,18 @@ FangaBase est un monorepo original pour d?marrer un SaaS, une marketplace, une p
 Prérequis : Node 22+, pnpm 11+, PHP 8.2+ et Composer 2.8+.
 
 ```sh
-pnpm setup
-pnpm doctor
-pnpm fangabase:init --config fangabase.config.example.yaml --dry-run
-pnpm fangabase:init --config fangabase.config.example.yaml
-php apps/server/artisan migrate --force
-pnpm test
-pnpm build
+git clone https://github.com/mamady223-dev/fangabase.git
+cd FangaBase
+pnpm install
+pnpm create:project
 ```
+
+FangaBase est le dépôt source du générateur. La commande crée une application
+indépendante dans un autre dossier, avec uniquement l'architecture choisie. En
+CI, utilisez `pnpm create:project --config <fichier.yaml> --destination
+<chemin> --dry-run --json`, puis relancez avec `--yes` pour confirmer
+explicitement l'écriture. Une destination non vide est refusée par défaut.
+`pnpm install` ne lance jamais de questionnaire.
 
 Docker est facultatif pour le développement courant et n'est jamais requis pour le profil mutualisé. Copiez `apps/server/.env.example` vers `apps/server/.env` uniquement pour un démarrage local, générez une clé locale avec `php apps/server/artisan key:generate`, et ne commitez jamais ce fichier.
 

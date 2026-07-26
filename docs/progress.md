@@ -1,5 +1,35 @@
 # Progression FangaBase
 
+## Générateur de projets ciblés
+
+État : **PASS local, validation CI requise** pour `0.3.0-rc.1`.
+
+`pnpm create:project` crée désormais une application indépendante hors du
+dépôt source. Le moteur résout un registre déclaratif, construit dans un
+dossier temporaire frère, vérifie les exclusions puis effectue un déplacement
+atomique. Le dry-run JSON ne crée rien; une destination non vide et les chemins
+dangereux sont refusés. `--force` exige une confirmation explicite et conserve
+une possibilité de rollback pendant le remplacement.
+
+La matrice couvre sept profils : Cloud/Vercel Next autonome, VPS Next autonome,
+VPS Laravel API + Next, VPS Laravel/Blade, mutualisé Laravel/Blade, hybride
+Laravel + Next et hybride Laravel + React. Les quatre graphes de dépendances
+distincts ont été générés dans des dossiers propres. Les installations figées
+Node, migrations Laravel, lint, typecheck, tests et builds représentatifs sont
+verts. Le profil Cloud KanuPay passe 43 tests générés (plus un test PostgreSQL
+conditionnel), et le profil mutualisé sans paiement passe 95 tests Laravel avec
+636 assertions après suppression réelle des adaptateurs et routes exclus.
+
+Le questionnaire sépare famille de déploiement, architecture, base, e-mail,
+paiement, facturation et source frontend. Le type de produit reste descriptif.
+Le doctor lit le manifeste et ne vérifie PHP/Composer que pour Laravel. Les
+projets contiennent README, guides, configuration, environnement minimal et
+manifeste SHA-256.
+
+Prochain bloc exact : exécuter les gates finales du dépôt, packaging et CI, puis
+publier le commit du générateur. Les comptes fournisseurs, déploiements et
+bases managées réelles restent des UAT externes.
+
 ## Correctif RC — Orange Money Mali
 
 État : **PASS_WITH_WARNINGS local, CI requise** pour `0.2.0-rc.2`.

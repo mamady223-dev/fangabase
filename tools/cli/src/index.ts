@@ -15,12 +15,18 @@ import { randomUUID } from "node:crypto";
 import { parse, stringify } from "yaml";
 import { Command } from "commander";
 import { configSchema } from "./config.js";
-import { promptConfigYaml } from "./interactive.js";
+import {
+  promptConfigYaml,
+  promptConfirmation,
+  promptDestination,
+} from "./interactive.js";
 import { deploymentFiles } from "./deployment.js";
 import { runSmoke } from "./smoke.js";
 import { backup, restore } from "./recovery.js";
+import { generateProject, planProject } from "./project-generator.js";
+import { runDoctor } from "./doctor.js";
 
-const generatorVersion = "0.2.0-rc.2";
+const generatorVersion = "0.3.0-rc.1";
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -101,7 +107,8 @@ program
   .option("--output <path>", "manifeste résolu", "fangabase.config.yaml")
   .option("--dry-run", "n'écrit aucun fichier", false)
   .option("--json", "sortie JSON", false)
-  .action(async (options) => {
+  .action(async (options, command) => {
+    options = { ...command.optsWithGlobals(), ...options };
     if (options.config)
       return initialize(
         options.config,
@@ -117,16 +124,85 @@ program
       await rm(temporary, { force: true });
     }
   });
-program.command("doctor").action(() => {
-  process.stdout.write(
-    JSON.stringify({
-      node: process.version,
-      platform: process.platform,
-      generator_version: generatorVersion,
-      ok: true,
-    }) + "\n",
-  );
-});
+program
+  .command("doctor")
+  .option("--config <path>", "configuration du projet", "fangabase.config.yaml")
+  .action(async (options) => {
+    const result = await runDoctor(options.config);
+    process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+    if (result.status === "FAIL") process.exitCode = 1;
+  });
+program
+  .command("create")
+  .option("--destination <path>", "nouveau dossier indépendant")
+  .option(
+    "--force",
+    "autorise uniquement une destination vide existante",
+    false,
+  )
+  .option("--yes", "confirmation explicite non interactive", false)
+  .action(async (options, command) => {
+    options = { ...command.optsWithGlobals(), ...options };
+    const invocationDirectory = process.env.INIT_CWD ?? process.cwd();
+    let config;
+    if (options.config) {
+      const source = resolve(invocationDirectory, options.config);
+      const result = configSchema.safeParse(
+        parse(await readFile(source, "utf8")),
+      );
+      if (!result.success)
+        throw new Error(
+          `Configuration FangaBase invalide:\n${result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("\n")}`,
+        );
+      config = result.data;
+    } else {
+      const temporary = parse(await promptConfigYaml());
+      config = configSchema.parse(temporary);
+    }
+    const destination = resolve(
+      invocationDirectory,
+      options.destination ?? (await promptDestination()),
+    );
+    const sourceRoot = resolve(import.meta.dirname, "../../..");
+    const plan = planProject(config, destination, sourceRoot);
+    if (!options.json) {
+      process.stdout.write(
+        [
+          `Projet: ${config.product.name}`,
+          `Destination: ${plan.destination}`,
+          `Backend: ${config.architecture.backend}`,
+          `Frontend: ${config.architecture.frontend}`,
+          `Déploiement: ${config.deployment?.family}`,
+          `Base: ${config.database.engine}`,
+          `E-mail: ${config.email.provider}`,
+          `Paiement: ${config.payments.providers.join(", ") || "aucun"}`,
+          `Facturation: ${config.billing.modes.join(", ")}`,
+          `Design: ${config.design.source}`,
+          `Inclus: ${plan.included.join(", ")}`,
+          `Exclus: ${plan.excluded.join(", ")}`,
+        ].join("\n") + "\n",
+      );
+    }
+    const confirmed =
+      options.dryRun ||
+      options.yes ||
+      (!options.config && (await promptConfirmation()));
+    const result = await generateProject({
+      config,
+      destination,
+      sourceRoot,
+      force: options.force,
+      confirmed,
+      dryRun: options.dryRun,
+    });
+    process.stdout.write(
+      options.json
+        ? `${JSON.stringify(result)}\n`
+        : options.dryRun
+          ? `Dry-run: ${result.files.length} sources prévues, aucune écriture.\n`
+          : `Projet créé: ${result.destination}\nCommandes:\n${result.commands.join("\n")}\n`,
+    );
+  });
 program
   .command("smoke")
   .requiredOption("--url <url>")

@@ -31,6 +31,28 @@ export async function promptConfigYaml(): Promise<string> {
           "Deploiement 1=Cloud/Vercel 2=VPS 3=Mutualise 4=Hybride [1]: ",
         )
       ).trim() || "1";
+    const technicalChoice =
+      architectureChoice === "2"
+        ? (
+            await ask(
+              "Architecture VPS 1=Next.js autonome 2=Laravel/Blade 3=Laravel API+Next.js 4=Laravel API+React [1]: ",
+            )
+          ).trim() || "1"
+        : architectureChoice === "4"
+          ? (
+              await ask(
+                "Frontend hybride 1=Next.js 2=React (backend Laravel) [1]: ",
+              )
+            ).trim() || "1"
+          : "1";
+    const databaseChoice =
+      (
+        await ask(
+          architectureChoice === "1"
+            ? "Base 1=Neon PostgreSQL 2=Supabase PostgreSQL 3=PostgreSQL [1]: "
+            : "Base 1=PostgreSQL 2=MySQL [1]: ",
+        )
+      ).trim() || "1";
     const emailChoice =
       (
         await ask("E-mail 1=Journal local 2=SMTP 3=Resend 4=Brevo [1]: ")
@@ -38,13 +60,13 @@ export async function promptConfigYaml(): Promise<string> {
     const paymentChoice =
       (
         await ask(
-          "Paiement 1=FedaPay 2=Stripe 3=Orange Money Mali 4=Aucun [1]: ",
+          "Paiement 1=Aucun 2=Stripe 3=FedaPay 4=Orange Money Mali 5=Moneroo (contrat requis) [1]: ",
         )
       ).trim() || "1";
     const billingChoice =
       (
         await ask(
-          "Facturation 1=Credits+abonnement 2=Abonnement 3=Paiement unique [1]: ",
+          "Facturation 1=Aucune 2=Abonnement 3=Credits 4=Credits+abonnement 5=Paiement unique [1]: ",
         )
       ).trim() || "1";
     const designChoice =
@@ -63,12 +85,32 @@ export async function promptConfigYaml(): Promise<string> {
         provider: "neon",
       },
       "2": {
-        target: "vps_next",
-        frontend: "next",
-        backend: "next",
-        ui: "next",
-        engine: "postgres",
-        provider: "postgres",
+        target: technicalChoice === "1" ? "vps_next" : "vps_laravel",
+        frontend:
+          technicalChoice === "2"
+            ? "blade"
+            : technicalChoice === "4"
+              ? "react"
+              : "next",
+        backend: technicalChoice === "1" ? "next" : "laravel",
+        ui:
+          technicalChoice === "2"
+            ? "blade"
+            : technicalChoice === "4"
+              ? "react"
+              : "next",
+        engine:
+          technicalChoice === "1"
+            ? "postgres"
+            : databaseChoice === "2"
+              ? "mysql"
+              : "postgres",
+        provider:
+          technicalChoice === "1"
+            ? "postgres"
+            : databaseChoice === "2"
+              ? "mysql"
+              : "postgres",
       },
       "3": {
         target: "shared_laravel",
@@ -80,11 +122,11 @@ export async function promptConfigYaml(): Promise<string> {
       },
       "4": {
         target: "hybrid",
-        frontend: "next",
+        frontend: technicalChoice === "2" ? "react" : "next",
         backend: "laravel",
-        ui: "next",
-        engine: "mysql",
-        provider: "mysql",
+        ui: technicalChoice === "2" ? "react" : "next",
+        engine: databaseChoice === "2" ? "mysql" : "postgres",
+        provider: databaseChoice === "2" ? "mysql" : "postgres",
       },
     } as const;
     const architecture =
@@ -94,10 +136,12 @@ export async function promptConfigYaml(): Promise<string> {
       paymentChoice === "2"
         ? "stripe"
         : paymentChoice === "3"
-          ? "orange_money_ml"
+          ? "fedapay"
           : paymentChoice === "4"
-            ? null
-            : "fedapay";
+            ? "orange_money_ml"
+            : paymentChoice === "5"
+              ? "moneroo"
+              : null;
     const designSource =
       designChoice === "2"
         ? "stitch"
@@ -146,11 +190,25 @@ export async function promptConfigYaml(): Promise<string> {
                 : "vps",
         docker: false,
         database: architecture.engine,
-        vps_variant: architecture.target === "vps_next" ? "next" : null,
+        vps_variant:
+          architecture.target === "vps_next"
+            ? "next"
+            : architecture.target === "vps_laravel"
+              ? architecture.frontend === "blade"
+                ? "laravel"
+                : "laravel_api_next"
+              : null,
       },
       database: {
         engine: architecture.engine,
-        provider: architecture.provider,
+        provider:
+          architecture.target === "cloud_vercel"
+            ? databaseChoice === "2"
+              ? "supabase"
+              : databaseChoice === "3"
+                ? "postgres"
+                : "neon"
+            : architecture.provider,
       },
       email: {
         provider:
@@ -171,8 +229,12 @@ export async function promptConfigYaml(): Promise<string> {
           billingChoice === "2"
             ? ["subscription"]
             : billingChoice === "3"
-              ? ["one_time"]
-              : ["credits", "subscription"],
+              ? ["credits"]
+              : billingChoice === "4"
+                ? ["credits", "subscription"]
+                : billingChoice === "5"
+                  ? ["one_time"]
+                  : [],
       },
       payments: {
         providers: selectedPayment ? [selectedPayment] : [],
@@ -201,6 +263,33 @@ export async function promptConfigYaml(): Promise<string> {
     return stringify(config);
   } finally {
     io?.close();
+  }
+}
+
+export async function promptDestination(): Promise<string> {
+  if (!stdin.isTTY)
+    throw new Error("--destination est obligatoire en mode non interactif.");
+  const io = createInterface({ input: stdin, output: stdout });
+  try {
+    const value = (await io.question("Dossier de destination: ")).trim();
+    if (!value) throw new Error("Le dossier de destination est obligatoire.");
+    return value;
+  } finally {
+    io.close();
+  }
+}
+
+export async function promptConfirmation(): Promise<boolean> {
+  if (!stdin.isTTY) return false;
+  const io = createInterface({ input: stdin, output: stdout });
+  try {
+    return (
+      (await io.question("Créer ce projet ? Tapez OUI pour confirmer: "))
+        .trim()
+        .toUpperCase() === "OUI"
+    );
+  } finally {
+    io.close();
   }
 }
 function slugify(value: string): string {
