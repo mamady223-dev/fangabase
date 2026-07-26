@@ -1,0 +1,40 @@
+name: Next backend PostgreSQL
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend-next:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: fangabase
+          POSTGRES_PASSWORD: fangabase_test
+          POSTGRES_DB: fangabase
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fangabase"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://fangabase:fangabase_test@127.0.0.1:5432/fangabase
+      DATABASE_DIRECT_URL: postgres://fangabase:fangabase_test@127.0.0.1:5432/fangabase
+      SESSION_SECRET: ci-only-session-secret-with-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @fangabase/backend-next migrate
+      - run: pnpm --filter @fangabase/backend-next test
+      - run: pnpm --filter @fangabase/web build

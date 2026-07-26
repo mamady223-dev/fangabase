@@ -1,11 +1,20 @@
+/* eslint-disable @next/next/no-html-link-for-pages */
+import { backendApplication } from "../server/backend";
+
+export const dynamic = "force-dynamic";
+
 type Health = { status: "ok" | "unavailable"; checked: boolean };
 
 async function backendHealth(): Promise<Health> {
-  const origin = process.env.FANGABASE_API_ORIGIN;
-  if (!origin) return { status: "unavailable", checked: false };
   try {
-    const response = await fetch(`${origin}/api/health`, { cache: "no-store" });
-    return { status: response.ok ? "ok" : "unavailable", checked: true };
+    const response = await backendApplication().handle({
+      method: "GET",
+      path: "/readiness",
+    });
+    return {
+      status: response.status === 200 ? "ok" : "unavailable",
+      checked: true,
+    };
   } catch {
     return { status: "unavailable", checked: true };
   }

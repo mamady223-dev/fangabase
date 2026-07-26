@@ -1,0 +1,25 @@
+{
+  "name": "@fangabase/backend-next",
+  "version": "0.2.0-rc.1",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "migrate": "tsx src/migrate.ts",
+    "worker": "tsx src/jobs.ts worker",
+    "scheduler": "tsx src/jobs.ts scheduler"
+  },
+  "dependencies": {
+    "@fangabase/contracts": "workspace:*",
+    "postgres": "3.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.32",
+    "tsx": "4.20.6",
+    "typescript": "5.8.3",
+    "vitest": "3.2.6"
+  }
+}
