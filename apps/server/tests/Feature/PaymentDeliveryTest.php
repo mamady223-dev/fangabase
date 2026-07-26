@@ -13,8 +13,6 @@ use FangaBase\Domain\Payments\PaymentProvider;
 use FangaBase\Domain\Payments\PaymentProviderRegistry;
 use FangaBase\Domain\Payments\PaymentReconciliationService;
 use FangaBase\Domain\Payments\PaymentWebhookProcessor;
-use FangaBase\Domain\Payments\MoneroPaymentService;
-use FangaBase\Domain\Payments\MoneroWallet;
 use FangaBase\Domain\Payments\ProviderDescriptor;
 use FangaBase\Domain\Payments\ProviderPayment;
 use FangaBase\Domain\Payments\ProviderRefund;
@@ -125,19 +123,6 @@ final class PaymentDeliveryTest extends TestCase
         self::assertSame('SUCCEEDED', DB::table('orders')->where('id', $checkout['order_id'])->value('status'));
     }
 
-    public function test_monero_rate_is_locked_and_confirmation_handles_under_over_and_duplicates(): void
-    {
-        $wallet = new TestMoneroWallet(); $service = new MoneroPaymentService($wallet);
-        $request = $service->create((string) Str::uuid(), 1000, 25, 1, 5);
-        self::assertSame(1000, $request['amount_atomic']); self::assertSame(25, (int) DB::table('monero_payment_requests')->value('rate_numerator'));
-        $wallet->received = [['amount_atomic' => 500, 'confirmations' => 10, 'tx_hash' => 'tx1']];
-        self::assertSame('UNDERPAID', $service->reconcile($request['id']));
-        $wallet->received = [['amount_atomic' => 1000, 'confirmations' => 10, 'tx_hash' => 'tx2']];
-        self::assertSame('CONFIRMED', $service->reconcile($request['id'])); self::assertSame('CONFIRMED', $service->reconcile($request['id']));
-        $other = $service->create((string) Str::uuid(), 1000, 25, 1, 5); $wallet->received = [['amount_atomic' => 1001, 'confirmations' => 10, 'tx_hash' => 'tx3']];
-        self::assertSame('OVERPAID', $service->reconcile($other['id']));
-    }
-
     private function registry(TestPaymentProvider $provider): void { $this->app->instance(PaymentProviderRegistry::class, new PaymentProviderRegistry([$provider])); }
     private function scope(): BillingScope { return new BillingScope('USER', $this->userId); }
 }
@@ -150,11 +135,4 @@ final class TestPaymentProvider implements PaymentProvider
     public function createCheckout(CheckoutRequest $request): ProviderPayment { $this->checkoutCalls++; return new ProviderPayment('checkout-1', 'PENDING', 'https://provider.test/pay', null, null); }
     public function paymentStatus(string $providerReference): ProviderPayment { return new ProviderPayment($providerReference, 'SUCCEEDED', null, 2500, 'XOF'); }
     public function requestRefund(string $providerReference, int $amountMinor, string $currency, string $idempotencyKey): ProviderRefund { return new ProviderRefund('refund-1', 'PROCESSING'); }
-}
-
-final class TestMoneroWallet implements MoneroWallet
-{
-    public array $received = [];
-    public function createIntegratedAddress(string $paymentId): string { return '4'.str_repeat('A', 105); }
-    public function payments(string $paymentId): array { return $this->received; }
 }

@@ -22,7 +22,7 @@
     "test:integration": "pnpm -r --if-present test:integration",
     "test:e2e": "pnpm --filter @fangabase/web test:e2e",
     "test:contracts": "pnpm --filter @fangabase/contracts test",
-    "test:parity": "pnpm --filter @fangabase/contracts test:parity",
+    "test:parity": "pnpm --filter @fangabase/conformance test",
     "build": "pnpm -r --if-present build",
     "audit": "pnpm audit --audit-level high",
     "release:package": "node tools/release/package.mjs",

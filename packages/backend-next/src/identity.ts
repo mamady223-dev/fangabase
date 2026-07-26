@@ -117,10 +117,7 @@ export class IdentityService {
     if (!rawToken) throw new BackendProblem("AUTH_REQUIRED", 401);
     const hash = tokenHash(rawToken);
     const session = state.sessions.find(
-      (candidate) =>
-        candidate.tokenHash === hash &&
-        !candidate.revokedAt &&
-        candidate.expiresAt > now(),
+      (candidate) => candidate.tokenHash === hash,
     );
     if (!session) throw new BackendProblem("AUTH_REQUIRED", 401);
     const user = state.users.find(
@@ -128,6 +125,8 @@ export class IdentityService {
     );
     if (!user) throw new BackendProblem("AUTH_REQUIRED", 401);
     this.assertActive(user);
+    if (session.revokedAt || session.expiresAt <= now())
+      throw new BackendProblem("AUTH_REQUIRED", 401);
     return publicUser(user);
   }
 

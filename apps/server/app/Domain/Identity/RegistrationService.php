@@ -22,6 +22,11 @@ final class RegistrationService
             throw ApiProblem::conflict('ACCOUNT_EXISTS');
         }
 
-        return $this->identities->create($normalizedEmail, $this->passwordPolicy->hash($password));
+        $bootstrapEmail = strtolower((string) config('fangabase.bootstrap_superadmin_email', ''));
+        $role = $bootstrapEmail !== '' && hash_equals($bootstrapEmail, $normalizedEmail)
+            ? 'SUPERADMIN'
+            : 'USER';
+
+        return $this->identities->create($normalizedEmail, $this->passwordPolicy->hash($password), $role);
     }
 }

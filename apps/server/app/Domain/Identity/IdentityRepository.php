@@ -19,16 +19,16 @@ final class IdentityRepository
     }
 
     /** @return array{id: string, email: string} */
-    public function create(string $email, string $passwordHash): array
+    public function create(string $email, string $passwordHash, string $role = 'USER'): array
     {
         $id = (string) Str::uuid();
         $now = now();
 
-        DB::transaction(function () use ($id, $email, $passwordHash, $now): void {
+        DB::transaction(function () use ($id, $email, $passwordHash, $role, $now): void {
             DB::table('users')->insert([
                 'id' => $id,
                 'email' => $email,
-                'role' => 'USER',
+                'role' => $role,
                 'status' => 'ACTIVE',
                 'session_version' => 1,
                 'created_at' => $now,

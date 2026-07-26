@@ -17,7 +17,6 @@ const paymentProviders = [
   "bictorys",
   "paytech",
   "moneroo",
-  "monero",
 ] as const;
 
 const deploymentFamilies = ["cloud", "vps", "shared", "hybrid"] as const;

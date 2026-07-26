@@ -18,14 +18,13 @@ use FangaBase\Infrastructure\Mail\SymfonySmtpTransport;
 use FangaBase\Domain\Infrastructure\Storage\PrivateStorage;
 use FangaBase\Infrastructure\Storage\LocalPrivateStorage;
 use Illuminate\Support\ServiceProvider;
-use FangaBase\Domain\Payments\MoneroWallet;
 use FangaBase\Domain\Payments\PaymentProviderRegistry;
 use FangaBase\Domain\Payments\ProviderDescriptor;
 use FangaBase\Domain\Payments\ProviderHttpClient;
 use FangaBase\Domain\Payments\WebhookVerifier;
 use FangaBase\Infrastructure\Payments\FedaPayPaymentProvider;
 use FangaBase\Infrastructure\Payments\LaravelPaymentHttpClient;
-use FangaBase\Infrastructure\Payments\MoneroWalletRpc;
+use FangaBase\Infrastructure\Payments\LocalPaymentProvider;
 use FangaBase\Infrastructure\Payments\StripePaymentProvider;
 use FangaBase\Infrastructure\Payments\StripeWebhookVerifier;
 use FangaBase\Infrastructure\Payments\UnavailablePaymentProvider;
@@ -48,20 +47,15 @@ final class AppServiceProvider extends ServiceProvider
             $http = $app->make(ProviderHttpClient::class);
             $blocked = fn (string $name, string $status): UnavailablePaymentProvider => new UnavailablePaymentProvider(new ProviderDescriptor($name, $status, [], [], []));
             return new PaymentProviderRegistry([
+                new LocalPaymentProvider(),
                 new StripePaymentProvider($http, config('fangabase.payments.stripe.secret_key'), (bool) config('fangabase.payments.stripe.enabled')),
                 new FedaPayPaymentProvider($http, config('fangabase.payments.fedapay.secret_key'), (bool) config('fangabase.payments.fedapay.enabled'), (string) config('fangabase.payments.fedapay.base_url')),
                 $blocked('cinetpay', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT), $blocked('paydunya', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
                 $blocked('orange_money', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT), $blocked('bictorys', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
                 $blocked('paytech', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT), $blocked('moneroo', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
-                $blocked('monero', ProviderDescriptor::DISABLED),
             ]);
         });
         $this->app->bind(WebhookVerifier::class, fn (): WebhookVerifier => new StripeWebhookVerifier((string) config('fangabase.payments.stripe.webhook_secret')));
-        $this->app->bind(MoneroWallet::class, function (): MoneroWallet {
-            $url = config('fangabase.payments.monero.wallet_rpc_url');
-            if (! config('fangabase.payments.monero.enabled') || ! is_string($url) || $url === '') throw new \RuntimeException('MONERO_DISABLED');
-            return new MoneroWalletRpc($url, config('fangabase.payments.monero.wallet_rpc_username'), config('fangabase.payments.monero.wallet_rpc_password'));
-        });
         $this->app->singleton(PayoutProviderRegistry::class, fn (): PayoutProviderRegistry => new PayoutProviderRegistry([
             new UnavailablePayoutProvider('fedapay'), new UnavailablePayoutProvider('cinetpay'), new UnavailablePayoutProvider('paydunya'),
             new UnavailablePayoutProvider('orange_money'), new UnavailablePayoutProvider('bictorys'), new UnavailablePayoutProvider('paytech'), new UnavailablePayoutProvider('moneroo'),

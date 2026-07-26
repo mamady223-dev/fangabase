@@ -116,12 +116,12 @@ final class UserFeatureController
             'size' => $stored->size,
             'is_public' => false,
             'original_name' => $input['name'],
-            'checksum' => $stored->checksum,
+            'checksum' => $stored->sha256,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        return response()->json(['id' => $id, 'name' => $input['name'], 'mime' => $stored->mime, 'size' => $stored->size, 'checksum' => $stored->checksum], 201);
+        return response()->json(['id' => $id, 'name' => $input['name'], 'mime' => $stored->mime, 'size' => $stored->size, 'checksum' => $stored->sha256], 201);
     }
 
     public function download(Request $request, string $file, PrivateStorage $storage): Response

@@ -1,0 +1,20 @@
+{
+  "name": "@fangabase/conformance",
+  "version": "0.2.0-rc.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --reporter=verbose",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fangabase/backend-next": "workspace:*",
+    "@fangabase/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.32",
+    "typescript": "5.8.3",
+    "vitest": "3.2.6"
+  }
+}

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'bootstrap_superadmin_email' => env('FANGABASE_BOOTSTRAP_SUPERADMIN_EMAIL'),
     'public_origin' => env('PUBLIC_ORIGIN', 'http://localhost:3000'),
     'cookie_domain' => env('COOKIE_DOMAIN'),
     'cookie_secure' => env('APP_ENV') === 'production',
@@ -32,9 +33,6 @@ return [
         'allowed_return_paths' => array_values(array_filter(explode(',', (string) env('PAYMENT_ALLOWED_RETURN_PATHS', '/billing,/checkout/complete')))),
         'stripe' => ['enabled' => filter_var(env('STRIPE_ENABLED', false), FILTER_VALIDATE_BOOL), 'secret_key' => env('STRIPE_SECRET_KEY'), 'webhook_secret' => env('STRIPE_WEBHOOK_SECRET')],
         'fedapay' => ['enabled' => filter_var(env('FEDAPAY_ENABLED', false), FILTER_VALIDATE_BOOL), 'secret_key' => env('FEDAPAY_SECRET_KEY'), 'base_url' => env('FEDAPAY_BASE_URL', 'https://sandbox-api.fedapay.com')],
-        'monero' => ['enabled' => filter_var(env('MONERO_ENABLED', false), FILTER_VALIDATE_BOOL), 'wallet_rpc_url' => env('MONERO_WALLET_RPC_URL'),
-            'wallet_rpc_username' => env('MONERO_WALLET_RPC_USERNAME'), 'wallet_rpc_password' => env('MONERO_WALLET_RPC_PASSWORD'),
-            'minimum_confirmations' => (int) env('MONERO_MINIMUM_CONFIRMATIONS', 10)],
     ],
     'withdrawals' => [
         'minimum_minor' => (int) env('WITHDRAWAL_MINIMUM_MINOR', 1000), 'maximum_minor' => (int) env('WITHDRAWAL_MAXIMUM_MINOR', 1000000),

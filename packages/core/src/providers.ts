@@ -140,5 +140,4 @@ export const providerActivation = {
   bictorys: "NEEDS_PROVIDER_CONTRACT",
   paytech: "NEEDS_PROVIDER_CONTRACT",
   moneroo: "NEEDS_PROVIDER_CONTRACT",
-  monero: "DISABLED",
 } as const satisfies Record<string, ProviderActivation>;

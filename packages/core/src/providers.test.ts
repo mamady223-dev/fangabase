@@ -27,6 +27,6 @@ describe("payment provider contracts", () => {
     expect(
       Object.values(providerActivation).every((value) => allowed.has(value)),
     ).toBe(true);
-    expect(providerActivation.monero).toBe("DISABLED");
+    expect(providerActivation.moneroo).toBe("NEEDS_PROVIDER_CONTRACT");
   });
 });

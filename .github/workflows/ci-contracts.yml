@@ -13,4 +13,3 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @fangabase/contracts typecheck
       - run: pnpm test:contracts
-      - run: pnpm test:parity

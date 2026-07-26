@@ -41,6 +41,20 @@ const valid = {
 };
 
 describe("configSchema", () => {
+  it("conserve Moneroo et refuse la cryptomonnaie Monero", () => {
+    expect(
+      configSchema.safeParse({
+        ...valid,
+        payments: { providers: ["moneroo"], default_provider: "moneroo" },
+      }).success,
+    ).toBe(true);
+    expect(
+      configSchema.safeParse({
+        ...valid,
+        payments: { providers: ["monero"], default_provider: "monero" },
+      }).success,
+    ).toBe(false);
+  });
   it("valide tous les exemples YAML", async () => {
     const directory = resolve(import.meta.dirname, "../../../examples/configs");
     for (const file of await readdir(directory)) {

@@ -2,7 +2,7 @@
 
 ## Jalon 13 — Parité backend
 
-État : **implémenté, release bloquée** pour `0.2.0-rc.1`.
+État : **implémenté, en validation finale** pour `0.2.0-rc.1`.
 
 Le backend Next.js autonome, ses migrations PostgreSQL, ses transactions, ses
 jobs et ses routes métier sont implémentés. Laravel expose désormais aussi les
@@ -11,35 +11,39 @@ L'ADR 0006 fixe une seule autorité par profil. Le CLI génère Cloud sans PHP,
 Composer ou `FANGABASE_API_ORIGIN`, limite VPS Next à PostgreSQL et produit un
 client React technique lorsqu'il est choisi.
 
-Résultats locaux intermédiaires : 98 tests JS/TS verts (un test PostgreSQL
-conditionnel réservé à la CI), 97 tests Laravel et 644 assertions, typecheck et
-cinq builds verts.
+La gate de parité exécute les 29 mêmes scénarios par HTTP contre Laravel et
+Next.js, avec une base SQLite Laravel isolée et un stockage Next.js isolé
+localement. En CI, Next.js utilise une base PostgreSQL dédiée. Elle couvre
+l'identité, les organisations, l'administration, les notifications, les
+uploads, la finance, les webhooks, les retraits, le rapprochement, l'Outbox,
+les codes d'erreur, CSRF et CORS.
 
 Les 12 workflows du commit `0687163` sont verts, notamment PostgreSQL Next.js,
 PostgreSQL/MySQL Laravel, E2E, sécurité, SAST, Docker et release.
 
-Prochain bloc exact : remplacer le test de parité limité aux enums par une
-suite comportementale commune exécutée contre les deux serveurs, puis créer
-`v0.2.0-rc.1` seulement si cette gate passe. Les UAT Google, Stripe, FedaPay,
-payout, e-mail, stockage distant et restauration live restent externes.
+Prochain bloc exact : publier le correctif de conformité et de catalogue,
+attendre toutes les gates CI du commit, puis créer `v0.2.0-rc.1` uniquement si
+elles sont vertes. Les UAT Google, Stripe, FedaPay, Moneroo, payout, e-mail,
+stockage distant et restauration live restent externes.
 
 Dernière mise à jour : 2026-07-26
 
-| Jalon                               | État               | Preuves                                                                                                                                                          | Reste obligatoire                                            |
-| ----------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| 0 - Audit initial                   | Terminé            | Dépôt et outils audités, ADR 0001                                                                                                                                | Docker local absent, couvert en CI lorsqu'il est compatible  |
-| 1 - Fondation                       | Terminé            | Monorepo, CLI, contrats, Next/Laravel, health et CI                                                                                                              | Aucun                                                        |
-| 2 - Identité et sécurité            | Terminé            | Auth persistante, vérification/reset one-shot, Outbox, sessions, replay/CSRF et Google PKCE testés                                                               | UAT Google réelle                                            |
-| 3 - Organisations et administration | Terminé            | Organisations, invitations, policies, anti-IDOR, administration globale et audit testés                                                                          | Aucun contrôle local restant                                 |
-| 4 - Infrastructure                  | Terminé localement | E-mail injectable, Outbox SQL, workers à bail et stockage privé                                                                                                  | UAT fournisseurs et stockage distant                         |
-| 5 - Finance commune                 | Terminé localement | Catalogue, crédits append-only/FEFO, abonnements et entitlements                                                                                                 | UAT fournisseurs réels                                       |
-| 6 - Fournisseurs                    | Terminé localement | Checkout serveur, Stripe, FedaPay, rapprochement, remboursements et Monero isolé                                                                                 | UAT sandbox Stripe/FedaPay et contrats externes              |
-| 7 - Retraits et rapprochement       | Terminé localement | Ledger, approbation, worker, polling/callback et rapprochement testés                                                                                            | UAT payout/callback officiels                                |
-| 8 - Profils de déploiement          | Terminé localement | Quatre familles CLI, artefacts sélectifs, smoke, manifeste et restauration isolée                                                                                | Restauration live en UAT                                     |
-| 9 - Workflow design                 | Terminé localement | Workflow explicite et facultatif, sans thème FangaBase                                                                                                           | Validation uniquement avec un design réellement fourni       |
-| 10 - Skills                         | Terminé            | Sept skills validées par `quick_validate.py`                                                                                                                     | Aucun                                                        |
-| 11 - Durcissement                   | Terminé            | SQLite, PostgreSQL 17, MySQL 8.4, E2E, CodeQL et Gitleaks                                                                                                        | Fournisseurs réels en UAT                                    |
-| 12 - Release candidate              | PASS_WITH_WARNINGS | RC `0.1.0-rc.1`, licence propriétaire adoptée, 80 tests JS/TS, 95 tests PHP/625 assertions, E2E, builds, audits sans avis haut/critique et package reproductible | Attendre la CI finale puis créer le tag RC si elle est verte |
+| Jalon                               | État               | Preuves                                                                                                             | Reste obligatoire                                           |
+| ----------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| 0 - Audit initial                   | Terminé            | Dépôt et outils audités, ADR 0001                                                                                   | Docker local absent, couvert en CI lorsqu'il est compatible |
+| 1 - Fondation                       | Terminé            | Monorepo, CLI, contrats, Next/Laravel, health et CI                                                                 | Aucun                                                       |
+| 2 - Identité et sécurité            | Terminé            | Auth persistante, vérification/reset one-shot, Outbox, sessions, replay/CSRF et Google PKCE testés                  | UAT Google réelle                                           |
+| 3 - Organisations et administration | Terminé            | Organisations, invitations, policies, anti-IDOR, administration globale et audit testés                             | Aucun contrôle local restant                                |
+| 4 - Infrastructure                  | Terminé localement | E-mail injectable, Outbox SQL, workers à bail et stockage privé                                                     | UAT fournisseurs et stockage distant                        |
+| 5 - Finance commune                 | Terminé localement | Catalogue, crédits append-only/FEFO, abonnements et entitlements                                                    | UAT fournisseurs réels                                      |
+| 6 - Fournisseurs                    | Terminé localement | Checkout serveur, Stripe, FedaPay, rapprochement et remboursements                                                  | UAT sandbox Stripe/FedaPay et contrats externes             |
+| 7 - Retraits et rapprochement       | Terminé localement | Ledger, approbation, worker, polling/callback et rapprochement testés                                               | UAT payout/callback officiels                               |
+| 8 - Profils de déploiement          | Terminé localement | Quatre familles CLI, artefacts sélectifs, smoke, manifeste et restauration isolée                                   | Restauration live en UAT                                    |
+| 9 - Workflow design                 | Terminé localement | Workflow explicite et facultatif, sans thème FangaBase                                                              | Validation uniquement avec un design réellement fourni      |
+| 10 - Skills                         | Terminé            | Sept skills validées par `quick_validate.py`                                                                        | Aucun                                                       |
+| 11 - Durcissement                   | Terminé            | SQLite, PostgreSQL 17, MySQL 8.4, E2E, CodeQL et Gitleaks                                                           | Fournisseurs réels en UAT                                   |
+| 12 - Release candidate              | PASS_WITH_WARNINGS | RC `0.1.0-rc.1`, licence propriétaire adoptée, E2E, builds, audits sans avis haut/critique et package reproductible | UAT externes documentées                                    |
+| 13 - Parité backend                 | En validation      | 29 scénarios comportementaux communs exécutés par HTTP contre Laravel et Next.js, bases isolées                     | CI multi-base du commit final et tag `v0.2.0-rc.1`          |
 
 ## État du jalon 12
 
@@ -61,7 +65,9 @@ Le jalon 11 est validé au commit `6b06521`. La préparation RC et son rapport i
 
 ## Prochain bloc exact
 
-Publier le commit de licence et de dépendances, attendre tous les workflows, puis créer `v0.1.0-rc.1` s'ils sont verts. Aucune release stable n'est prévue à ce stade.
+Publier le correctif de conformité et de catalogue, attendre tous les
+workflows, puis créer `v0.2.0-rc.1` s'ils sont verts. Aucune release stable
+n'est prévue à ce stade.
 
 ## Règle durable du jalon 9
 

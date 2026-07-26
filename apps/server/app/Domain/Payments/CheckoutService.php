@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 final readonly class CheckoutService
 {
-    public function __construct(private CatalogService $catalog, private PersistentIdempotency $idempotency, private PaymentProviderRegistry $providers, private SubscriptionService $subscriptions) {}
+    public function __construct(private CatalogService $catalog, private PersistentIdempotency $idempotency, private PaymentProviderRegistry $providers, private SubscriptionService $subscriptions, private PaymentWebhookProcessor $webhooks) {}
 
     public function create(BillingScope $owner, string $priceId, string $providerName, string $purpose, string $returnPath, string $key): array
     {
@@ -45,6 +45,19 @@ final readonly class CheckoutService
                 }
                 if ($payment->checkoutUrl === null || ! str_starts_with($payment->checkoutUrl, 'https://')) throw new \RuntimeException('PAYMENT_PROVIDER_INVALID_RESPONSE');
                 DB::table('payment_attempts')->where('id', $attemptId)->update(['provider_reference' => $payment->reference, 'status' => 'PENDING', 'raw_status' => $payment->status, 'updated_at' => now()]);
+                if ($providerName === 'local' && $payment->status === 'SUCCEEDED') {
+                    $this->webhooks->process(new VerifiedPaymentEvent(
+                        'local',
+                        'local:'.$orderId,
+                        'payment.completed',
+                        $orderId,
+                        $payment->reference,
+                        'SUCCEEDED',
+                        (int) $price->amount_minor,
+                        strtoupper((string) $price->currency),
+                        1,
+                    ));
+                }
                 return ['order_id' => $orderId, 'attempt_id' => $attemptId, 'provider' => $providerName, 'status' => 'PENDING', 'checkout_url' => $payment->checkoutUrl,
                     'amount_minor' => (int) $price->amount_minor, 'currency' => strtoupper((string) $price->currency), 'subscription_id' => $subscriptionId];
             }));

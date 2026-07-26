@@ -4,7 +4,7 @@
 
 | Domaine                             | Contrat commun                      | Laravel                        | Next.js autonome                | Preuve locale                             | Preuve CI requise         |
 | ----------------------------------- | ----------------------------------- | ------------------------------ | ------------------------------- | ----------------------------------------- | ------------------------- |
-| Identité, compte, sessions          | Routes, rôles, erreurs              | Présent                        | Présent                         | PHP 97 tests ; Next 15 scénarios agrégés  | PostgreSQL Next           |
+| Identité, compte, sessions          | Routes, rôles, erreurs              | Présent                        | Présent                         | Scénarios HTTP communs                    | PostgreSQL Next           |
 | Google OAuth PKCE                   | Route et invariants                 | Présent                        | Présent, fournisseur injectable | Tests Laravel et Next                     | UAT Google externe        |
 | Organisations et administration     | Routes, rôles, pagination           | Présent                        | Présent                         | Anti-IDOR, suspension, dernier SUPERADMIN | PostgreSQL Next           |
 | Notifications, profil, uploads      | Routes et erreurs                   | Présent après J13              | Présent                         | Tests domaine Next ; migrations Laravel   | Stockages distants en UAT |
@@ -15,18 +15,28 @@
 | Health/readiness                    | Routes                              | Présent                        | Présent                         | Route loading et build Next               | Démarrage production CI   |
 | React headless                      | Client/API/CSRF                     | Applicable aux profils Laravel | Générable lorsqu'autorisé       | Tests CLI                                 | Build généré              |
 
-Inventaire final local :
+## Preuve comportementale
 
-- Laravel : 68 routes HTTP chargées par `artisan route:list`;
-- Next.js : 65 routes contractuelles servies par le handler dynamique, plus
-  les handlers techniques historiques ;
-- tests JS/TS : 98 verts, avec un test PostgreSQL conditionnel ignoré
-  localement et obligatoire dans `ci-next-postgres`;
-- tests Laravel : 97 verts, 644 assertions.
+La preuve de parité ne repose ni sur un nombre de routes, ni sur une comparaison
+d'enums ou de fichiers. `@fangabase/conformance` démarre réellement Laravel et
+Next.js, leur envoie les mêmes requêtes HTTP et utilise des bases isolées.
+Laravel emploie une base SQLite dédiée localement. Next.js emploie un stockage
+isolé localement et une base PostgreSQL dédiée dans `ci-next-postgres`.
 
-La conformité comportementale exhaustive entre deux serveurs réellement
-démarrés reste une gate CI à renforcer. Le seul test d'enums partagé n'est pas
-présenté comme une preuve E2E complète.
+Les 29 scénarios obligatoires couvrent : inscription, connexion, utilisateur
+courant, vérification e-mail, oubli et réinitialisation du mot de passe,
+changement de mot de passe, rotation et révocation des sessions, organisations,
+invitations, rôles, anti-IDOR, suspension, dernier SUPERADMIN, notifications,
+uploads, catalogue, crédits, abonnements, entitlements, paiement local,
+idempotence, webhook dupliqué, remboursement, retrait, rapprochement, Outbox,
+codes d'erreur, CSRF et CORS.
+
+Résultats locaux :
+
+- 29 scénarios communs verts sur Laravel ;
+- 29 scénarios communs verts sur Next.js ;
+- Laravel : 96 tests, 638 assertions ;
+- PostgreSQL Next.js obligatoire dans `ci-next-postgres`.
 
 Date de l'audit initial : 2026-07-26  
 Référence avant jalon 13 : `v0.1.0-rc.1`

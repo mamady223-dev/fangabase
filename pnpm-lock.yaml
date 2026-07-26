@@ -88,6 +88,25 @@ importers:
         specifier: 3.2.6
         version: 3.2.6(@types/node@22.15.32)(tsx@4.20.6)(yaml@2.8.0)
 
+  packages/conformance:
+    dependencies:
+      '@fangabase/backend-next':
+        specifier: workspace:*
+        version: link:../backend-next
+      '@fangabase/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+    devDependencies:
+      '@types/node':
+        specifier: 22.15.32
+        version: 22.15.32
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+      vitest:
+        specifier: 3.2.6
+        version: 3.2.6(@types/node@22.15.32)(tsx@4.20.6)(yaml@2.8.0)
+
   packages/contracts: {}
 
   packages/core:

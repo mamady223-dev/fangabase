@@ -17,13 +17,12 @@ Les cl?s fournisseurs restent absentes des exemples. Apr?s rotation : mettre ? j
 
 ## Paiements
 
-| Variable                                                | Effet                                                                 |
-| ------------------------------------------------------- | --------------------------------------------------------------------- |
-| `PAYMENT_ALLOWED_RETURN_PATHS`                          | Liste exacte de chemins relatifs autorises; aucune URL externe.       |
-| `STRIPE_ENABLED`, `FEDAPAY_ENABLED`, `MONERO_ENABLED`   | Interrupteurs d'urgence, desactives par defaut.                       |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`            | Secrets Stripe sandbox/live, jamais commits.                          |
-| `FEDAPAY_SECRET_KEY`, `FEDAPAY_BASE_URL`                | Secret et origine officielle FedaPay; sandbox par defaut.             |
-| `MONERO_WALLET_RPC_URL`, `MONERO_MINIMUM_CONFIRMATIONS` | Wallet RPC prive et confirmations exigees; module bloque sans wallet. |
+| Variable                                     | Effet                                                           |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| `PAYMENT_ALLOWED_RETURN_PATHS`               | Liste exacte de chemins relatifs autorises; aucune URL externe. |
+| `STRIPE_ENABLED`, `FEDAPAY_ENABLED`          | Interrupteurs d'urgence, desactives par defaut.                 |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Secrets Stripe sandbox/live, jamais commits.                    |
+| `FEDAPAY_SECRET_KEY`, `FEDAPAY_BASE_URL`     | Secret et origine officielle FedaPay; sandbox par defaut.       |
 
 Les statuts `IMPLEMENTED_NEEDS_SANDBOX_UAT`, `NEEDS_PROVIDER_CONTRACT`, `DISABLED` et `UNSUPPORTED` sont les seuls statuts autorises. Une configuration presente ne vaut jamais validation de production.
 

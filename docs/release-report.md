@@ -1,15 +1,16 @@
 # Rapport de release candidate - 2026-07-26
 
-Décision du jalon 13 : **FAIL POUR LE TAG**. `pnpm release:check`
-passe, PHPUnit passe (97 tests, 644 assertions) et l'audit npm ne contient
-aucune vulnérabilité haute ou critique. Le package et sa somme SHA-256 sont
-produits par la gate reproductible `release:package`.
+Décision locale du jalon 13 : **PASS_WITH_WARNINGS, CI REQUISE AVANT TAG**.
+La suite de conformité exécute les 29 mêmes scénarios par HTTP contre Laravel
+et Next.js avec des bases isolées. Elle remplace la comparaison d'enums comme
+preuve de parité. Les enums restent testés séparément comme contrat.
 
-Les 12 workflows du commit `0687163` sont verts, dont PostgreSQL Next.js,
-PostgreSQL/MySQL Laravel, E2E, sécurité, SAST, Docker et release. Le tag
-`v0.2.0-rc.1` reste néanmoins bloqué : le test partagé actuel ne compare que
-les enums et ne constitue pas encore la suite comportementale commune exigée
-contre les deux backends.
+Monero Wallet RPC et le parcours XMR ont été retirés du produit. La migration
+historique additive est conservée pour ne supprimer aucune preuve financière.
+Moneroo, plateforme africaine d'orchestration de paiements, reste au catalogue
+avec le statut `NEEDS_PROVIDER_CONTRACT` : son contrat, l'accès marchand et une
+éventuelle transition vers Orqex doivent être vérifiés. Aucun endpoint, SDK,
+webhook ou secret Moneroo n'a été inventé.
 
 ## Préparation de `0.2.0-rc.1` — jalon 13
 
@@ -20,10 +21,10 @@ persistance PostgreSQL versionnée, des transactions, les fonctions métier
 génériques, une Outbox et des jobs. Laravel reste l'autorité des profils
 Laravel et hybride. L'ADR 0006 garantit une seule autorité par application.
 
-Résultats locaux intermédiaires : 98 tests JS/TS verts (un test PostgreSQL
-conditionnel ignoré localement), 97 tests Laravel et 644 assertions, typecheck
-vert et cinq builds verts. `ci-next-postgres` doit valider migrations et
-concurrence PostgreSQL avant le tag.
+Résultats locaux : conformité commune verte sur 29 scénarios par backend,
+PHPUnit vert avec 96 tests et 638 assertions, deux scénarios Playwright verts,
+lint, typecheck et builds verts. `ci-next-postgres` exécute aussi la conformité
+avec la persistance PostgreSQL avant le tag.
 
 La décision finale et le SHA-256 du package seront inscrits après les gates et
 la CI. Aucune UAT externe n'est requalifiée comme automatisée.
@@ -37,12 +38,12 @@ La release candidate `0.1.0-rc.1` est techniquement reproductible. La gate jurid
 | Gate                                         | Résultat          | Preuve                                                                            |
 | -------------------------------------------- | ----------------- | --------------------------------------------------------------------------------- |
 | Installation JS figée en clone propre        | PASS              | `pnpm install --frozen-lockfile --ignore-scripts`                                 |
-| Format, lint, typecheck, tests et builds     | PASS              | `pnpm release:check`; 80 tests JS/TS; quatre builds                               |
-| Laravel local SQLite                         | PASS              | 95 tests, 625 assertions; `migrate:fresh` sur SQLite mémoire                      |
+| Format, lint, typecheck, tests et builds     | PASS local        | 101 tests JS/TS verts, 1 PostgreSQL conditionnel réservé à la CI; builds verts    |
+| Laravel local SQLite                         | PASS              | 96 tests, 638 assertions                                                          |
 | Laravel CI multi-base                        | PASS              | `ci-laravel` et `ci-databases`; SQLite, PostgreSQL 17 et MySQL 8.4                |
 | E2E headless                                 | PASS              | 2 scénarios Playwright localement en clone propre et `ci-e2e`                     |
 | Charge worker bornée                         | PASS local        | 101 messages traités une fois par deux workers alternés; 1 test, 5 assertions     |
-| Contrats et parité                           | PASS              | 8 tests de contrats et 1 test de parité                                           |
+| Contrats et parité                           | PASS local        | 29 scénarios communs par HTTP sur chacun des deux backends et bases isolées       |
 | Skills                                       | PASS              | sept validations `quick_validate.py`                                              |
 | Secrets/SAST                                 | PASS              | scan dépôt/archive, Gitleaks, CodeQL et `ci-security`                             |
 | Dépendances hautes/critiques                 | PASS au seuil     | aucune alerte haute/critique ; une npm modérée et une Composer faible documentées |
@@ -62,7 +63,7 @@ Les actions GitHub sont épinglées par SHA. Le workflow release utilise une ins
 
 ## UAT externes
 
-Les comptes sandbox Stripe/FedaPay, les contrats payout, le wallet RPC Monero, les fournisseurs e-mail/stockage réels et une restauration live exigent une infrastructure ou des comptes humains externes. Ils restent visibles et ne sont pas présentés comme validés. Docker n'est jamais requis pour l'hébergement mutualisé.
+Les comptes sandbox Stripe/FedaPay, les contrats payout, Moneroo, les fournisseurs e-mail/stockage réels et une restauration live exigent une infrastructure ou des comptes humains externes. Moneroo reste `NEEDS_PROVIDER_CONTRACT` et n'est pas validé en sandbox ; aucun endpoint, SDK, webhook ou secret n'est inventé. Docker n'est jamais requis pour l'hébergement mutualisé.
 
 ## Licence
 

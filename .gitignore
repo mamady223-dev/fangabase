@@ -13,6 +13,7 @@ vendor/
 tmp/
 storage/framework/
 storage/logs/
+apps/server/storage/app/private/
 **/bootstrap/cache/*.php
 apps/web/test-results/
 apps/web/playwright-report/

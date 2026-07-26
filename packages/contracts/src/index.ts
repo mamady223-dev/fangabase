@@ -318,6 +318,12 @@ export const backendContractRoutes: readonly ContractRoute[] = [
     auth: "admin",
     csrf: true,
   },
+  {
+    method: "POST",
+    path: "/admin/reconciliation/withdrawals",
+    auth: "admin",
+    csrf: true,
+  },
   { method: "GET", path: "/admin/audit", auth: "admin", csrf: false },
   { method: "GET", path: "/admin/outbox", auth: "admin", csrf: false },
   { method: "GET", path: "/admin/rate-limits", auth: "admin", csrf: false },

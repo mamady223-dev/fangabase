@@ -9,6 +9,7 @@ use FangaBase\Domain\Payments\CheckoutService;
 use FangaBase\Domain\Payments\PaymentWebhookProcessor;
 use FangaBase\Domain\Payments\RefundService;
 use FangaBase\Domain\Payments\WebhookVerifier;
+use FangaBase\Domain\Payments\VerifiedPaymentEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -36,6 +37,30 @@ final class PaymentController
     {
         $raw = $request->getContent();
         $event = $verifier->verify($raw, $request->headers->all(), time());
+        return response()->json(['status' => $processor->process($event)]);
+    }
+
+    public function localWebhook(Request $request, PaymentWebhookProcessor $processor): JsonResponse
+    {
+        abort_unless(app()->environment('testing'), 404);
+        $data = $request->validate([
+            'event_id' => ['required', 'string', 'max:120'],
+            'order_id' => ['required', 'uuid'],
+            'amount_minor' => ['required', 'integer', 'min:1'],
+            'currency' => ['required', 'string', 'size:3'],
+        ]);
+        $event = new VerifiedPaymentEvent(
+            'local',
+            $data['event_id'],
+            'payment.completed',
+            $data['order_id'],
+            'local:'.$data['order_id'],
+            'SUCCEEDED',
+            (int) $data['amount_minor'],
+            strtoupper($data['currency']),
+            1,
+        );
+
         return response()->json(['status' => $processor->process($event)]);
     }
 }

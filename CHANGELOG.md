@@ -28,7 +28,7 @@
 
 ### Paiements et fournisseurs
 
-- Adaptateurs locaux, Stripe, FedaPay et Monero isolés selon leurs capacités documentées.
+- Adaptateurs locaux, Stripe et FedaPay isolés selon leurs capacités documentées.
 - Stripe et FedaPay exigent encore une UAT sandbox ; les fournisseurs sans contrat vérifié restent `NEEDS_PROVIDER_CONTRACT`.
 
 ### Déploiement et qualité
@@ -42,7 +42,7 @@
 - Les Applications étudiantes peuvent être commercialisées ; FangaBase lui-même ne peut être revendu, partagé ou redistribué.
 - Les dépendances tierces conservent leurs propres licences et avis.
 - Docker local indisponible ; image VPS Next vérifiée en CI. Docker n'est jamais requis en mutualisé.
-- Comptes fournisseurs, wallet Monero, stockage distant, restauration live et charge réellement concurrente restent des UAT externes.
+- Comptes fournisseurs, stockage distant, restauration live et charge réellement concurrente restent des UAT externes.
 
 ### Compatibilité
 

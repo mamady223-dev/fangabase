@@ -8,6 +8,7 @@ use FangaBase\Domain\Identity\LoginService;
 use FangaBase\Domain\Identity\EmailVerificationService;
 use FangaBase\Domain\Identity\PasswordResetService;
 use FangaBase\Domain\Identity\RegistrationService;
+use FangaBase\Domain\Identity\LocalIdentityMailProvider;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use FangaBase\Http\SessionCookieFactory;
@@ -42,12 +43,21 @@ final class AuthController
         return $response;
     }
 
-    public function requestVerification(Request $request, EmailVerificationService $verification): JsonResponse
+    public function requestVerification(Request $request, EmailVerificationService $verification, LocalIdentityMailProvider $mail): JsonResponse
     {
         $input = $request->validate(['email' => ['required', 'string', 'email:rfc', 'max:254']]);
         $verification->request($input['email'], 'verify-email:'.$request->ip());
 
-        return response()->json(['message' => 'Si le compte existe, un e-mail sera envoye'], 202);
+        $response = ['message' => 'Si le compte existe, un e-mail sera envoye'];
+        if (app()->environment('testing') && $request->header('X-FangaBase-Conformance') === '1') {
+            try {
+                $response['verificationToken'] = $mail->latestToken($input['email'], 'VERIFY_EMAIL');
+            } catch (\RuntimeException) {
+                $response['verificationToken'] = null;
+            }
+        }
+
+        return response()->json($response, 202);
     }
 
     public function confirmVerification(Request $request, EmailVerificationService $verification): JsonResponse
@@ -58,12 +68,21 @@ final class AuthController
         return response()->json(['message' => 'Adresse e-mail verifiee']);
     }
 
-    public function forgotPassword(Request $request, PasswordResetService $passwordReset): JsonResponse
+    public function forgotPassword(Request $request, PasswordResetService $passwordReset, LocalIdentityMailProvider $mail): JsonResponse
     {
         $input = $request->validate(['email' => ['required', 'string', 'email:rfc', 'max:254']]);
         $passwordReset->request($input['email'], 'forgot-password:'.$request->ip());
 
-        return response()->json(['message' => 'Si le compte existe, un e-mail sera envoye'], 202);
+        $response = ['message' => 'Si le compte existe, un e-mail sera envoye'];
+        if (app()->environment('testing') && $request->header('X-FangaBase-Conformance') === '1') {
+            try {
+                $response['resetToken'] = $mail->latestToken($input['email'], 'RESET_PASSWORD');
+            } catch (\RuntimeException) {
+                $response['resetToken'] = null;
+            }
+        }
+
+        return response()->json($response, 202);
     }
 
     public function resetPassword(Request $request, PasswordResetService $passwordReset): JsonResponse

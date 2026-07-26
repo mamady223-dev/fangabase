@@ -8,6 +8,6 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "test:parity": "vitest run src/parity.test.ts"
+    "test:enums": "vitest run src/parity.test.ts"
   }
 }

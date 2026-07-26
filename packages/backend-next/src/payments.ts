@@ -21,7 +21,6 @@ export const paymentProviderMatrix: Record<string, PaymentProviderStatus> = {
   local: "LOCAL_TEST",
   stripe: "IMPLEMENTED_NEEDS_SANDBOX_UAT",
   fedapay: "IMPLEMENTED_NEEDS_SANDBOX_UAT",
-  monero: "DISABLED",
   cinetpay: "NEEDS_PROVIDER_CONTRACT",
   paydunya: "NEEDS_PROVIDER_CONTRACT",
   orange_money: "NEEDS_PROVIDER_CONTRACT",

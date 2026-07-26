@@ -614,6 +614,8 @@ export class BackendApplication {
             pathParam(params, "withdrawal"),
           ),
         );
+      case "POST /admin/reconciliation/withdrawals":
+        return response(200, this.withdrawals.reconcile(state, actor!));
       case "GET /admin/audit":
         return response(
           200,

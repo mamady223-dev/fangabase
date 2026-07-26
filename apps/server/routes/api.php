@@ -38,6 +38,9 @@ Route::get('/oauth/google/start', [GoogleOAuthController::class, 'start']);
 Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'callback']);
 Route::get('/catalog', [CatalogController::class, 'index']);
 Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook']);
+if (app()->environment('testing')) {
+    Route::post('/webhooks/local', [PaymentController::class, 'localWebhook']);
+}
 Route::post('/webhooks/payouts/{provider}', [WithdrawalController::class, 'callback']);
 
 Route::middleware('session.auth')->group(function (): void {
