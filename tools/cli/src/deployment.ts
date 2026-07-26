@@ -18,6 +18,24 @@ function familyOf(
 function env(config: FangaBaseConfig, family: string): string {
   const hybrid = family === "hybrid";
   const nextBackend = config.architecture.backend === "next";
+  const orangeMoneyMl = config.payments.providers.includes("orange_money_ml")
+    ? `ORANGE_MONEY_ENABLED=true
+ORANGE_MONEY_ENVIRONMENT=sandbox
+ORANGE_MONEY_COUNTRY=ML
+ORANGE_MONEY_CURRENCY=XOF
+ORANGE_MONEY_OAUTH_TOKEN_URL=
+ORANGE_MONEY_API_BASE_URL=
+ORANGE_MONEY_CLIENT_ID=
+ORANGE_MONEY_CLIENT_SECRET=
+ORANGE_MONEY_MERCHANT_ACCOUNT=
+ORANGE_MONEY_MERCHANT_CODE=
+ORANGE_MONEY_MERCHANT_KEY=
+ORANGE_MONEY_RETURN_URL=https://${hybrid ? "api" : "app"}.example.invalid/api/payments/orange-money-ml/return
+ORANGE_MONEY_CANCEL_URL=https://${hybrid ? "api" : "app"}.example.invalid/api/payments/orange-money-ml/cancel
+ORANGE_MONEY_NOTIFICATION_URL=https://${hybrid ? "api" : "app"}.example.invalid/api/webhooks/orange-money-ml
+ORANGE_MONEY_HTTP_TIMEOUT_SECONDS=15
+`
+    : "";
   return `${header}APP_ENV=production
 APP_URL=https://app.example.invalid
 APP_VERSION=release-id
@@ -26,7 +44,7 @@ ${nextBackend ? "DATABASE_DIRECT_URL=inject-direct-migration-url\nSESSION_SECRET
 MAIL_PROVIDER=${config.email.provider}
 STORAGE_PROVIDER=${config.storage.provider}
 QUEUE_PROVIDER=${config.queue.provider}
-${hybrid ? "BACKEND_PUBLIC_URL=https://api.example.invalid\nFRONTEND_ALLOWED_ORIGINS=https://app.example.invalid\nSESSION_SECURE_COOKIE=true\nSESSION_SAME_SITE=none\n" : ""}# Replace every example.invalid value and inject secrets outside Git.
+${hybrid ? "BACKEND_PUBLIC_URL=https://api.example.invalid\nFRONTEND_ALLOWED_ORIGINS=https://app.example.invalid\nSESSION_SECURE_COOKIE=true\nSESSION_SAME_SITE=none\n" : ""}${orangeMoneyMl}# Replace every example.invalid value and inject secrets outside Git.
 `;
 }
 
@@ -52,6 +70,14 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
     { path: "README.md", content: runbook(config, family) },
     { path: "SMOKE.md", content: smoke },
     { path: "RECOVERY.md", content: recovery },
+    ...(config.payments.providers.includes("orange_money_ml")
+      ? [
+          {
+            path: "ORANGE-MONEY-MALI.md",
+            content: orangeMoneyMlGuide(config, family),
+          },
+        ]
+      : []),
     ...(config.architecture.frontend === "react" ? reactFrontend() : []),
   ];
   if (family === "cloud") {
@@ -129,6 +155,41 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
   const files = [...common, ...serverFiles];
   if (config.deployment?.docker) files.push(...dockerFiles(config));
   return files;
+}
+
+function orangeMoneyMlGuide(config: FangaBaseConfig, family: string): string {
+  const authority =
+    family === "hybrid" || config.architecture.backend === "laravel"
+      ? "Laravel"
+      : "Next.js";
+  const operations =
+    family === "shared"
+      ? "Planifiez le rapprochement et l'Outbox avec le cron borné généré ; aucun daemon permanent n'est requis."
+      : "Exécutez le worker et le rapprochement selon le profil généré.";
+  return `${header}# Orange Money Mali
+
+Cette intégration est facultative et spécifique au contrat Orange Money Mali.
+Le backend d'autorité est ${authority}. La génération des variables ne crée
+pas un compte marchand et ne valide ni une sandbox officielle ni la production.
+
+1. Terminez la génération du projet.
+2. Devenez marchand Orange Money auprès d'Orange Mali et terminez la conformité KYA.
+3. Obtenez du contrat marchand les URL, identifiants et paramètres applicables.
+4. Renseignez les variables ORANGE_MONEY_* dans l'hébergeur, jamais dans Git.
+5. Configurez les trois URL HTTPS publiques générées.
+6. Exécutez les migrations.
+7. Testez d'abord avec ORANGE_MONEY_ENVIRONMENT=simulator.
+8. Effectuez ensuite la recette sandbox officielle si votre compte l'autorise.
+9. Vérifiez notifications, statuts, montants et devise XOF.
+10. Passez en production uniquement après validation écrite d'Orange Mali.
+
+${operations}
+
+Les routes return/cancel ne sont jamais autoritaires. Si le contrat ne fournit
+pas de signature vérifiable, la notification déclenche obligatoirement une
+interrogation serveur-à-serveur du statut. Ne publiez jamais les clés, tokens
+OAuth, pay tokens, notification tokens, signatures ou certificats.
+`;
 }
 
 function reactFrontend(): DeploymentFile[] {

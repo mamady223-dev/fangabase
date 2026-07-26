@@ -4,7 +4,8 @@
 | ------------------------------------ | ----------------------------- | --------------------------------------------------------------------- |
 | Stripe                               | IMPLEMENTED_NEEDS_SANDBOX_UAT | Adaptateur Checkout/refund et webhook signe; UAT compte reel requise  |
 | FedaPay                              | IMPLEMENTED_NEEDS_SANDBOX_UAT | Transaction/token/statut; webhook/refund bloques sans contrat complet |
-| CinetPay, PayDunya, PayTech, Moneroo | NEEDS_PROVIDER_CONTRACT       | Port et tests g?n?riques                                              |
+| Orange Money Mali                    | IMPLEMENTED_NEEDS_SANDBOX_UAT | Simulateur et parité locale ; contrat marchand et UAT réelle requis   |
+| CinetPay, PayDunya, PayTech, Moneroo | NEEDS_PROVIDER_CONTRACT       | Port et tests génériques                                              |
 | Orange Money                         | NEEDS_PROVIDER_CONTRACT       | Contrat/pays requis                                                   |
 | Bictorys                             | NEEDS_PROVIDER_CONTRACT       | Cl?s paiement/payout distinctes requises                              |
 

@@ -25,6 +25,9 @@ use FangaBase\Domain\Payments\WebhookVerifier;
 use FangaBase\Infrastructure\Payments\FedaPayPaymentProvider;
 use FangaBase\Infrastructure\Payments\LaravelPaymentHttpClient;
 use FangaBase\Infrastructure\Payments\LocalPaymentProvider;
+use FangaBase\Infrastructure\Payments\OrangeMoneyMlHttpGateway;
+use FangaBase\Infrastructure\Payments\OrangeMoneyMlPaymentProvider;
+use FangaBase\Infrastructure\Payments\OrangeMoneyMlSimulator;
 use FangaBase\Infrastructure\Payments\StripePaymentProvider;
 use FangaBase\Infrastructure\Payments\StripeWebhookVerifier;
 use FangaBase\Infrastructure\Payments\UnavailablePaymentProvider;
@@ -46,19 +49,24 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PaymentProviderRegistry::class, function ($app): PaymentProviderRegistry {
             $http = $app->make(ProviderHttpClient::class);
             $blocked = fn (string $name, string $status): UnavailablePaymentProvider => new UnavailablePaymentProvider(new ProviderDescriptor($name, $status, [], [], []));
+            $orangeConfiguration = (array) config('fangabase.payments.orange_money_ml');
+            $orangeGateway = ($orangeConfiguration['environment'] ?? null) === 'simulator'
+                ? new OrangeMoneyMlSimulator(['status' => strtoupper((string) ($orangeConfiguration['simulator_scenario'] ?? 'pending'))])
+                : new OrangeMoneyMlHttpGateway($http);
             return new PaymentProviderRegistry([
                 new LocalPaymentProvider(),
                 new StripePaymentProvider($http, config('fangabase.payments.stripe.secret_key'), (bool) config('fangabase.payments.stripe.enabled')),
                 new FedaPayPaymentProvider($http, config('fangabase.payments.fedapay.secret_key'), (bool) config('fangabase.payments.fedapay.enabled'), (string) config('fangabase.payments.fedapay.base_url')),
+                new OrangeMoneyMlPaymentProvider($orangeGateway, $orangeConfiguration),
                 $blocked('cinetpay', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT), $blocked('paydunya', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
-                $blocked('orange_money', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT), $blocked('bictorys', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
+                $blocked('bictorys', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
                 $blocked('paytech', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT), $blocked('moneroo', ProviderDescriptor::NEEDS_PROVIDER_CONTRACT),
             ]);
         });
         $this->app->bind(WebhookVerifier::class, fn (): WebhookVerifier => new StripeWebhookVerifier((string) config('fangabase.payments.stripe.webhook_secret')));
         $this->app->singleton(PayoutProviderRegistry::class, fn (): PayoutProviderRegistry => new PayoutProviderRegistry([
             new UnavailablePayoutProvider('fedapay'), new UnavailablePayoutProvider('cinetpay'), new UnavailablePayoutProvider('paydunya'),
-            new UnavailablePayoutProvider('orange_money'), new UnavailablePayoutProvider('bictorys'), new UnavailablePayoutProvider('paytech'), new UnavailablePayoutProvider('moneroo'),
+            new UnavailablePayoutProvider('orange_money_ml'), new UnavailablePayoutProvider('bictorys'), new UnavailablePayoutProvider('paytech'), new UnavailablePayoutProvider('moneroo'),
         ]));
         $this->app->bind(PayoutCallbackVerifier::class, ConfiguredHmacPayoutCallbackVerifier::class);
         $this->app->singleton(LaravelProviderHttpClient::class);

@@ -3,9 +3,12 @@
   "payment_statuses": [
     "CREATED",
     "PENDING",
+    "PROCESSING",
     "SUCCEEDED",
     "FAILED",
     "CANCELLED",
+    "EXPIRED",
+    "NEEDS_REVIEW",
     "REFUNDED"
   ],
   "withdrawal_statuses": [

@@ -30,6 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 'SESSION_REPLAY' => 'Reutilisation de session detectee',
                 'CSRF_INVALID' => 'Protection CSRF invalide',
                 'OAUTH_INVALID' => 'Connexion OAuth invalide',
+                'PAYMENT_PROVIDER_NOT_CONFIGURED' => 'Fournisseur de paiement non configure',
+                'PAYMENT_PROVIDER_CURRENCY_UNSUPPORTED' => 'Devise non prise en charge',
+                'PAYMENT_PROVIDER_TIMEOUT' => 'Statut du paiement a verifier',
+                'PAYMENT_PROVIDER_TEMPORARY' => 'Fournisseur temporairement indisponible',
+                'PAYMENT_PROVIDER_REJECTED' => 'Requete de paiement refusee',
+                'PAYMENT_PROVIDER_INVALID_RESPONSE' => 'Reponse fournisseur invalide',
             ];
 
             return response()->json([

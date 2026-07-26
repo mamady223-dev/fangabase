@@ -36,7 +36,11 @@ export async function promptConfigYaml(): Promise<string> {
         await ask("E-mail 1=Journal local 2=SMTP 3=Resend 4=Brevo [1]: ")
       ).trim() || "1";
     const paymentChoice =
-      (await ask("Paiement 1=FedaPay 2=Stripe 3=Aucun [1]: ")).trim() || "1";
+      (
+        await ask(
+          "Paiement 1=FedaPay 2=Stripe 3=Orange Money Mali 4=Aucun [1]: ",
+        )
+      ).trim() || "1";
     const billingChoice =
       (
         await ask(
@@ -90,8 +94,10 @@ export async function promptConfigYaml(): Promise<string> {
       paymentChoice === "2"
         ? "stripe"
         : paymentChoice === "3"
-          ? null
-          : "fedapay";
+          ? "orange_money_ml"
+          : paymentChoice === "4"
+            ? null
+            : "fedapay";
     const designSource =
       designChoice === "2"
         ? "stitch"

@@ -1,5 +1,33 @@
 # Rapport de release candidate - 2026-07-26
 
+## Préparation de `0.2.0-rc.2` — Orange Money Mali
+
+Décision locale : **PASS_WITH_WARNINGS, CI REQUISE AVANT TAG**.
+
+Orange Money Mali est intégré comme fournisseur spécifique
+`orange_money_ml`, sans reprendre le métier, les contrôleurs, les modèles, les
+pages ou les textes du projet de référence. Seul le flux technique observé a
+servi de preuve. Les URL d'API restent vides par défaut et doivent être
+confirmées par le contrat marchand Orange Mali.
+
+Laravel et Next.js possèdent chacun un adaptateur isolé, un cache OAuth fondé
+sur `expires_in`, un stockage chiffré des tokens nécessaires au statut et un
+simulateur sans secret réel. Le checkout utilise le catalogue serveur et XOF
+en entier. Les notifications, retours et annulations ne sont jamais
+autoritaires et déclenchent une vérification serveur-à-serveur. La suite
+comportementale commune comporte 30 scénarios, dont Orange Money Mali par HTTP
+contre les deux backends avec bases isolées.
+
+Les gates locales passent : 115 tests JS/TS verts, un test PostgreSQL
+conditionnel réservé à la CI, 107 tests Laravel et 667 assertions, 2 scénarios
+E2E, conformité HTTP commune sur 30 scénarios par backend, lint, typecheck,
+builds et `release:check`.
+
+La sandbox et la production Orange Mali, le compte marchand, la conformité
+KYA, le contrat, les identifiants et toute signature officielle restent
+**UAT EXTERNE REQUISE**. Le tag `v0.2.0-rc.2` reste conditionné à toutes les
+gates locales et CI.
+
 Décision locale du jalon 13 : **PASS_WITH_WARNINGS, CI REQUISE AVANT TAG**.
 La suite de conformité exécute les 29 mêmes scénarios par HTTP contre Laravel
 et Next.js avec des bases isolées. Elle remplace la comparaison d'enums comme

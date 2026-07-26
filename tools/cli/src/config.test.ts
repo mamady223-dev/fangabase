@@ -55,6 +55,27 @@ describe("configSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("utilise uniquement l'identifiant Orange Money Mali canonique", () => {
+    expect(
+      configSchema.safeParse({
+        ...valid,
+        payments: {
+          providers: ["orange_money_ml"],
+          default_provider: "orange_money_ml",
+        },
+      }).success,
+    ).toBe(true);
+    expect(
+      configSchema.safeParse({
+        ...valid,
+        payments: {
+          providers: ["orange_money"],
+          default_provider: "orange_money",
+        },
+      }).success,
+    ).toBe(false);
+  });
   it("valide tous les exemples YAML", async () => {
     const directory = resolve(import.meta.dirname, "../../../examples/configs");
     for (const file of await readdir(directory)) {

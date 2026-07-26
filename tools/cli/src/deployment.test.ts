@@ -115,6 +115,24 @@ describe("deployment profiles", () => {
     ));
   it("generates Docker only when explicitly selected on VPS", () =>
     expect(paths(vps(true))).toContain("docker/Dockerfile"));
+  it("génère Orange Money Mali uniquement lorsqu'il est sélectionné", () => {
+    expect(contents(base)).not.toContain("ORANGE_MONEY_CLIENT_SECRET");
+    const orange = {
+      ...base,
+      payments: {
+        providers: ["orange_money_ml" as const],
+        default_provider: "orange_money_ml" as const,
+      },
+    };
+    const generated = deploymentFiles(orange);
+    const environment = generated.find(
+      (file) => file.path === ".env.production.example",
+    )?.content;
+    expect(environment).toContain("ORANGE_MONEY_ENABLED=true");
+    expect(environment).toContain("ORANGE_MONEY_CLIENT_SECRET=\n");
+    expect(environment).not.toMatch(/NEXT_PUBLIC_ORANGE|VITE_ORANGE/);
+    expect(paths(orange)).toContain("ORANGE-MONEY-MALI.md");
+  });
 });
 
 function vps(docker = false): FangaBaseConfig {

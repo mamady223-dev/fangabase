@@ -7,6 +7,7 @@ export * from "./organizations.js";
 export * from "./user-features.js";
 export * from "./billing.js";
 export * from "./payments.js";
+export * from "./orange-money-ml.js";
 export * from "./withdrawals.js";
 export * from "./infrastructure.js";
 export * from "./router.js";

@@ -136,7 +136,7 @@ export const providerActivation = {
   fedapay: "IMPLEMENTED_NEEDS_SANDBOX_UAT",
   cinetpay: "NEEDS_PROVIDER_CONTRACT",
   paydunya: "NEEDS_PROVIDER_CONTRACT",
-  orange_money: "NEEDS_PROVIDER_CONTRACT",
+  orange_money_ml: "IMPLEMENTED_NEEDS_SANDBOX_UAT",
   bictorys: "NEEDS_PROVIDER_CONTRACT",
   paytech: "NEEDS_PROVIDER_CONTRACT",
   moneroo: "NEEDS_PROVIDER_CONTRACT",

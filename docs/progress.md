@@ -1,8 +1,30 @@
 # Progression FangaBase
 
+## Correctif RC — Orange Money Mali
+
+État : **PASS_WITH_WARNINGS local, CI requise** pour `0.2.0-rc.2`.
+
+Orange Money Mali est intégré sous l'identifiant canonique `orange_money_ml`
+sur Laravel et Next.js. Les deux backends utilisent le catalogue serveur, les
+montants XOF entiers, l'idempotence et le moteur financier existant. Les tokens
+techniques sont chiffrés, les callbacks navigateur ne sont pas autoritaires et
+les notifications déclenchent une vérification serveur-à-serveur. Le
+simulateur local ne prétend pas être une sandbox officielle.
+
+Les gates locales passent : 115 tests JS/TS, 107 tests Laravel avec 667
+assertions, 2 scénarios E2E, lint, typecheck, builds et `release:check`. La
+suite de conformité commune comporte désormais 30 scénarios et exécute
+également un checkout Orange Money Mali par HTTP sur les deux backends avec des
+bases isolées.
+
+Prochain bloc exact : terminer toutes les gates locales, publier le correctif,
+attendre la CI multi-base puis créer `v0.2.0-rc.2` uniquement si elle est
+entièrement verte. Le compte marchand, la conformité KYA, le contrat, la
+sandbox et la production Orange Mali restent des UAT externes.
+
 ## Jalon 13 — Parité backend
 
-État : **implémenté, en validation finale** pour `0.2.0-rc.1`.
+État : **validé et tagué** dans `v0.2.0-rc.1`.
 
 Le backend Next.js autonome, ses migrations PostgreSQL, ses transactions, ses
 jobs et ses routes métier sont implémentés. Laravel expose désormais aussi les
@@ -11,7 +33,7 @@ L'ADR 0006 fixe une seule autorité par profil. Le CLI génère Cloud sans PHP,
 Composer ou `FANGABASE_API_ORIGIN`, limite VPS Next à PostgreSQL et produit un
 client React technique lorsqu'il est choisi.
 
-La gate de parité exécute les 29 mêmes scénarios par HTTP contre Laravel et
+La gate de parité exécute désormais 30 scénarios par HTTP contre Laravel et
 Next.js, avec une base SQLite Laravel isolée et un stockage Next.js isolé
 localement. En CI, Next.js utilise une base PostgreSQL dédiée. Elle couvre
 l'identité, les organisations, l'administration, les notifications, les
@@ -21,9 +43,8 @@ les codes d'erreur, CSRF et CORS.
 Les 12 workflows du commit `0687163` sont verts, notamment PostgreSQL Next.js,
 PostgreSQL/MySQL Laravel, E2E, sécurité, SAST, Docker et release.
 
-Prochain bloc exact : publier le correctif de conformité et de catalogue,
-attendre toutes les gates CI du commit, puis créer `v0.2.0-rc.1` uniquement si
-elles sont vertes. Les UAT Google, Stripe, FedaPay, Moneroo, payout, e-mail,
+Le correctif de conformité et de catalogue est publié et tagué
+`v0.2.0-rc.1`. Les UAT Google, Stripe, FedaPay, Moneroo, payout, e-mail,
 stockage distant et restauration live restent externes.
 
 Dernière mise à jour : 2026-07-26
@@ -43,7 +64,7 @@ Dernière mise à jour : 2026-07-26
 | 10 - Skills                         | Terminé            | Sept skills validées par `quick_validate.py`                                                                        | Aucun                                                       |
 | 11 - Durcissement                   | Terminé            | SQLite, PostgreSQL 17, MySQL 8.4, E2E, CodeQL et Gitleaks                                                           | Fournisseurs réels en UAT                                   |
 | 12 - Release candidate              | PASS_WITH_WARNINGS | RC `0.1.0-rc.1`, licence propriétaire adoptée, E2E, builds, audits sans avis haut/critique et package reproductible | UAT externes documentées                                    |
-| 13 - Parité backend                 | En validation      | 29 scénarios comportementaux communs exécutés par HTTP contre Laravel et Next.js, bases isolées                     | CI multi-base du commit final et tag `v0.2.0-rc.1`          |
+| 13 - Parité backend                 | Terminé            | 30 scénarios comportementaux communs exécutés par HTTP contre Laravel et Next.js, bases isolées                     | Aucun contrôle local restant                                |
 
 ## État du jalon 12
 
@@ -65,9 +86,9 @@ Le jalon 11 est validé au commit `6b06521`. La préparation RC et son rapport i
 
 ## Prochain bloc exact
 
-Publier le correctif de conformité et de catalogue, attendre tous les
-workflows, puis créer `v0.2.0-rc.1` s'ils sont verts. Aucune release stable
-n'est prévue à ce stade.
+Publier l'intégration Orange Money Mali, attendre tous les workflows, puis
+créer `v0.2.0-rc.2` s'ils sont verts. Aucune release stable n'est prévue à ce
+stade.
 
 ## Règle durable du jalon 9
 

@@ -6,6 +6,8 @@ import { resolve } from "node:path";
 import {
   BackendApplication,
   MemoryStore,
+  OrangeMoneyMlProvider,
+  OrangeMoneyMlSimulator,
   PostgresStore,
   type TransactionalStore,
 } from "@fangabase/backend-next";
@@ -97,7 +99,11 @@ beforeAll(async () => {
     DB_DATABASE: sqlite,
     FANGABASE_BOOTSTRAP_SUPERADMIN_EMAIL: "admin-laravel@example.test",
     CORS_ORIGINS: "http://student.example.test",
+    CACHE_STORE: "array",
     STRIPE_WEBHOOK_SECRET: "conformance-stripe-secret",
+    ORANGE_MONEY_ENABLED: "true",
+    ORANGE_MONEY_ENVIRONMENT: "simulator",
+    ORANGE_MONEY_SIMULATOR_SCENARIO: "success",
   };
   const migrated = spawnSync("php", ["artisan", "migrate:fresh", "--force"], {
     cwd: resolve(root, "apps/server"),
@@ -128,6 +134,27 @@ beforeAll(async () => {
     bootstrapSuperadminEmail: "admin-next@example.test",
     stripeWebhookSecret: "conformance-stripe-secret",
     payoutWebhookSecret: "conformance-payout-secret",
+    orangeMoneyMlProvider: new OrangeMoneyMlProvider(
+      {
+        enabled: true,
+        environment: "simulator",
+        country: "ML",
+        currency: "XOF",
+        oauthTokenUrl: "",
+        apiBaseUrl: "",
+        clientId: "",
+        clientSecret: "",
+        merchantAccount: "",
+        merchantCode: "",
+        merchantKey: "",
+        returnUrl: "",
+        cancelUrl: "",
+        notificationUrl: "",
+        timeoutSeconds: 1,
+      },
+      new OrangeMoneyMlSimulator("success"),
+      "conformance-session-secret-at-least-32-characters",
+    ),
   });
   nextServer = createServer(async (request, response) => {
     const chunks: Buffer[] = [];
@@ -456,6 +483,47 @@ async function runBehavioralSuite(
   );
   expect(duplicate.status).toBe(201);
   mark(covered, "local_payment", "idempotency");
+  const orangeCheckout = await client.mutate(
+    "POST",
+    "/payments/checkouts",
+    flavor === "laravel"
+      ? {
+          price_id: priceId,
+          provider: "orange_money_ml",
+          purpose: "ONE_TIME",
+          return_path: "/billing",
+        }
+      : {
+          priceId,
+          provider: "orange_money_ml",
+        },
+    { "idempotency-key": "orange-money-ml-conformance" },
+  );
+  expect(orangeCheckout.status).toBe(201);
+  const orangePayload = JSON.stringify(orangeCheckout.body);
+  expect(orangePayload).toContain("https://orange-money-ml.simulator.invalid/");
+  expect(orangePayload).not.toMatch(
+    /client_secret|merchant_key|pay_token|notif_token|sim-pay-|sim-notif-/,
+  );
+  const orangeOrderId = String(
+    orangeCheckout.body.order_id ??
+      (orangeCheckout.body.payment as Record<string, unknown> | undefined)?.id,
+  );
+  expect(
+    (
+      await client.request("POST", "/webhooks/orange-money-ml", {
+        order_id: orangeOrderId,
+      })
+    ).status,
+  ).toBe(202);
+  expect(
+    (
+      await client.request("POST", "/webhooks/orange-money-ml", {
+        order_id: orangeOrderId,
+      })
+    ).status,
+  ).toBe(202);
+  mark(covered, "orange_money_ml");
   const orderId = String(
     checkout.body.order_id ??
       checkout.body.id ??

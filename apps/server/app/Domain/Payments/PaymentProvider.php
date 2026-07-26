@@ -10,7 +10,7 @@ interface PaymentProvider
 
     public function createCheckout(CheckoutRequest $request): ProviderPayment;
 
-    public function paymentStatus(string $providerReference): ProviderPayment;
+    public function paymentStatus(string $providerReference, array $context = []): ProviderPayment;
 
     public function requestRefund(string $providerReference, int $amountMinor, string $currency, string $idempotencyKey): ProviderRefund;
 }

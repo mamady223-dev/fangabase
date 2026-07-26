@@ -1,6 +1,14 @@
 # Journal des changements
 
-## 0.2.0-rc.1 - en préparation
+## 0.2.0-rc.2 - en préparation
+
+- Ajout de l'intégration générique Orange Money Mali `orange_money_ml` pour
+  Laravel et Next.js, avec simulateur local, secrets chiffrés, callbacks non
+  autoritaires et UAT marchand externe obligatoire.
+- Migration contrôlée de l'ancien identifiant `orange_money` vers
+  `orange_money_ml`.
+
+## 0.2.0-rc.1 - 2026-07-26
 
 - Backend Next.js persistant et autonome : identité, OAuth, organisations,
   fonctions utilisateur, finance, paiements, retraits et Outbox.

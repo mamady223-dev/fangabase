@@ -3,9 +3,12 @@ export const userStatuses = ["ACTIVE", "SUSPENDED"] as const;
 export const paymentStatuses = [
   "CREATED",
   "PENDING",
+  "PROCESSING",
   "SUCCEEDED",
   "FAILED",
   "CANCELLED",
+  "EXPIRED",
+  "NEEDS_REVIEW",
   "REFUNDED",
 ] as const;
 export const withdrawalStatuses = [
@@ -41,6 +44,12 @@ export const errorCodes = [
   "IDEMPOTENCY_BODY_MISMATCH",
   "WEBHOOK_INVALID",
   "PAYMENT_PROVIDER_UNAVAILABLE",
+  "PAYMENT_PROVIDER_NOT_CONFIGURED",
+  "PAYMENT_PROVIDER_CURRENCY_UNSUPPORTED",
+  "PAYMENT_PROVIDER_TIMEOUT",
+  "PAYMENT_PROVIDER_TEMPORARY",
+  "PAYMENT_PROVIDER_REJECTED",
+  "PAYMENT_PROVIDER_INVALID_RESPONSE",
   "INSUFFICIENT_BALANCE",
   "CONFLICT",
 ] as const;
@@ -246,6 +255,24 @@ export const backendContractRoutes: readonly ContractRoute[] = [
     auth: "public",
     csrf: false,
   },
+  {
+    method: "POST",
+    path: "/webhooks/orange-money-ml",
+    auth: "public",
+    csrf: false,
+  },
+  {
+    method: "GET",
+    path: "/payments/orange-money-ml/return",
+    auth: "public",
+    csrf: false,
+  },
+  {
+    method: "GET",
+    path: "/payments/orange-money-ml/cancel",
+    auth: "public",
+    csrf: false,
+  },
   { method: "GET", path: "/withdrawals", auth: "session", csrf: false },
   {
     method: "GET",
@@ -354,6 +381,12 @@ export function stableError(code: ErrorCode, requestId: string): ApiError {
       "La cl? a d?j? ?t? utilis?e pour une autre demande",
     WEBHOOK_INVALID: "Notification invalide",
     PAYMENT_PROVIDER_UNAVAILABLE: "Paiement temporairement indisponible",
+    PAYMENT_PROVIDER_NOT_CONFIGURED: "Fournisseur de paiement non configuré",
+    PAYMENT_PROVIDER_CURRENCY_UNSUPPORTED: "Devise non prise en charge",
+    PAYMENT_PROVIDER_TIMEOUT: "Statut du paiement à vérifier",
+    PAYMENT_PROVIDER_TEMPORARY: "Fournisseur temporairement indisponible",
+    PAYMENT_PROVIDER_REJECTED: "Requête de paiement refusée",
+    PAYMENT_PROVIDER_INVALID_RESPONSE: "Réponse fournisseur invalide",
     INSUFFICIENT_BALANCE: "Solde insuffisant",
     CONFLICT: "Conflit avec l'?tat courant",
   };

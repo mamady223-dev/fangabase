@@ -123,6 +123,17 @@ final class PaymentDeliveryTest extends TestCase
         self::assertSame('SUCCEEDED', DB::table('orders')->where('id', $checkout['order_id'])->value('status'));
     }
 
+    public function test_status_reconciliation_places_amount_or_currency_divergence_in_review(): void
+    {
+        $this->registry(new TestPaymentProvider(statusAmount: 2499));
+        $checkout = app(CheckoutService::class)->create($this->scope(), $this->catalog['priceId'], 'test', 'ONE_TIME', '/billing', 'checkout-review-1');
+
+        self::assertSame('NEEDS_REVIEW', app(PaymentReconciliationService::class)->reconcile($checkout['order_id']));
+        self::assertSame('NEEDS_REVIEW', DB::table('orders')->where('id', $checkout['order_id'])->value('status'));
+        self::assertSame(1, DB::table('audit_events')->where('action', 'payment.provider_review_required')->count());
+        self::assertSame(0, DB::table('money_ledger_entries')->count());
+    }
+
     private function registry(TestPaymentProvider $provider): void { $this->app->instance(PaymentProviderRegistry::class, new PaymentProviderRegistry([$provider])); }
     private function scope(): BillingScope { return new BillingScope('USER', $this->userId); }
 }
@@ -130,9 +141,10 @@ final class PaymentDeliveryTest extends TestCase
 final class TestPaymentProvider implements PaymentProvider
 {
     public int $checkoutCalls = 0;
+    public function __construct(private int $statusAmount = 2500, private string $statusCurrency = 'XOF') {}
     public function descriptor(): ProviderDescriptor { return new ProviderDescriptor('test', ProviderDescriptor::IMPLEMENTED_NEEDS_SANDBOX_UAT,
         ['ONE_TIME_PAYMENT', 'SUBSCRIPTION', 'HOSTED_CHECKOUT', 'WEBHOOK', 'STATUS', 'FULL_REFUND', 'PARTIAL_REFUND'], ['XOF'], ['*']); }
     public function createCheckout(CheckoutRequest $request): ProviderPayment { $this->checkoutCalls++; return new ProviderPayment('checkout-1', 'PENDING', 'https://provider.test/pay', null, null); }
-    public function paymentStatus(string $providerReference): ProviderPayment { return new ProviderPayment($providerReference, 'SUCCEEDED', null, 2500, 'XOF'); }
+    public function paymentStatus(string $providerReference, array $context = []): ProviderPayment { return new ProviderPayment($providerReference, 'SUCCEEDED', null, $this->statusAmount, $this->statusCurrency); }
     public function requestRefund(string $providerReference, int $amountMinor, string $currency, string $idempotencyKey): ProviderRefund { return new ProviderRefund('refund-1', 'PROCESSING'); }
 }

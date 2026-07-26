@@ -126,11 +126,16 @@ export type PaymentRecord = {
   status:
     | "CREATED"
     | "PENDING"
+    | "PROCESSING"
     | "SUCCEEDED"
     | "FAILED"
     | "CANCELLED"
+    | "EXPIRED"
+    | "NEEDS_REVIEW"
     | "REFUNDED";
   refundedMinor: number;
+  providerReference?: string | null;
+  safeMetadata?: Record<string, unknown>;
   createdAt: string;
 };
 

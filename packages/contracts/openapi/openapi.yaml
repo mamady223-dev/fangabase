@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: FangaBase API
-  version: 0.2.0-rc.1
+  version: 0.2.0-rc.2
 servers:
   - url: https://api.example.invalid/api
 paths:
@@ -171,6 +171,34 @@ paths:
       responses:
         "202": { description: ?v?nement enregistr? }
         "400": { $ref: "#/components/responses/Error" }
+  /webhooks/orange-money-ml:
+    post:
+      operationId: receiveOrangeMoneyMlNotification
+      description: La notification n'est jamais autoritaire et déclenche une vérification serveur-à-serveur du statut.
+      responses:
+        "202": { description: Notification acceptée ou dédupliquée }
+        "400": { $ref: "#/components/responses/Error" }
+        "413": { $ref: "#/components/responses/Error" }
+  /payments/orange-money-ml/return:
+    get:
+      operationId: verifyOrangeMoneyMlReturn
+      parameters:
+        - { in: query, name: token, required: true, schema: { type: string } }
+      responses:
+        "202": { description: Statut interrogé côté serveur }
+        "404": { $ref: "#/components/responses/Error" }
+  /payments/orange-money-ml/cancel:
+    get:
+      operationId: verifyOrangeMoneyMlCancel
+      parameters:
+        - { in: query, name: token, required: true, schema: { type: string } }
+      responses:
+        "202":
+          {
+            description: Annulation non autoritaire,
+            statut interrogé côté serveur,
+          }
+        "404": { $ref: "#/components/responses/Error" }
   /webhooks/payouts/{provider}:
     post:
       operationId: receivePayoutWebhook

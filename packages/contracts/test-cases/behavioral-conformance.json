@@ -19,6 +19,7 @@
   "subscriptions",
   "entitlements",
   "local_payment",
+  "orange_money_ml",
   "idempotency",
   "duplicate_webhook",
   "refund",

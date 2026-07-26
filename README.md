@@ -1,6 +1,11 @@
 # FangaBase
 
-> Version en préparation : `0.2.0-rc.1`.
+> Version en préparation : `0.2.0-rc.2`.
+
+Orange Money Mali est disponible comme intégration facultative
+`orange_money_ml`. Elle reste désactivée sans sélection et exige un contrat
+marchand Orange Mali avant toute UAT réelle. Voir
+[`docs/payments/orange-money-mali.md`](docs/payments/orange-money-mali.md).
 
 FangaBase est headless et propose deux familles backend de même niveau :
 Next.js autonome (`cloud_vercel`, `vps_next`) ou Laravel

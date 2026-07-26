@@ -38,6 +38,9 @@ Route::get('/oauth/google/start', [GoogleOAuthController::class, 'start']);
 Route::get('/oauth/google/callback', [GoogleOAuthController::class, 'callback']);
 Route::get('/catalog', [CatalogController::class, 'index']);
 Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook']);
+Route::post('/webhooks/orange-money-ml', [PaymentController::class, 'orangeMoneyMlWebhook'])->middleware('throttle:60,1');
+Route::get('/payments/orange-money-ml/return', [PaymentController::class, 'orangeMoneyMlReturn']);
+Route::get('/payments/orange-money-ml/cancel', [PaymentController::class, 'orangeMoneyMlCancel']);
 if (app()->environment('testing')) {
     Route::post('/webhooks/local', [PaymentController::class, 'localWebhook']);
 }

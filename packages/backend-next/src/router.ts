@@ -17,6 +17,7 @@ import { UserFeatureService } from "./user-features.js";
 import { WithdrawalService } from "./withdrawals.js";
 import type { BackendState } from "./state.js";
 import { tokenHash } from "./crypto.js";
+import type { OrangeMoneyMlProvider } from "./orange-money-ml.js";
 
 export type BackendRequest = {
   method: "GET" | "POST" | "PATCH" | "DELETE";
@@ -52,6 +53,7 @@ export type BackendOptions = {
   googleAudience?: string;
   stripeWebhookSecret?: string;
   payoutWebhookSecret?: string;
+  orangeMoneyMlProvider?: OrangeMoneyMlProvider;
 };
 
 export class BackendApplication {
@@ -72,7 +74,10 @@ export class BackendApplication {
       options.secret,
       options.bootstrapSuperadminEmail,
     );
-    this.payments = new PaymentService(options.secret);
+    this.payments = new PaymentService(
+      options.secret,
+      options.orangeMoneyMlProvider ?? null,
+    );
     this.withdrawals = new WithdrawalService(options.secret);
     this.google = options.googleProvider ?? new DisabledGoogleProvider();
   }
@@ -432,14 +437,18 @@ export class BackendApplication {
           ),
         );
       case "POST /payments/checkouts": {
-        const result = this.payments.checkout(
+        const result = await this.payments.checkout(
           state,
           actor!,
           {
             priceId: stringField(body, "priceId"),
             provider: stringField(body, "provider"),
-            amountMinor: numberField(body, "amountMinor"),
-            currency: currencyField(body),
+            ...(body.amountMinor === undefined
+              ? {}
+              : { amountMinor: numberField(body, "amountMinor") }),
+            ...(body.currency === undefined
+              ? {}
+              : { currency: currencyField(body) }),
           },
           idempotency,
         );
@@ -463,6 +472,23 @@ export class BackendApplication {
             request.rawBody ?? "",
             requiredHeader(request, "stripe-signature"),
             this.options.stripeWebhookSecret ?? "",
+          ),
+        );
+      case "POST /webhooks/orange-money-ml":
+        return response(
+          202,
+          await this.payments.orangeMoneyMlWebhook(
+            state,
+            request.rawBody ?? "",
+          ),
+        );
+      case "GET /payments/orange-money-ml/return":
+      case "GET /payments/orange-money-ml/cancel":
+        return response(
+          202,
+          await this.payments.orangeMoneyMlReturn(
+            state,
+            request.query?.token ?? "",
           ),
         );
       case "GET /withdrawals":

@@ -30,7 +30,7 @@ describe("CLI FangaBase", () => {
     expect(first.status, first.stderr).toBe(0);
     expect(JSON.parse(first.stdout).changed).toBe(true);
     expect(await readFile(output, "utf8")).toContain(
-      "generator_version: 0.2.0-rc.1",
+      "generator_version: 0.2.0-rc.2",
     );
     const second = run();
     expect(second.status, second.stderr).toBe(0);
@@ -127,7 +127,7 @@ it("accepte le questionnaire interactif minimal", async () => {
     ],
     {
       encoding: "utf8",
-      input: "Fanga Interactif\nProfil test\n1\n1\n1\n3\n1\n1\n",
+      input: "Fanga Interactif\nProfil test\n1\n1\n1\n4\n1\n1\n",
     },
   );
   expect(result.status, result.stderr).toBe(0);

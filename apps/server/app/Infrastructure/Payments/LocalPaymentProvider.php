@@ -32,7 +32,7 @@ final class LocalPaymentProvider implements PaymentProvider
         return new ProviderPayment('local:'.$request->orderId, 'SUCCEEDED', 'https://local.invalid/pay/'.$request->orderId, $request->amountMinor, $request->currency);
     }
 
-    public function paymentStatus(string $providerReference): ProviderPayment
+    public function paymentStatus(string $providerReference, array $context = []): ProviderPayment
     {
         return new ProviderPayment($providerReference, 'SUCCEEDED', null, null, null);
     }

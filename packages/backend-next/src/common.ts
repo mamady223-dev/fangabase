@@ -20,6 +20,12 @@ export class BackendProblem extends Error {
       | "IDEMPOTENCY_BODY_MISMATCH"
       | "WEBHOOK_INVALID"
       | "PAYMENT_PROVIDER_UNAVAILABLE"
+      | "PAYMENT_PROVIDER_NOT_CONFIGURED"
+      | "PAYMENT_PROVIDER_CURRENCY_UNSUPPORTED"
+      | "PAYMENT_PROVIDER_TIMEOUT"
+      | "PAYMENT_PROVIDER_TEMPORARY"
+      | "PAYMENT_PROVIDER_REJECTED"
+      | "PAYMENT_PROVIDER_INVALID_RESPONSE"
       | "INSUFFICIENT_BALANCE"
       | "CONFLICT",
     readonly status: number,
@@ -105,6 +111,29 @@ export function withIdempotency<T>(
     body: result.body,
   };
   state.idempotency.push(record);
+  return result;
+}
+
+export async function withAsyncIdempotency<T>(
+  state: BackendState,
+  scope: string,
+  body: unknown,
+  operation: () => Promise<{ status: number; body: T }>,
+): Promise<{ status: number; body: T }> {
+  const bodyFingerprint = fingerprint(body);
+  const existing = state.idempotency.find((item) => item.scope === scope);
+  if (existing) {
+    if (existing.fingerprint !== bodyFingerprint)
+      throw new BackendProblem("IDEMPOTENCY_BODY_MISMATCH", 409);
+    return { status: existing.status, body: existing.body as T };
+  }
+  const result = await operation();
+  state.idempotency.push({
+    scope,
+    fingerprint: bodyFingerprint,
+    status: result.status,
+    body: result.body,
+  });
   return result;
 }
 

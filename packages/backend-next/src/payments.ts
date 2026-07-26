@@ -1,12 +1,20 @@
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
 import {
   audit,
   BackendProblem,
   enqueue,
   now,
   positiveMinor,
+  withAsyncIdempotency,
   withIdempotency,
 } from "./common.js";
+import type { OrangeMoneyMlProvider } from "./orange-money-ml.js";
 import type { PublicUser } from "./identity.js";
 import type { BackendState, PaymentRecord } from "./state.js";
 import { requiredPrice } from "./billing.js";
@@ -23,30 +31,34 @@ export const paymentProviderMatrix: Record<string, PaymentProviderStatus> = {
   fedapay: "IMPLEMENTED_NEEDS_SANDBOX_UAT",
   cinetpay: "NEEDS_PROVIDER_CONTRACT",
   paydunya: "NEEDS_PROVIDER_CONTRACT",
-  orange_money: "NEEDS_PROVIDER_CONTRACT",
+  orange_money_ml: "IMPLEMENTED_NEEDS_SANDBOX_UAT",
   bictorys: "NEEDS_PROVIDER_CONTRACT",
   paytech: "NEEDS_PROVIDER_CONTRACT",
   moneroo: "NEEDS_PROVIDER_CONTRACT",
 };
 
 export class PaymentService {
-  constructor(private readonly secret: string) {}
+  constructor(
+    private readonly secret: string,
+    private readonly orangeMoneyMl: OrangeMoneyMlProvider | null = null,
+  ) {}
 
-  checkout(
+  async checkout(
     state: BackendState,
     actor: PublicUser,
     input: {
       priceId: string;
       provider: string;
-      amountMinor: number;
-      currency: "XOF" | "EUR" | "USD";
+      amountMinor?: number;
+      currency?: "XOF" | "EUR" | "USD";
     },
     idempotencyKey: string,
   ) {
     const price = requiredPrice(state, input.priceId);
     if (
-      price.amountMinor !== input.amountMinor ||
-      price.currency !== input.currency
+      (input.amountMinor !== undefined &&
+        input.amountMinor !== price.amountMinor) ||
+      (input.currency !== undefined && input.currency !== price.currency)
     )
       throw new BackendProblem("VALIDATION_FAILED", 422);
     const capability = paymentProviderMatrix[input.provider];
@@ -55,11 +67,13 @@ export class PaymentService {
       ["NEEDS_PROVIDER_CONTRACT", "DISABLED"].includes(capability)
     )
       throw new BackendProblem("PAYMENT_PROVIDER_UNAVAILABLE", 503);
-    return withIdempotency(
+    return withAsyncIdempotency(
       state,
       `${actor.id}:payment.checkout:${input.provider}:${idempotencyKey}`,
       input,
-      () => {
+      async () => {
+        if (input.provider === "orange_money_ml" && !this.orangeMoneyMl)
+          throw new BackendProblem("PAYMENT_PROVIDER_NOT_CONFIGURED", 503);
         const payment: PaymentRecord = {
           id: randomUUID(),
           ownerId: actor.id,
@@ -71,6 +85,32 @@ export class PaymentService {
           refundedMinor: 0,
           createdAt: now(),
         };
+        let paymentUrl: string | null = null;
+        const publicToken = randomBytes(24).toString("base64url");
+        if (input.provider === "orange_money_ml") {
+          if (price.currency !== "XOF")
+            throw new BackendProblem(
+              "PAYMENT_PROVIDER_CURRENCY_UNSUPPORTED",
+              422,
+            );
+          const external = await this.orangeMoneyMl!.checkout({
+            orderId: payment.id,
+            amountMinor: price.amountMinor,
+            currency: "XOF",
+          });
+          payment.status = external.status;
+          payment.providerReference = external.reference;
+          payment.safeMetadata = {
+            orderId: payment.id,
+            amountMinor: payment.amountMinor,
+            currency: payment.currency,
+            encryptedTokens: external.encryptedTokens,
+            publicTokenHash: createHash("sha256")
+              .update(publicToken)
+              .digest("hex"),
+          };
+          paymentUrl = external.paymentUrl;
+        }
         state.payments.push(payment);
         enqueue(state, this.secret, "payment.created", actor.id, {
           paymentId: payment.id,
@@ -91,11 +131,115 @@ export class PaymentService {
             paymentUrl:
               input.provider === "local"
                 ? null
-                : "https://provider.example.invalid/checkout",
+                : input.provider === "orange_money_ml"
+                  ? paymentUrl
+                  : "https://provider.example.invalid/checkout",
+            publicToken,
           },
         };
       },
     );
+  }
+
+  async orangeMoneyMlWebhook(
+    state: BackendState,
+    rawBody: string,
+  ): Promise<{ accepted: true; duplicate: boolean; status: string }> {
+    if (Buffer.byteLength(rawBody) > 65536)
+      throw new BackendProblem("WEBHOOK_INVALID", 413);
+    const nowMs = Date.now();
+    const rateKey = "webhook:orange_money_ml";
+    let rate = state.rateLimits.find((item) => item.key === rateKey);
+    if (!rate) {
+      rate = { key: rateKey, attempts: [] };
+      state.rateLimits.push(rate);
+    }
+    rate.attempts = rate.attempts.filter(
+      (attempt) => nowMs - Date.parse(attempt) < 60_000,
+    );
+    if (rate.attempts.length >= 60)
+      throw new BackendProblem("RATE_LIMITED", 429);
+    rate.attempts.push(new Date(nowMs).toISOString());
+    let payload: Record<string, unknown>;
+    try {
+      payload = JSON.parse(rawBody) as Record<string, unknown>;
+    } catch {
+      throw new BackendProblem("WEBHOOK_INVALID", 400);
+    }
+    const reference =
+      typeof payload.reference === "string"
+        ? payload.reference
+        : typeof payload.order_id === "string"
+          ? payload.order_id
+          : null;
+    if (!reference)
+      return { accepted: true, duplicate: false, status: "PENDING" };
+    const payment = state.payments.find(
+      (item) =>
+        item.provider === "orange_money_ml" &&
+        (item.providerReference === reference || item.id === reference),
+    );
+    if (!payment)
+      return { accepted: true, duplicate: false, status: "PENDING" };
+    const eventKey = `orange_money_ml:${createHash("sha256").update(rawBody).digest("hex")}`;
+    if (state.webhookEvents.includes(eventKey))
+      return { accepted: true, duplicate: true, status: payment.status };
+    if (!this.orangeMoneyMl)
+      throw new BackendProblem("PAYMENT_PROVIDER_NOT_CONFIGURED", 503);
+    const verified = await this.orangeMoneyMl.status(
+      payment.providerReference ?? payment.id,
+      payment.safeMetadata ?? {},
+    );
+    if (
+      (verified.amountMinor !== null &&
+        verified.amountMinor !== payment.amountMinor) ||
+      (verified.currency !== null && verified.currency !== payment.currency)
+    ) {
+      payment.status = "NEEDS_REVIEW";
+      audit(
+        state,
+        "system",
+        "payment.provider_mismatch",
+        "payment",
+        payment.id,
+      );
+    } else {
+      payment.status = verified.status;
+    }
+    state.webhookEvents.push(eventKey);
+    enqueue(state, this.secret, "payment.webhook.received", payment.ownerId, {
+      provider: "orange_money_ml",
+      paymentId: payment.id,
+      status: payment.status,
+    });
+    return { accepted: true, duplicate: false, status: payment.status };
+  }
+
+  async orangeMoneyMlReturn(
+    state: BackendState,
+    publicToken: string,
+  ): Promise<{ status: string }> {
+    const hash = createHash("sha256").update(publicToken).digest("hex");
+    const payment = state.payments.find(
+      (item) =>
+        item.provider === "orange_money_ml" &&
+        item.safeMetadata?.publicTokenHash === hash,
+    );
+    if (!payment) throw new BackendProblem("NOT_FOUND", 404);
+    if (!this.orangeMoneyMl)
+      throw new BackendProblem("PAYMENT_PROVIDER_NOT_CONFIGURED", 503);
+    const verified = await this.orangeMoneyMl.status(
+      payment.providerReference ?? payment.id,
+      payment.safeMetadata ?? {},
+    );
+    if (
+      (verified.amountMinor !== null &&
+        verified.amountMinor !== payment.amountMinor) ||
+      (verified.currency !== null && verified.currency !== payment.currency)
+    )
+      payment.status = "NEEDS_REVIEW";
+    else payment.status = verified.status;
+    return { status: payment.status };
   }
 
   refund(

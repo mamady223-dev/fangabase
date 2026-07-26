@@ -33,7 +33,7 @@ final readonly class FedaPayPaymentProvider implements PaymentProvider
         return new ProviderPayment($id, 'PENDING', $this->required($token, 'url'), null, null);
     }
 
-    public function paymentStatus(string $providerReference): ProviderPayment
+    public function paymentStatus(string $providerReference, array $context = []): ProviderPayment
     {
         $json = $this->http->request('GET', $this->baseUrl.'/v1/transactions/'.rawurlencode($providerReference), $this->headers(null), [], 'json', 15)->requireSuccess();
         $item = is_array($json['v1/transaction'] ?? null) ? $json['v1/transaction'] : ($json['transaction'] ?? $json);

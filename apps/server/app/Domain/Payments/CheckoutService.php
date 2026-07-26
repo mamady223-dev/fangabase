@@ -44,7 +44,15 @@ final readonly class CheckoutService
                     throw $error;
                 }
                 if ($payment->checkoutUrl === null || ! str_starts_with($payment->checkoutUrl, 'https://')) throw new \RuntimeException('PAYMENT_PROVIDER_INVALID_RESPONSE');
-                DB::table('payment_attempts')->where('id', $attemptId)->update(['provider_reference' => $payment->reference, 'status' => 'PENDING', 'raw_status' => $payment->status, 'updated_at' => now()]);
+                $publicToken = bin2hex(random_bytes(24));
+                $safeMetadata = [...$payment->safeMetadata, 'public_token_hash' => hash('sha256', $publicToken)];
+                DB::table('payment_attempts')->where('id', $attemptId)->update([
+                    'provider_reference' => $payment->reference,
+                    'status' => 'PENDING',
+                    'raw_status' => $payment->status,
+                    'safe_metadata' => json_encode($safeMetadata, JSON_THROW_ON_ERROR),
+                    'updated_at' => now(),
+                ]);
                 if ($providerName === 'local' && $payment->status === 'SUCCEEDED') {
                     $this->webhooks->process(new VerifiedPaymentEvent(
                         'local',
@@ -59,7 +67,8 @@ final readonly class CheckoutService
                     ));
                 }
                 return ['order_id' => $orderId, 'attempt_id' => $attemptId, 'provider' => $providerName, 'status' => 'PENDING', 'checkout_url' => $payment->checkoutUrl,
-                    'amount_minor' => (int) $price->amount_minor, 'currency' => strtoupper((string) $price->currency), 'subscription_id' => $subscriptionId];
+                    'amount_minor' => (int) $price->amount_minor, 'currency' => strtoupper((string) $price->currency), 'subscription_id' => $subscriptionId,
+                    'public_token' => $publicToken];
             }));
     }
 

@@ -13,7 +13,7 @@ const paymentProviders = [
   "fedapay",
   "cinetpay",
   "paydunya",
-  "orange_money",
+  "orange_money_ml",
   "bictorys",
   "paytech",
   "moneroo",

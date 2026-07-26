@@ -17,14 +17,25 @@ Les cl?s fournisseurs restent absentes des exemples. Apr?s rotation : mettre ? j
 
 ## Paiements
 
-| Variable                                     | Effet                                                           |
-| -------------------------------------------- | --------------------------------------------------------------- |
-| `PAYMENT_ALLOWED_RETURN_PATHS`               | Liste exacte de chemins relatifs autorises; aucune URL externe. |
-| `STRIPE_ENABLED`, `FEDAPAY_ENABLED`          | Interrupteurs d'urgence, desactives par defaut.                 |
-| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Secrets Stripe sandbox/live, jamais commits.                    |
-| `FEDAPAY_SECRET_KEY`, `FEDAPAY_BASE_URL`     | Secret et origine officielle FedaPay; sandbox par defaut.       |
+| Variable                                                                                   | Effet                                                                              |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `PAYMENT_ALLOWED_RETURN_PATHS`                                                             | Liste exacte de chemins relatifs autorises; aucune URL externe.                    |
+| `STRIPE_ENABLED`, `FEDAPAY_ENABLED`                                                        | Interrupteurs d'urgence, desactives par defaut.                                    |
+| `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`                                               | Secrets Stripe sandbox/live, jamais commits.                                       |
+| `FEDAPAY_SECRET_KEY`, `FEDAPAY_BASE_URL`                                                   | Secret et origine officielle FedaPay; sandbox par defaut.                          |
+| `ORANGE_MONEY_ENABLED`, `ORANGE_MONEY_ENVIRONMENT`                                         | Activation conditionnelle Orange Money Mali et mode simulateur/sandbox/production. |
+| `ORANGE_MONEY_OAUTH_TOKEN_URL`, `ORANGE_MONEY_API_BASE_URL`                                | URL remises ou confirmées par le contrat marchand Mali ; vides par défaut.         |
+| `ORANGE_MONEY_CLIENT_ID`, `ORANGE_MONEY_CLIENT_SECRET`                                     | Identifiants OAuth exclusivement côté serveur.                                     |
+| `ORANGE_MONEY_MERCHANT_ACCOUNT`, `ORANGE_MONEY_MERCHANT_CODE`, `ORANGE_MONEY_MERCHANT_KEY` | Paramètres marchands contractuels, jamais exposés au client.                       |
+| `ORANGE_MONEY_RETURN_URL`, `ORANGE_MONEY_CANCEL_URL`, `ORANGE_MONEY_NOTIFICATION_URL`      | Callbacks HTTPS dirigés vers le backend d'autorité.                                |
+| `ORANGE_MONEY_HTTP_TIMEOUT_SECONDS`                                                        | Timeout fournisseur, 15 secondes par défaut.                                       |
 
 Les statuts `IMPLEMENTED_NEEDS_SANDBOX_UAT`, `NEEDS_PROVIDER_CONTRACT`, `DISABLED` et `UNSUPPORTED` sont les seuls statuts autorises. Une configuration presente ne vaut jamais validation de production.
+
+Les variables Orange ne sont générées que si `orange_money_ml` est sélectionné.
+Le questionnaire ne collecte aucune clé. Aucun secret Orange ne doit utiliser
+`NEXT_PUBLIC_*`, `VITE_*` ou un autre préfixe client. Voir
+`docs/payments/orange-money-mali.md`.
 
 ## Retraits
 

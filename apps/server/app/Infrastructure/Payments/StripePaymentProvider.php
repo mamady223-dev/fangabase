@@ -34,7 +34,7 @@ final readonly class StripePaymentProvider implements PaymentProvider
         return new ProviderPayment($this->required($json, 'id'), 'PENDING', $this->required($json, 'url'), null, null);
     }
 
-    public function paymentStatus(string $providerReference): ProviderPayment
+    public function paymentStatus(string $providerReference, array $context = []): ProviderPayment
     {
         $json = $this->http->request('GET', 'https://api.stripe.com/v1/checkout/sessions/'.rawurlencode($providerReference), $this->headers(null), [], 'form', 15)->requireSuccess();
         $status = ($json['payment_status'] ?? '') === 'paid' ? 'SUCCEEDED' : 'PENDING';
