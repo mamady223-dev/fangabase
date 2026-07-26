@@ -15,6 +15,8 @@ use FangaBase\Infrastructure\Mail\LocalMailProvider;
 use FangaBase\Infrastructure\Mail\ResendMailProvider;
 use FangaBase\Infrastructure\Mail\SmtpMailProvider;
 use FangaBase\Infrastructure\Mail\SymfonySmtpTransport;
+use FangaBase\Domain\Infrastructure\Storage\PrivateStorage;
+use FangaBase\Infrastructure\Storage\LocalPrivateStorage;
 use Illuminate\Support\ServiceProvider;
 use FangaBase\Domain\Payments\MoneroWallet;
 use FangaBase\Domain\Payments\PaymentProviderRegistry;
@@ -37,6 +39,10 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(GoogleOAuthProvider::class, OfficialGoogleOAuthProvider::class);
+        $this->app->singleton(PrivateStorage::class, fn (): PrivateStorage => new LocalPrivateStorage(
+            storage_path('app/private'),
+            (string) config('app.key'),
+        ));
         $this->app->bind(ProviderHttpClient::class, LaravelPaymentHttpClient::class);
         $this->app->singleton(PaymentProviderRegistry::class, function ($app): PaymentProviderRegistry {
             $http = $app->make(ProviderHttpClient::class);

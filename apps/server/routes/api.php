@@ -15,6 +15,9 @@ use FangaBase\Http\Controllers\PaymentController;
 use FangaBase\Http\Controllers\CatalogController;
 use FangaBase\Http\Controllers\WithdrawalController;
 use FangaBase\Http\Controllers\WithdrawalAdminController;
+use FangaBase\Http\Controllers\AccountController;
+use FangaBase\Http\Controllers\UserFeatureController;
+use FangaBase\Http\Controllers\OperationsAdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function (): void {
@@ -38,6 +41,11 @@ Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook']);
 Route::post('/webhooks/payouts/{provider}', [WithdrawalController::class, 'callback']);
 
 Route::middleware('session.auth')->group(function (): void {
+    Route::get('/auth/me', [AccountController::class, 'me']);
+    Route::get('/notifications', [UserFeatureController::class, 'notifications']);
+    Route::get('/notifications/unread-count', [UserFeatureController::class, 'unreadCount']);
+    Route::get('/profile', [UserFeatureController::class, 'profile']);
+    Route::get('/files/{file}', [UserFeatureController::class, 'download']);
     Route::get('/organizations', [OrganizationController::class, 'index']);
     Route::get('/organizations/{organization}', [OrganizationController::class, 'show']);
     Route::get('/organizations/{organization}/members', [OrganizationMembershipController::class, 'index']);
@@ -49,6 +57,11 @@ Route::middleware('session.auth')->group(function (): void {
     Route::get('/withdrawals/balance', [WithdrawalController::class, 'balance']);
 
     Route::middleware('strict.csrf')->group(function (): void {
+        Route::post('/auth/password/change', [AccountController::class, 'changePassword']);
+        Route::post('/notifications/{notification}/read', [UserFeatureController::class, 'markRead']);
+        Route::put('/notification-preferences', [UserFeatureController::class, 'preferences']);
+        Route::patch('/profile', [UserFeatureController::class, 'updateProfile']);
+        Route::post('/files', [UserFeatureController::class, 'upload']);
         Route::post('/payments/checkouts', [PaymentController::class, 'checkout']);
         Route::post('/payments/orders/{order}/refunds', [PaymentController::class, 'refund']);
         Route::post('/payout-accounts', [WithdrawalController::class, 'account']);
@@ -72,6 +85,9 @@ Route::middleware('session.auth')->group(function (): void {
         Route::get('/organizations', [PlatformAdminController::class, 'organizations']);
         Route::get('/billing/events', [BillingAdminController::class, 'events']);
         Route::get('/withdrawals', [WithdrawalAdminController::class, 'index']);
+        Route::get('/audit', [OperationsAdminController::class, 'audit']);
+        Route::get('/outbox', [OperationsAdminController::class, 'outbox']);
+        Route::get('/rate-limits', [OperationsAdminController::class, 'rateLimits']);
         Route::middleware('strict.csrf')->group(function (): void {
             Route::patch('/users/{user}', [PlatformAdminController::class, 'updateUser']);
             Route::patch('/organizations/{organization}', [PlatformAdminController::class, 'updateOrganization']);
