@@ -68,6 +68,33 @@ describe("deployment profiles", () => {
     expect(contents(base)).toContain(
       "Serverless runtimes cannot host persistent workers",
     ));
+  it("keeps autonomous Cloud free of Laravel, Composer and proxy origins", () => {
+    expect(contents(base)).not.toMatch(
+      /artisan|composer|FANGABASE_API_ORIGIN/i,
+    );
+    expect(contents(base)).toContain("@fangabase/backend-next migrate");
+  });
+  it("generates Next.js VPS worker and scheduler commands", () => {
+    const generated = contents(vpsNext());
+    expect(generated).toContain("@fangabase/backend-next worker");
+    expect(generated).toContain("@fangabase/backend-next scheduler");
+    expect(generated).not.toMatch(/artisan|composer|FANGABASE_API_ORIGIN/i);
+  });
+  it("generates a real neutral React client when selected", () => {
+    const files = deploymentFiles({
+      ...shared(),
+      architecture: {
+        target: "shared_laravel",
+        frontend: "react",
+        backend: "laravel",
+        ui: "react",
+      },
+    });
+    expect(files.map((file) => file.path)).toContain("frontend/src.tsx");
+    expect(
+      files.find((file) => file.path === "frontend/src.tsx")?.content,
+    ).toContain('credentials: "include"');
+  });
   it("generates VPS workers and scheduler", () =>
     expect(paths(vps())).toEqual(
       expect.arrayContaining([
@@ -104,6 +131,23 @@ function vps(docker = false): FangaBaseConfig {
       database: "postgres",
       docker,
       vps_variant: "laravel",
+    },
+  };
+}
+function vpsNext(): FangaBaseConfig {
+  return {
+    ...base,
+    architecture: {
+      target: "vps_next",
+      frontend: "next",
+      backend: "next",
+      ui: "next",
+    },
+    deployment: {
+      family: "vps",
+      database: "postgres",
+      docker: false,
+      vps_variant: "next",
     },
   };
 }

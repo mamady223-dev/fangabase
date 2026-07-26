@@ -1,6 +1,6 @@
 {
   "name": "@fangabase/web",
-  "version": "0.1.0-rc.1",
+  "version": "0.2.0-rc.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,6 +14,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@fangabase/backend-next": "workspace:*",
     "@fangabase/contracts": "workspace:*",
     "next": "16.2.11",
     "react": "19.2.7",

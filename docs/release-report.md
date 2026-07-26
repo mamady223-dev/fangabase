@@ -1,5 +1,30 @@
 # Rapport de release candidate - 2026-07-26
 
+Décision locale du jalon 13 : **PASS_WITH_WARNINGS**. `pnpm release:check`
+passe, PHPUnit passe (97 tests, 644 assertions) et l'audit npm ne contient
+aucune vulnérabilité haute ou critique. Le package et sa somme SHA-256 sont
+produits par la gate reproductible `release:package`.
+
+Le tag `v0.2.0-rc.1` reste bloqué jusqu'à la réussite de la CI PostgreSQL
+Next.js et des autres workflows obligatoires.
+
+## Préparation de `0.2.0-rc.1` — jalon 13
+
+Statut courant : **EN VALIDATION**.
+
+Le backend Next.js n'est plus un proxy obligatoire : il possède une
+persistance PostgreSQL versionnée, des transactions, les fonctions métier
+génériques, une Outbox et des jobs. Laravel reste l'autorité des profils
+Laravel et hybride. L'ADR 0006 garantit une seule autorité par application.
+
+Résultats locaux intermédiaires : 98 tests JS/TS verts (un test PostgreSQL
+conditionnel ignoré localement), 97 tests Laravel et 644 assertions, typecheck
+vert et cinq builds verts. `ci-next-postgres` doit valider migrations et
+concurrence PostgreSQL avant le tag.
+
+La décision finale et le SHA-256 du package seront inscrits après les gates et
+la CI. Aucune UAT externe n'est requalifiée comme automatisée.
+
 Statut global : **PASS_WITH_WARNINGS**, sous réserve de la CI du commit final.
 
 La release candidate `0.1.0-rc.1` est techniquement reproductible. La gate juridique est close : `LICENSE` désigne Mamady Traoré comme auteur et titulaire légal des droits, en qualité de CEO de Motechnova, sans présenter Motechnova comme titulaire distinct. Toutes les gates locales obligatoires passent ; le tag reste conditionné au succès des workflows du commit final.

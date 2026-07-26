@@ -11,7 +11,7 @@ product:
     default_currency: XOF,
   }
 architecture:
-  { target: vps_laravel, frontend: inertia, backend: laravel, ui: inertia }
+  { target: vps_laravel, frontend: react, backend: laravel, ui: react }
 database: { engine: postgres, provider: postgres }
 email: { provider: smtp }
 storage: { provider: s3 }

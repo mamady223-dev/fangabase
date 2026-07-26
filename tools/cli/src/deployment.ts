@@ -17,10 +17,12 @@ function familyOf(
 
 function env(config: FangaBaseConfig, family: string): string {
   const hybrid = family === "hybrid";
+  const nextBackend = config.architecture.backend === "next";
   return `${header}APP_ENV=production
 APP_URL=https://app.example.invalid
 APP_VERSION=release-id
-DATABASE_URL=inject-at-runtime
+DATABASE_URL=inject-pooled-runtime-url
+${nextBackend ? "DATABASE_DIRECT_URL=inject-direct-migration-url\nSESSION_SECRET=inject-at-runtime\n" : ""}
 MAIL_PROVIDER=${config.email.provider}
 STORAGE_PROVIDER=${config.storage.provider}
 QUEUE_PROVIDER=${config.queue.provider}
@@ -50,13 +52,14 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
     { path: "README.md", content: runbook(config, family) },
     { path: "SMOKE.md", content: smoke },
     { path: "RECOVERY.md", content: recovery },
+    ...(config.architecture.frontend === "react" ? reactFrontend() : []),
   ];
   if (family === "cloud") {
     return [
       ...common,
       {
         path: "vercel.json",
-        content: `${JSON.stringify({ framework: "nextjs", buildCommand: "pnpm --filter @fangabase/web build", crons: [] }, null, 2)}\n`,
+        content: `${JSON.stringify({ framework: "nextjs", buildCommand: "pnpm --filter @fangabase/web build", crons: [{ path: "/api/cron", schedule: "*/5 * * * *" }] }, null, 2)}\n`,
       },
     ];
   }
@@ -92,7 +95,22 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
             content: systemd("scheduler", "php artisan schedule:work"),
           },
         ]
-      : []),
+      : [
+          {
+            path: "systemd/fangabase-worker.service",
+            content: systemd(
+              "worker",
+              "pnpm --filter @fangabase/backend-next worker",
+            ),
+          },
+          {
+            path: "systemd/fangabase-scheduler.service",
+            content: systemd(
+              "scheduler",
+              "pnpm --filter @fangabase/backend-next scheduler",
+            ),
+          },
+        ]),
     {
       path: "nginx/fangabase.conf.example",
       content: `${header}server { listen 443 ssl; server_name example.invalid; location / { proxy_pass http://127.0.0.1:${config.architecture.backend === "laravel" ? "8000" : "3000"}; proxy_set_header X-Forwarded-Proto $scheme; proxy_set_header Host $host; } }\n`,
@@ -111,6 +129,72 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
   const files = [...common, ...serverFiles];
   if (config.deployment?.docker) files.push(...dockerFiles(config));
   return files;
+}
+
+function reactFrontend(): DeploymentFile[] {
+  return [
+    {
+      path: "frontend/package.json",
+      content: `${JSON.stringify(
+        {
+          name: "fangabase-react-headless",
+          private: true,
+          type: "module",
+          scripts: { dev: "vite", build: "tsc && vite build" },
+          dependencies: { react: "19.1.0", "react-dom": "19.1.0" },
+          devDependencies: {
+            "@vitejs/plugin-react": "4.6.0",
+            vite: "7.0.0",
+            typescript: "5.8.3",
+            "@types/react": "19.1.8",
+            "@types/react-dom": "19.1.6",
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    },
+    {
+      path: "frontend/index.html",
+      content:
+        '<div id="root"></div><script type="module" src="/src.tsx"></script>\n',
+    },
+    {
+      path: "frontend/src.tsx",
+      content: `import React from "react";
+import { createRoot } from "react-dom/client";
+import "./style.css";
+
+const origin = import.meta.env.VITE_API_ORIGIN || "";
+async function api(path: string, init: RequestInit = {}) {
+  const csrf = document.cookie.split("; ").find((item) => item.startsWith("fangabase_csrf="))?.split("=")[1];
+  const response = await fetch(origin + path, {
+    ...init,
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRF-Token": decodeURIComponent(csrf) } : {}), ...init.headers },
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body?.error?.code || "REQUEST_FAILED");
+  return body;
+}
+
+function App() {
+  const [result, setResult] = React.useState("Non vérifié");
+  return <main><h1>Application technique</h1><p>{result}</p><button onClick={() => api("/api/health").then(() => setResult("Backend disponible")).catch((error) => setResult(error.message))}>Vérifier</button></main>;
+}
+createRoot(document.getElementById("root")!).render(<App />);
+`,
+    },
+    {
+      path: "frontend/style.css",
+      content:
+        "body{font:16px system-ui;line-height:1.5;margin:2rem;max-width:48rem}button{font:inherit;padding:.5rem}\n",
+    },
+    {
+      path: "frontend/.env.example",
+      content: "VITE_API_ORIGIN=https://api.example.invalid\n",
+    },
+  ];
 }
 
 function systemd(name: string, command: string): string {
@@ -176,6 +260,10 @@ CMD ["php","artisan","serve","--host=0.0.0.0","--port=8000"]
 }
 
 function runbook(config: FangaBaseConfig, family: string): string {
+  const migration =
+    config.architecture.backend === "next"
+      ? "pnpm --filter @fangabase/backend-next migrate"
+      : "php apps/server/artisan migrate --force";
   const limitations =
     family === "cloud"
       ? "Laravel is not deployed on Vercel by this profile. Use Hybrid when Laravel is the backend. Serverless runtimes cannot host persistent workers."
@@ -184,5 +272,5 @@ function runbook(config: FangaBaseConfig, family: string): string {
         : family === "hybrid"
           ? "HTTPS is mandatory. Configure exact CORS origins, CSRF trusted origins, secure HttpOnly cookies and route callbacks/webhooks to Laravel."
           : "Provision HTTPS, trusted proxies, log rotation, one scheduler, distinct workers and database backups.";
-  return `${header}# ${family} deployment\n\nRequired: ${config.database.engine}, runtime secrets, HTTPS, migrations and health checks.\nOptional: Redis-compatible cache, remote private storage and remote email adapter.\n\nBuild: \`pnpm install --frozen-lockfile && pnpm build\`\nMigrate once under a deployment lock: \`php apps/server/artisan migrate --force\`\nHealth: \`/api/health\`; readiness: \`/api/readiness\`; liveness: \`/up\`.\n\n${limitations}\n\nSet file permissions to the service user, expose only proxy ports, redact logs, inject secrets at runtime and configure backup retention.\n`;
+  return `${header}# ${family} deployment\n\nRequired: ${config.database.engine}, runtime secrets, HTTPS, migrations and health checks.\nOptional: Redis-compatible cache, remote private storage and remote email adapter.\n\nBuild: \`pnpm install --frozen-lockfile && pnpm build\`\nMigrate once under a deployment lock: \`${migration}\`\nHealth: \`/api/health\`; readiness: \`/api/readiness\`.\n\n${limitations}\n\nSet file permissions to the service user, expose only proxy ports, redact logs, inject secrets at runtime and configure backup retention.\n`;
 }

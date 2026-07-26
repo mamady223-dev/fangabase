@@ -1,5 +1,18 @@
 # FangaBase
 
+> Version en préparation : `0.2.0-rc.1`.
+
+FangaBase est headless et propose deux familles backend de même niveau :
+Next.js autonome (`cloud_vercel`, `vps_next`) ou Laravel
+(`vps_laravel`, `shared_laravel`, `hybrid`). Aucun chemin n'est recommandé par
+défaut : le choix dépend de l'hébergement et reste celui de l'étudiant.
+
+Le backend Next.js utilise PostgreSQL, `DATABASE_URL` poolée au runtime,
+`DATABASE_DIRECT_URL` pour les migrations et `SESSION_SECRET`. Neon et
+Supabase sont compatibles via leurs URLs PostgreSQL. Il ne requiert ni PHP, ni
+Composer, ni `FANGABASE_API_ORIGIN`. Le profil hybride conserve Laravel comme
+unique autorité et dirige les callbacks vers son API.
+
 FangaBase est un monorepo original pour d?marrer un SaaS, une marketplace, une plateforme de services ou un outil m?tier sur Vercel, VPS, h?bergement mutualis? ou architecture hybride.
 
 ## Démarrage

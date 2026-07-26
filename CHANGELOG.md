@@ -1,5 +1,16 @@
 # Journal des changements
 
+## 0.2.0-rc.1 - en préparation
+
+- Backend Next.js persistant et autonome : identité, OAuth, organisations,
+  fonctions utilisateur, finance, paiements, retraits et Outbox.
+- Migrations PostgreSQL, runtime poolé, jobs VPS et CI PostgreSQL Next.js.
+- API Laravel génériques complétées pour compte, notifications, profil,
+  uploads et exploitation.
+- Autorité unique explicite par profil et génération Cloud sans Laravel.
+- Template technique React headless réel ; `inertia` n'est plus proposé tant
+  qu'il n'est pas implémenté.
+
 ## 0.1.0-rc.1 - 2026-07-26
 
 ### Fonctionnalités

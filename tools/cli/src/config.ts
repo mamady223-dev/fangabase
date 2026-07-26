@@ -44,9 +44,9 @@ export const configSchema = z
     }),
     architecture: z.object({
       target: z.enum(architectureTargets),
-      frontend: z.enum(["next", "blade", "inertia"]),
+      frontend: z.enum(["next", "react", "blade"]),
       backend: z.enum(["next", "laravel"]),
-      ui: z.enum(["next", "blade", "inertia"]),
+      ui: z.enum(["next", "react", "blade"]),
     }),
     deployment: z
       .object({
@@ -150,7 +150,8 @@ export const configSchema = z
     }
     if (
       value.architecture.target === "cloud_vercel" &&
-      (value.architecture.backend !== "next" ||
+      (value.architecture.frontend !== "next" ||
+        value.architecture.backend !== "next" ||
         value.database.engine !== "postgres")
     ) {
       context.addIssue({
@@ -160,8 +161,31 @@ export const configSchema = z
       });
     }
     if (
-      value.architecture.target === "shared_laravel" &&
+      value.architecture.target === "vps_next" &&
+      (value.architecture.backend !== "next" ||
+        value.architecture.frontend !== "next" ||
+        value.database.engine !== "postgres")
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["architecture", "target"],
+        message: "vps_next exige Next.js full-stack et PostgreSQL",
+      });
+    }
+    if (
+      value.architecture.target === "vps_laravel" &&
       value.architecture.backend !== "laravel"
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["architecture", "backend"],
+        message: "vps_laravel exige Laravel",
+      });
+    }
+    if (
+      value.architecture.target === "shared_laravel" &&
+      (value.architecture.backend !== "laravel" ||
+        !["blade", "react"].includes(value.architecture.frontend))
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
@@ -171,13 +195,14 @@ export const configSchema = z
     }
     if (
       value.architecture.target === "hybrid" &&
-      (value.architecture.frontend !== "next" ||
+      (!["next", "react"].includes(value.architecture.frontend) ||
         value.architecture.backend !== "laravel")
     ) {
       context.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["architecture"],
-        message: "hybrid exige un frontend Next.js et un backend Laravel",
+        message:
+          "hybrid exige un frontend Next.js ou React et un backend Laravel",
       });
     }
     if (
