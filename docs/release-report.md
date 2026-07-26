@@ -1,12 +1,15 @@
 # Rapport de release candidate - 2026-07-26
 
-Décision locale du jalon 13 : **PASS_WITH_WARNINGS**. `pnpm release:check`
+Décision du jalon 13 : **FAIL POUR LE TAG**. `pnpm release:check`
 passe, PHPUnit passe (97 tests, 644 assertions) et l'audit npm ne contient
 aucune vulnérabilité haute ou critique. Le package et sa somme SHA-256 sont
 produits par la gate reproductible `release:package`.
 
-Le tag `v0.2.0-rc.1` reste bloqué jusqu'à la réussite de la CI PostgreSQL
-Next.js et des autres workflows obligatoires.
+Les 12 workflows du commit `0687163` sont verts, dont PostgreSQL Next.js,
+PostgreSQL/MySQL Laravel, E2E, sécurité, SAST, Docker et release. Le tag
+`v0.2.0-rc.1` reste néanmoins bloqué : le test partagé actuel ne compare que
+les enums et ne constitue pas encore la suite comportementale commune exigée
+contre les deux backends.
 
 ## Préparation de `0.2.0-rc.1` — jalon 13
 

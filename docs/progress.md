@@ -2,7 +2,7 @@
 
 ## Jalon 13 — Parité backend
 
-État : **en validation** pour `0.2.0-rc.1`.
+État : **implémenté, release bloquée** pour `0.2.0-rc.1`.
 
 Le backend Next.js autonome, ses migrations PostgreSQL, ses transactions, ses
 jobs et ses routes métier sont implémentés. Laravel expose désormais aussi les
@@ -15,10 +15,13 @@ Résultats locaux intermédiaires : 98 tests JS/TS verts (un test PostgreSQL
 conditionnel réservé à la CI), 97 tests Laravel et 644 assertions, typecheck et
 cinq builds verts.
 
-Prochain bloc exact : exécuter les gates finales, publier le jalon 13, attendre
-notamment `ci-next-postgres`, puis créer `v0.2.0-rc.1` uniquement si toutes les
-gates obligatoires sont vertes. Les UAT Google, Stripe, FedaPay, payout,
-e-mail, stockage distant et restauration live restent externes.
+Les 12 workflows du commit `0687163` sont verts, notamment PostgreSQL Next.js,
+PostgreSQL/MySQL Laravel, E2E, sécurité, SAST, Docker et release.
+
+Prochain bloc exact : remplacer le test de parité limité aux enums par une
+suite comportementale commune exécutée contre les deux serveurs, puis créer
+`v0.2.0-rc.1` seulement si cette gate passe. Les UAT Google, Stripe, FedaPay,
+payout, e-mail, stockage distant et restauration live restent externes.
 
 Dernière mise à jour : 2026-07-26
 
