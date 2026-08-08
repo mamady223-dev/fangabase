@@ -14,6 +14,8 @@ Le tag `v0.3.0-rc.1` et la branche `stable` restent strictement conditionnés au
 
 L’audit pnpm ne signale plus aucune vulnérabilité haute ou critique après épinglage des versions corrigées de `brace-expansion`, `js-yaml` et `nanoid`; deux avis modérés restent documentaires au seuil de release.
 
+La première CI du commit `349ca1c` a détecté de nouveaux avis Composer publiés en août 2026. Guzzle est passé à 7.15.3 et League CommonMark à 2.9.0; l’audit Composer ne conserve qu’un avis faible explicitement toléré par la gate. Le SHA invalide de l’action pnpm ajouté à `ci-docs` a été remplacé par le SHA déjà vérifié dans les autres workflows.
+
 ## Préparation de `0.3.0-rc.1` — générateur ciblé
 
 Décision provisoire : **PASS_WITH_WARNINGS, CI requise**.

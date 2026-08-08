@@ -7,6 +7,7 @@
 - Uniformise les commandes et guides post-génération selon le profil.
 - Corrige le clone canonique, les prérequis par profil et ajoute `pnpm docs:check`.
 - Épingle `brace-expansion`, `js-yaml` et `nanoid` aux correctifs disponibles; aucune alerte haute ou critique ne reste dans l’audit pnpm.
+- Met à jour Guzzle 7.15.3 et League CommonMark 2.9.0 après les avis de sécurité publiés pendant la CI.
 
 ## 0.3.0-rc.1 - en préparation
 
