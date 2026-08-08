@@ -201,6 +201,25 @@ describe("générateur de projet ciblé", () => {
       });
       const rootFiles = await readdir(destination);
       expect(rootFiles).toContain("generation-manifest.json");
+      expect(rootFiles).toEqual(
+        expect.arrayContaining([
+          "GETTING_STARTED.md",
+          "NEXT_STEPS.md",
+          "CONFIGURATION_SERVICES.md",
+          "ARCHITECTURE.md",
+        ]),
+      );
+      const packageJson = JSON.parse(
+        await readFile(join(destination, "package.json"), "utf8"),
+      );
+      expect(packageJson.scripts).toEqual(
+        expect.objectContaining({
+          setup: expect.any(String),
+          doctor: "node tools/doctor.mjs",
+          migrate: expect.any(String),
+          "smoke:auth": "node tools/smoke-auth.mjs",
+        }),
+      );
       expect(
         await readFile(join(destination, "fangabase.config.yaml"), "utf8"),
       ).toContain(config.product.name);

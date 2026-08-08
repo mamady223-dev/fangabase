@@ -1,12 +1,10 @@
-﻿# Rapport E2E headless
+# Rapport E2E
 
-Les flux API critiques sont exercÃ©s par les tests Feature Laravel avec SQLite isolÃ©e et adaptateurs locaux : inscription, vÃ©rification e-mail, login, rotation/replay/logout, reset, organisations et IDOR, invitations/rÃ´les, suspensions, dernier SUPERADMIN, crÃ©dits/entitlements, paiement simulÃ©, retrait simulÃ©, CSRF/CORS, rate limits, webhooks et Outbox/worker.
+Les flux API critiques sont exercés contre Laravel et Next.js avec des bases isolées : identité, sessions, organisations, administration, facturation, paiements, retraits, webhooks, CSRF, CORS et Outbox.
 
-Le navigateur Playwright ne couvre volontairement que la page technique : statut headless, health expurgÃ©, backend absent, absence de liens vers les pages exemples et absence de secrets dans le document. Aucun design n'est crÃ©Ã©.
+Le navigateur Playwright couvre volontairement l’interface technique headless : santé nettoyée, backend indisponible, absence de liens vers les exemples et absence de secrets. Aucun design n’est créé.
 
-Statuts possibles :
-
-- local Laravel : exÃ©cutÃ© avec SQLite et fournisseurs locaux ;
-- navigateur Chromium : exÃ©cutÃ© seulement si le binaire Playwright est installÃ© ;
-- fournisseurs rÃ©els : jamais appelÃ©s ;
-- PostgreSQL 17/MySQL 8.4 : migrations et 94 tests exÃ©cutÃ©s avec succÃ¨s dans `ci-databases`; moteurs indisponibles localement.
+- Laravel local : SQLite et fournisseurs locaux ;
+- Chromium : exécuté lorsque le binaire Playwright est disponible ;
+- fournisseurs réels : jamais appelés par les tests automatisés ;
+- PostgreSQL et MySQL : migrations et tests exécutés dans les workflows dédiés.

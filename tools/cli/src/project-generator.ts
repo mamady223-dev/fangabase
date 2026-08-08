@@ -16,6 +16,7 @@ import { tmpdir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { stringify } from "yaml";
 import type { FangaBaseConfig } from "./config.js";
+import { copyProductDocs } from "./product-docs.js";
 
 export type GeneratedFile = { path: string; sha256: string };
 export type Component = {
@@ -203,6 +204,7 @@ export async function generateProject(options: {
   force?: boolean;
   confirmed?: boolean;
   dryRun?: boolean;
+  productDocs?: string;
 }): Promise<ProjectPlan & { generatedFiles: GeneratedFile[] }> {
   const plan = planProject(
     options.config,
@@ -226,6 +228,13 @@ export async function generateProject(options: {
   const staging = await mkdtemp(join(parent, ".fangabase-generate-"));
   try {
     await materialize(options.config, options.sourceRoot, staging, plan);
+    if (options.productDocs) {
+      const copied = await copyProductDocs(options.productDocs, staging);
+      await writeFile(
+        join(staging, "docs/product/IMPLEMENTATION_HANDOFF.md"),
+        `# Relais d'implémentation\n\nDocuments importés : ${copied.join(", ") || "aucun"}.\n\nCes documents décrivent le produit. Ils ne modifient ni les contrats ni le modèle métier automatiquement.\n`,
+      );
+    }
     const generatedFiles = await inventory(staging);
     await writeFile(
       join(staging, "generation-manifest.json"),
@@ -334,6 +343,68 @@ async function materialize(
     `${envLines(config).join("\n")}\n`,
   );
   await writeDocs(staging, config, plan);
+  await writeGeneratedTooling(staging, config);
+}
+
+async function writeGeneratedTooling(
+  staging: string,
+  config: FangaBaseConfig,
+): Promise<void> {
+  const packagePath = join(staging, "package.json");
+  const laravel = config.architecture.backend === "laravel";
+  const frontend = config.architecture.frontend !== "blade";
+  const current = (await exists(packagePath))
+    ? (JSON.parse(await readFile(packagePath, "utf8")) as {
+        scripts?: Record<string, string>;
+        [key: string]: unknown;
+      })
+    : {
+        name: config.product.slug,
+        private: true,
+        packageManager: "pnpm@11.9.0",
+      };
+  current.scripts = {
+    ...(current.scripts ?? {}),
+    setup: laravel
+      ? frontend
+        ? "pnpm install --frozen-lockfile && composer install --working-dir=apps/server --no-interaction --prefer-dist"
+        : "composer install --working-dir=apps/server --no-interaction --prefer-dist"
+      : "pnpm install --frozen-lockfile",
+    doctor: "node tools/doctor.mjs",
+    migrate: laravel
+      ? "php apps/server/artisan migrate --force"
+      : "pnpm --filter @fangabase/backend-next migrate",
+    "smoke:auth": "node tools/smoke-auth.mjs",
+  };
+  if (laravel && !frontend) {
+    current.scripts.dev = "composer --working-dir=apps/server run dev";
+    current.scripts.test = "composer --working-dir=apps/server test";
+    current.scripts.build =
+      "composer --working-dir=apps/server validate --strict";
+  } else if (laravel) {
+    current.scripts["dev:server"] =
+      "composer --working-dir=apps/server run dev";
+    current.scripts["dev:frontend"] = "pnpm --dir frontend dev";
+  }
+  await writeFile(packagePath, `${JSON.stringify(current, null, 2)}\n`);
+  await mkdir(join(staging, "tools"), { recursive: true });
+  await writeFile(join(staging, "tools/doctor.mjs"), generatedDoctor(config));
+  await writeFile(
+    join(staging, "tools/smoke-auth.mjs"),
+    generatedAuthSmoke(config),
+  );
+}
+
+function generatedDoctor(config: FangaBaseConfig): string {
+  const tools =
+    config.architecture.backend === "laravel"
+      ? ["node", "pnpm", "php", "composer"]
+      : ["node", "pnpm"];
+  return `import{spawnSync}from"node:child_process";import{readFileSync,existsSync}from"node:fs";const checks=[];for(const name of ${JSON.stringify(tools)}){const command=name==="node"?process.execPath:name;const result=spawnSync(command,["--version"],{encoding:"utf8",shell:process.platform==="win32"});checks.push({name,status:result.status===0?"PASS":"FAIL"});}try{const config=readFileSync("fangabase.config.yaml","utf8");if(!config.includes("version: 1"))throw new Error();checks.push({name:"configuration",status:"PASS"});}catch{checks.push({name:"configuration",status:"FAIL"});}checks.push({name:"environment",status:existsSync(".env")?"PASS":"WARNING",explanation:".env reste local et hors Git"});const status=checks.some(c=>c.status==="FAIL")?"FAIL":checks.some(c=>c.status==="WARNING")?"WARNING":"PASS";console.log(JSON.stringify({status,checks},null,2));if(status==="FAIL")process.exitCode=1;\n`;
+}
+
+function generatedAuthSmoke(config: FangaBaseConfig): string {
+  return `const production=(process.env.NODE_ENV??"").toLowerCase()==="production"||(process.env.APP_ENV??"").toLowerCase()==="production";if(production)throw new Error("smoke:auth refuse de s'exécuter en production");const origin=(process.env.FANGABASE_SMOKE_URL??"http://127.0.0.1:${config.architecture.backend === "laravel" ? "8000/api" : "3000/api"}").replace(/\\/$/,"");const email=\`smoke-\${Date.now()}-\${crypto.randomUUID()}@example.invalid\`;const password=\`Smoke!\${crypto.randomUUID()}aA1\`;let cookies={};async function call(path,method="GET",body){const headers={accept:"application/json"};if(body){headers["content-type"]="application/json";headers["x-fangabase-csrf"]=cookies.fangabase_csrf??"";}if(Object.keys(cookies).length)headers.cookie=Object.entries(cookies).map(([k,v])=>\`\${k}=\${v}\`).join("; ");const response=await fetch(origin+path,{method,headers,body:body?JSON.stringify(body):undefined});for(const value of response.headers.getSetCookie?.()??[]){const [pair]=value.split(";");const [key,...rest]=pair.split("=");cookies[key]=rest.join("=");}const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(\`\${method} \${path}: HTTP \${response.status} \${data?.error?.code??""}\`);return data;}await call("/health");const registered=await call("/auth/register","POST",{name:"Smoke Auth",email,password});const token=registered.verificationToken??registered.verification_token;if(!token)throw new Error("Jeton de vérification local absent; activez uniquement le fournisseur de test local");await call("/auth/email/verification/confirm","POST",{token});await call("/auth/login","POST",{email,password});await call("/auth/me");await call("/auth/refresh","POST",{});await call("/auth/logout","POST",{});const denied=await fetch(origin+"/auth/me",{headers:{cookie:Object.entries(cookies).map(([k,v])=>\`\${k}=\${v}\`).join("; ")}});if(denied.status!==401)throw new Error("La session reste utilisable après logout");console.log(JSON.stringify({status:"PASS",backend:${JSON.stringify(config.architecture.backend)},email:"utilisateur de test unique supprimable"}));\n`;
 }
 
 async function filterLaravelProviders(
@@ -530,7 +601,10 @@ async function writeNextWorkspace(
   - packages/*
 
 overrides:
+  brace-expansion: 5.0.9
+  js-yaml: 4.3.1
   minimatch@3.1.5: 10.2.5
+  nanoid: 3.3.17
   postcss: 8.5.18
   sharp: 0.35.0
 
@@ -849,13 +923,83 @@ async function writeDocs(
     `# ${config.product.name}\n\n${config.product.description}\n\nProjet headless généré par FangaBase. Aucun métier ni design officiel n'est imposé.\n\n## Installation\n\n\`\`\`sh\n${install}\n\`\`\`\n`,
   );
   await writeFile(
-    join(staging, "docs/getting-started.md"),
+    join(staging, "GETTING_STARTED.md"),
     `# Démarrage\n\nComplétez \`.env\` hors Git, installez, migrez, testez puis démarrez selon les commandes du manifeste de génération.\n`,
   );
   await writeFile(
-    join(staging, "docs/architecture.md"),
+    join(staging, "ARCHITECTURE.md"),
     `# Architecture\n\nProfil : \`${config.architecture.target}\`.\nBackend d'autorité : \`${config.architecture.backend}\`.\nFrontend : \`${config.architecture.frontend}\`.\nBase : \`${config.database.engine}\`.\n`,
   );
+  await writeFile(
+    join(staging, "NEXT_STEPS.md"),
+    `# Prochaines étapes\n\n1. Copiez \`.env.example\` vers \`.env\` sans le commiter.\n2. Lancez \`pnpm setup\`, \`pnpm doctor\` puis \`pnpm migrate\`.\n3. Démarrez les processus indiqués dans le README.\n4. Lancez \`pnpm smoke:auth\` en environnement local.\n5. Intégrez votre métier et votre design explicitement choisi.\n`,
+  );
+  await writeFile(
+    join(staging, "CONFIGURATION_SERVICES.md"),
+    serviceDocumentation(config),
+  );
+}
+
+function serviceDocumentation(config: FangaBaseConfig): string {
+  const sections = [
+    `# Configuration des services sélectionnés\n\nAucun secret ne doit être commité. Les callbacks utilisent l'origine réellement déployée.`,
+    serviceSection(
+      "Base de données",
+      config.database.provider,
+      ["DATABASE_URL"],
+      "Connexion et migrations persistantes.",
+    ),
+    serviceSection(
+      "E-mail",
+      config.email.provider,
+      ["MAIL_PROVIDER"],
+      "Envoi transactionnel via l'Outbox.",
+    ),
+    serviceSection(
+      "Stockage",
+      config.storage.provider,
+      [],
+      "Stockage privé des fichiers.",
+    ),
+  ];
+  for (const provider of config.payments.providers) {
+    const variables =
+      provider === "stripe"
+        ? ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"]
+        : provider === "fedapay"
+          ? ["FEDAPAY_SECRET_KEY", "FEDAPAY_WEBHOOK_SECRET"]
+          : provider === "orange_money_ml"
+            ? [
+                "ORANGE_MONEY_CLIENT_ID",
+                "ORANGE_MONEY_CLIENT_SECRET",
+                "ORANGE_MONEY_API_BASE_URL",
+              ]
+            : ["MONEROO_ENABLED"];
+    const status =
+      provider === "moneroo"
+        ? "NEEDS_PROVIDER_CONTRACT; sandbox non validée."
+        : provider === "orange_money_ml"
+          ? "Contrat marchand et UAT sandbox officielle requis."
+          : "Adaptateur inclus; accès marchand et UAT requis.";
+    sections.push(
+      serviceSection(
+        `Paiement ${provider}`,
+        status,
+        variables,
+        "Checkout, vérification serveur et webhooks signés lorsqu'ils sont contractuellement disponibles.",
+      ),
+    );
+  }
+  return `${sections.join("\n\n")}\n`;
+}
+
+function serviceSection(
+  title: string,
+  status: string,
+  variables: string[],
+  purpose: string,
+): string {
+  return `## ${title}\n\n- But : ${purpose}\n- Statut : ${status}\n- Variables : ${variables.length ? variables.map((item) => `\`${item}\``).join(", ") : "aucune variable distante"}\n- Source et endpoints : À confirmer dans le contrat officiel du fournisseur.\n- Absence de configuration : le service distant reste désactivé ou le doctor signale un avertissement.\n- Vérification : \`pnpm doctor\`, puis UAT sandbox avant production.\n- Sécurité : secrets au runtime, erreurs fournisseur nettoyées, callbacks HTTPS vérifiés.`;
 }
 
 async function validateGenerated(

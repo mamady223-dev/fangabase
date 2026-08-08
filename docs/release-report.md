@@ -1,5 +1,19 @@
 # Rapport de release candidate - 2026-07-26
 
+## Stabilisation finale de `0.3.0-rc.1`
+
+Décision locale : **PASS_WITH_WARNINGS, CI et UAT externes requises**.
+
+Le parcours distingue les prérequis Next.js et Laravel. La commande canonique est `git clone https://github.com/mamady223-dev/fangabase.git FangaBase`. Le CLI importe un brief déterministe par `--brief` et des documents produit Markdown contrôlés sans générer d’entités métier.
+
+Les projets disposent des guides et commandes post-génération uniformes. `CONFIGURATION_SERVICES.md` est construit uniquement depuis les services sélectionnés. Moneroo reste `NEEDS_PROVIDER_CONTRACT` et non validé en sandbox. Le smoke d’identité local refuse la production et n’ajoute aucun endpoint public.
+
+Résultats locaux : `docs:check`, format, lint, typecheck, tests JS/TS, builds et `release:check` verts; 72 tests CLI, 107 tests Laravel avec 667 assertions et 2 scénarios Playwright verts. Le scan ciblé ne trouve aucun secret réel. Le package RC contient 408 entrées et sa vérification croisée passe.
+
+Le tag `v0.3.0-rc.1` et la branche `stable` restent strictement conditionnés au succès de tous les workflows obligatoires du commit publié.
+
+L’audit pnpm ne signale plus aucune vulnérabilité haute ou critique après épinglage des versions corrigées de `brace-expansion`, `js-yaml` et `nanoid`; deux avis modérés restent documentaires au seuil de release.
+
 ## Préparation de `0.3.0-rc.1` — générateur ciblé
 
 Décision provisoire : **PASS_WITH_WARNINGS, CI requise**.

@@ -1,5 +1,13 @@
 # Journal des changements
 
+## Stabilisation finale de 0.3.0-rc.1
+
+- Ajoute `--brief` pour importer un bloc déterministe `yaml fangabase` validé par le schéma existant.
+- Ajoute l’import sûr `--product-docs` sans génération de métier.
+- Uniformise les commandes et guides post-génération selon le profil.
+- Corrige le clone canonique, les prérequis par profil et ajoute `pnpm docs:check`.
+- Épingle `brace-expansion`, `js-yaml` et `nanoid` aux correctifs disponibles; aucune alerte haute ou critique ne reste dans l’audit pnpm.
+
 ## 0.3.0-rc.1 - en préparation
 
 - Transformation du CLI en générateur atomique de projets indépendants avec

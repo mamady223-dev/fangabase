@@ -2,65 +2,46 @@
 
 > Version en préparation : `0.3.0-rc.1`.
 
-Orange Money Mali est disponible comme intégration facultative
-`orange_money_ml`. Elle reste désactivée sans sélection et exige un contrat
-marchand Orange Mali avant toute UAT réelle. Voir
-[`docs/payments/orange-money-mali.md`](docs/payments/orange-money-mali.md).
-
-FangaBase est headless et propose deux familles backend de même niveau :
-Next.js autonome (`cloud_vercel`, `vps_next`) ou Laravel
-(`vps_laravel`, `shared_laravel`, `hybrid`). Aucun chemin n'est recommandé par
-défaut : le choix dépend de l'hébergement et reste celui de l'étudiant.
-
-Le backend Next.js utilise PostgreSQL, `DATABASE_URL` poolée au runtime,
-`DATABASE_DIRECT_URL` pour les migrations et `SESSION_SECRET`. Neon et
-Supabase sont compatibles via leurs URLs PostgreSQL. Il ne requiert ni PHP, ni
-Composer, ni `FANGABASE_API_ORIGIN`. Le profil hybride conserve Laravel comme
-unique autorité et dirige les callbacks vers son API.
-
-FangaBase est un monorepo original pour d?marrer un SaaS, une marketplace, une plateforme de services ou un outil m?tier sur Vercel, VPS, h?bergement mutualis? ou architecture hybride.
+FangaBase est un générateur de socles applicatifs headless. Il produit un projet indépendant avec une seule autorité backend : Next.js autonome (`cloud_vercel`, `vps_next`) ou Laravel (`vps_laravel`, `shared_laravel`, `hybrid`). Il n’impose ni métier, ni thème, ni identité graphique.
 
 ## Démarrage
 
-Prérequis : Node 22+, pnpm 11+, PHP 8.2+ et Composer 2.8+.
+Prérequis communs : Git, Node.js 22+ et pnpm 11+.
+
+- Profils Next.js : aucun PHP ni Composer requis.
+- Profils Laravel et hybrides : PHP 8.2+ et Composer 2.8+ requis.
+- Docker reste facultatif et n’est jamais requis en hébergement mutualisé.
 
 ```sh
-git clone https://github.com/mamady223-dev/fangabase.git
+git clone https://github.com/mamady223-dev/fangabase.git FangaBase
 cd FangaBase
-pnpm install
+pnpm install --frozen-lockfile
 pnpm create:project
 ```
 
-FangaBase est le dépôt source du générateur. La commande crée une application
-indépendante dans un autre dossier, avec uniquement l'architecture choisie. En
-CI, utilisez `pnpm create:project --config <fichier.yaml> --destination
-<chemin> --dry-run --json`, puis relancez avec `--yes` pour confirmer
-explicitement l'écriture. Une destination non vide est refusée par défaut.
-`pnpm install` ne lance jamais de questionnaire.
-
-Docker est facultatif pour le développement courant et n'est jamais requis pour le profil mutualisé. Copiez `apps/server/.env.example` vers `apps/server/.env` uniquement pour un démarrage local, générez une clé locale avec `php apps/server/artisan key:generate`, et ne commitez jamais ce fichier.
-
-La configuration canonique est `fangabase.config.yaml`. Les contrats communs sont dans `packages/contracts`; le code m?tier TypeScript et PHP reste s?par?.
-
-Consultez `docs/progress.md` pour l'état factuel et `docs/getting-started/quickstart.md` pour le parcours pédagogique complet.
-
-## Release candidate et licence
-
-La version préparée est `0.1.0-rc.1`. FangaBase est distribué sous la [licence commerciale propriétaire](LICENSE), dont Mamady Traoré est l'auteur et le titulaire légal des droits, en qualité de CEO de Motechnova. Cette qualité professionnelle ne fait pas de Motechnova un titulaire juridique distinct.
-
-Les étudiants autorisés peuvent utiliser et modifier FangaBase afin de créer et commercialiser leurs propres applications. Ils ne peuvent pas vendre, revendre, partager ou redistribuer FangaBase, ni l'intégrer à un template, kit, générateur ou produit concurrent destiné à des tiers. Les dépendances tierces conservent leurs propres licences. La licence du dépôt ne constitue pas un avis juridique professionnel.
-
-Créer et vérifier l'archive autorisée :
+Le générateur accepte aussi un fichier déterministe :
 
 ```sh
+pnpm create:project --config fangabase.config.example.yaml --destination ../mon-projet --dry-run --json
+pnpm create:project --config fangabase.config.example.yaml --destination ../mon-projet --yes
+```
+
+Un brief produit conforme peut être fourni avec `--brief FANGABASE_INPUT.md`. Il doit contenir exactement un bloc clôturé `yaml fangabase`, validé par le même schéma. `--product-docs <dossier>` copie uniquement des fichiers Markdown sûrs dans `docs/product`; le générateur ne déduit aucun modèle métier de ces documents.
+
+La destination doit être extérieure au dépôt source. Elle est construite dans un dossier temporaire, validée, inventoriée avec SHA-256 puis déplacée atomiquement. `.git`, dépendances installées, builds, fichiers `.env` locaux et secrets sont exclus.
+
+Chaque projet généré expose `pnpm setup`, `pnpm doctor`, `pnpm migrate`, `pnpm dev`, `pnpm test`, `pnpm build` et `pnpm smoke:auth` lorsque l’identité est disponible. Consultez [le démarrage rapide](docs/getting-started/quickstart.md) et [les profils](docs/architecture/profiles.md).
+
+## Services et paiements
+
+Seuls les services sélectionnés sont documentés dans le projet généré. Aucun endpoint fournisseur n’est inventé. Moneroo reste `NEEDS_PROVIDER_CONTRACT` et n’est pas validé en sandbox. Orange Money Mali reste désactivé sans contrat marchand ni UAT officielle.
+
+## Licence et release
+
+FangaBase est distribué sous la [licence commerciale propriétaire](LICENSE). Mamady Traoré est l’auteur et le titulaire légal des droits, en qualité de CEO de Motechnova, sans faire de Motechnova un titulaire juridique distinct. Les étudiants autorisés peuvent créer et commercialiser leurs applications; ils ne peuvent ni partager, ni redistribuer, ni revendre FangaBase. Les dépendances tierces conservent leurs licences.
+
+```sh
+pnpm release:check
 pnpm release:package
 pnpm release:verify
 ```
-
-La procédure complète est dans `docs/release/packaging.md`.
-
-## Exploitation headless
-
-Le choix Cloud/Vercel, VPS, mutualisé ou hybride génère uniquement les artefacts compatibles dans `deployment/`. Consultez `docs/architecture/profiles.md`, `docs/operations/smoke-tests.md` et `docs/operations/backup-restore.md`. Les valeurs `example.invalid` sont volontairement non fonctionnelles : injectez les domaines et secrets au runtime sans les enregistrer dans Git.
-
-Pour raccorder le frontend choisi par l'étudiant sans adopter de thème commun, consultez `docs/frontend/integration.md` et `docs/frontend/origin-matrix.md`. Stitch, Banani, les maquettes, l'IA explicitement demandée et les frontends personnalisés restent des workflows facultatifs.

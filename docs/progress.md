@@ -1,5 +1,17 @@
 # Progression FangaBase
 
+## Stabilisation du générateur `0.3.0-rc.1`
+
+État : **PASS local, CI requise avant publication**.
+
+Le générateur accepte une configuration YAML ou un brief Markdown contenant exactement un bloc `yaml fangabase`, validé par le schéma existant. Les documents produit facultatifs sont limités à des Markdown sûrs et copiés dans `docs/product`; aucun modèle métier n’est déduit.
+
+Les sept profils génèrent les guides racine attendus et les commandes uniformes `setup`, `doctor`, `migrate`, `dev`, `test`, `build` et `smoke:auth` selon leur architecture. La documentation des services ne contient que les choix effectifs et n’invente aucun contrat fournisseur. La gate `docs:check` vérifie la version, le clone, les prérequis par profil et l’encodage des documents maintenus. Les 72 tests CLI sont verts.
+
+Les gates locales passent : 72 tests CLI, 107 tests Laravel avec 667 assertions, 2 scénarios Playwright, lint, typecheck, tests JS/TS, builds, `release:check`, audit sans avis haut/critique, scan de secrets et package vérifié.
+
+Prochain bloc exact : publier le commit sur `origin/main`, attendre tous les workflows obligatoires, puis créer `v0.3.0-rc.1` et la branche `stable` sur le même commit uniquement si la CI est entièrement verte.
+
 ## Générateur de projets ciblés
 
 État : **PASS local, validation CI requise** pour `0.3.0-rc.1`.

@@ -25,6 +25,7 @@ import { runSmoke } from "./smoke.js";
 import { backup, restore } from "./recovery.js";
 import { generateProject, planProject } from "./project-generator.js";
 import { runDoctor } from "./doctor.js";
+import { readBrief } from "./brief.js";
 
 const generatorVersion = "0.3.0-rc.1";
 
@@ -134,6 +135,8 @@ program
   });
 program
   .command("create")
+  .option("--brief <path>", "brief Markdown contenant un bloc yaml fangabase")
+  .option("--product-docs <path>", "dossier de documents produit Markdown")
   .option("--destination <path>", "nouveau dossier indépendant")
   .option(
     "--force",
@@ -145,7 +148,11 @@ program
     options = { ...command.optsWithGlobals(), ...options };
     const invocationDirectory = process.env.INIT_CWD ?? process.cwd();
     let config;
-    if (options.config) {
+    if (options.config && options.brief)
+      throw new Error("Utilisez soit --config, soit --brief, jamais les deux.");
+    if (options.brief) {
+      config = await readBrief(resolve(invocationDirectory, options.brief));
+    } else if (options.config) {
       const source = resolve(invocationDirectory, options.config);
       const result = configSchema.safeParse(
         parse(await readFile(source, "utf8")),
@@ -194,6 +201,9 @@ program
       force: options.force,
       confirmed,
       dryRun: options.dryRun,
+      ...(options.productDocs
+        ? { productDocs: resolve(invocationDirectory, options.productDocs) }
+        : {}),
     });
     process.stdout.write(
       options.json

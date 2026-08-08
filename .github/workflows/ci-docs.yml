@@ -10,3 +10,9 @@ jobs:
         run: '! git grep -nE "production-ready|TODO|PLACEHOLDER" -- README.md docs apps packages tools'
       - name: Required documents
         run: test -f docs/progress.md && test -f docs/teaching/glossary.md && test -f THIRD_PARTY_NOTICES.md
+      - uses: pnpm/action-setup@4d6ce2a4f0d3f8be5dca7ecb6f2b1f8f58e9a9e0 # v4
+        with: { version: 11.9.0 }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm docs:check
