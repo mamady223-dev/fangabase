@@ -2,6 +2,8 @@
 
 ## Stabilisation du générateur `0.3.0-rc.1`
 
+Correctif post-RC : le harnais de conformité ne choisit plus un port pseudo-aléatoire et ne masque plus la sortie de `artisan serve`. Il désactive le rechargement automatique, détecte les arrêts prématurés et restitue les logs Laravel sans réessayer ni affaiblir un scénario métier.
+
 État : **PASS local, CI requise avant publication**.
 
 Le générateur accepte une configuration YAML ou un brief Markdown contenant exactement un bloc `yaml fangabase`, validé par le schéma existant. Les documents produit facultatifs sont limités à des Markdown sûrs et copiés dans `docs/product`; aucun modèle métier n’est déduit.

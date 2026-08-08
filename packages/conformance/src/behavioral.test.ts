@@ -44,11 +44,21 @@ class Client {
       headers.cookie = [...this.cookies]
         .map(([name, value]) => `${name}=${value}`)
         .join("; ");
-    const response = await fetch(`${this.origin}/api${path}`, {
-      method,
-      headers,
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${this.origin}/api${path}`, {
+        method,
+        headers,
+        ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      });
+    } catch (error) {
+      const diagnostics =
+        this.flavor === "laravel" ? `\n${laravelFailure()}` : "";
+      throw new Error(
+        `${method} ${path}: ${error instanceof Error ? error.message : String(error)}${diagnostics}`,
+        { cause: error },
+      );
+    }
     for (const cookie of response.headers.getSetCookie()) {
       const [pair] = cookie.split(";", 1);
       const separator = pair!.indexOf("=");
@@ -82,6 +92,7 @@ class Client {
 const root = resolve(import.meta.dirname, "../../..");
 const sqlite = resolve(root, ".tmp/conformance.sqlite");
 let laravel: ChildProcess;
+let laravelLogs = "";
 let nextServer: Server;
 let laravelOrigin = "";
 let nextOrigin = "";
@@ -112,14 +123,28 @@ beforeAll(async () => {
   });
   if (migrated.status !== 0)
     throw new Error(`LARAVEL_MIGRATION_FAILED:${migrated.stderr}`);
-  const laravelPort = 18080 + Math.floor(Math.random() * 1000);
+  const laravelPort = await availablePort();
   laravelOrigin = `http://127.0.0.1:${laravelPort}`;
   laravel = spawn(
     "php",
-    ["artisan", "serve", "--host=127.0.0.1", `--port=${laravelPort}`],
-    { cwd: resolve(root, "apps/server"), env, stdio: "ignore" },
+    [
+      "artisan",
+      "serve",
+      "--host=127.0.0.1",
+      `--port=${laravelPort}`,
+      "--tries=1",
+      "--no-reload",
+      "--no-ansi",
+    ],
+    {
+      cwd: resolve(root, "apps/server"),
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
   );
-  await ready(`${laravelOrigin}/api/health`);
+  captureLaravelOutput(laravel.stdout);
+  captureLaravelOutput(laravel.stderr);
+  await ready(`${laravelOrigin}/api/health`, () => laravelFailure());
 
   nextStore = process.env.DATABASE_URL
     ? new PostgresStore(
@@ -675,8 +700,10 @@ function errorCode(result: Result): string {
   );
 }
 
-async function ready(url: string): Promise<void> {
+async function ready(url: string, diagnostics: () => string): Promise<void> {
   for (let attempt = 0; attempt < 80; attempt += 1) {
+    if (laravel.exitCode !== null || laravel.signalCode !== null)
+      throw new Error(`SERVER_EXITED:${url}\n${diagnostics()}`);
     try {
       if ((await fetch(url)).ok) return;
     } catch {
@@ -684,5 +711,34 @@ async function ready(url: string): Promise<void> {
     }
     await new Promise((resolveWait) => setTimeout(resolveWait, 100));
   }
-  throw new Error(`SERVER_NOT_READY:${url}`);
+  throw new Error(`SERVER_NOT_READY:${url}\n${diagnostics()}`);
+}
+
+async function availablePort(): Promise<number> {
+  const probe = createServer();
+  await new Promise<void>((resolveListen, rejectListen) => {
+    probe.once("error", rejectListen);
+    probe.listen(0, "127.0.0.1", resolveListen);
+  });
+  const address = probe.address();
+  if (!address || typeof address === "string") {
+    probe.close();
+    throw new Error("LARAVEL_PORT_ALLOCATION_FAILED");
+  }
+  await new Promise<void>((resolveClose, rejectClose) =>
+    probe.close((error) => (error ? rejectClose(error) : resolveClose())),
+  );
+  return address.port;
+}
+
+function captureLaravelOutput(stream: NodeJS.ReadableStream | null): void {
+  stream?.on("data", (chunk: Buffer | string) => {
+    laravelLogs = `${laravelLogs}${chunk.toString()}`.slice(-16_384);
+  });
+}
+
+function laravelFailure(): string {
+  const state = `Laravel process pid=${laravel.pid ?? "unknown"}, exit=${laravel.exitCode ?? "running"}, signal=${laravel.signalCode ?? "none"}`;
+  const logs = laravelLogs.trim() || "Aucune sortie Laravel capturée.";
+  return `${state}\n--- Laravel output ---\n${logs}`;
 }

@@ -2,6 +2,8 @@
 
 ## Stabilisation finale de 0.3.0-rc.1
 
+- Stabilise le harnais de conformité Laravel avec `--no-reload`, un port système libre et des diagnostics de processus complets en cas de rupture réseau.
+
 - Ajoute `--brief` pour importer un bloc déterministe `yaml fangabase` validé par le schéma existant.
 - Ajoute l’import sûr `--product-docs` sans génération de métier.
 - Uniformise les commandes et guides post-génération selon le profil.
