@@ -4,6 +4,8 @@
 
 Correctif post-RC : le harnais de conformité ne choisit plus un port pseudo-aléatoire et ne masque plus la sortie de `artisan serve`. Il désactive le rechargement automatique, détecte les arrêts prématurés et restitue les logs Laravel sans réessayer ni affaiblir un scénario métier.
 
+Les diagnostics de la relance `v0.3.0-rc.2` ont isolé une réutilisation de socket keep-alive après fermeture par le serveur PHP de développement. Le client de conformité demande désormais `Connection: close`; ce réglage reste strictement limité au harnais local et CI.
+
 État : **PASS local, CI requise avant publication**.
 
 Le générateur accepte une configuration YAML ou un brief Markdown contenant exactement un bloc `yaml fangabase`, validé par le schéma existant. Les documents produit facultatifs sont limités à des Markdown sûrs et copiés dans `docs/product`; aucun modèle métier n’est déduit.

@@ -36,6 +36,7 @@ class Client {
   ): Promise<Result> {
     const headers: Record<string, string> = {
       accept: "application/json",
+      connection: "close",
       "x-fangabase-conformance": "1",
       ...extraHeaders,
     };

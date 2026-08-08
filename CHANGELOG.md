@@ -3,6 +3,7 @@
 ## Stabilisation finale de 0.3.0-rc.1
 
 - Stabilise le harnais de conformité Laravel avec `--no-reload`, un port système libre et des diagnostics de processus complets en cas de rupture réseau.
+- Désactive la réutilisation keep-alive dans le client de conformité pour respecter le comportement de fermeture du serveur PHP de développement.
 
 - Ajoute `--brief` pour importer un bloc déterministe `yaml fangabase` validé par le schéma existant.
 - Ajoute l’import sûr `--product-docs` sans génération de métier.

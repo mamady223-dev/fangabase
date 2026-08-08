@@ -4,6 +4,8 @@
 
 Correctif post-RC : les exécutions supplémentaires sur le tag et `stable` ont révélé une fermeture intermittente du serveur Laravel de test. Le harnais utilise désormais un port libre fourni par le système, lance `artisan serve --no-reload --tries=1`, capture sa sortie et expose son état exact en cas d’échec. Aucun retry HTTP ni assouplissement de scénario n’a été ajouté.
 
+Les logs de `v0.3.0-rc.2` ont confirmé que Laravel restait actif et traitait la requête pendant la fermeture de socket. Le client Node ne réutilise plus les connexions du serveur PHP de développement (`Connection: close`). Cette adaptation ne concerne ni les contrats HTTP de production ni le code métier.
+
 Décision locale : **PASS_WITH_WARNINGS, CI et UAT externes requises**.
 
 Le parcours distingue les prérequis Next.js et Laravel. La commande canonique est `git clone https://github.com/mamady223-dev/fangabase.git FangaBase`. Le CLI importe un brief déterministe par `--brief` et des documents produit Markdown contrôlés sans générer d’entités métier.
