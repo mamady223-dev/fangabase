@@ -10,7 +10,7 @@ La sortie possède un unique environnement racine, ne contient aucun `apps/serve
 
 UAT locale du profil VPS : installations verrouillées vertes ; 13 migrations SQLite ; 96 tests Laravel et 641 assertions ; 1 test React ; typecheck ; build Vite de 777 modules avec manifeste ; doctor ciblé ; smoke auth complet et nettoyage local verts. SSR reste désactivé et aucun serveur Node permanent n’est requis en production.
 
-Gates du dépôt : 104 tests CLI, 107 tests Laravel et 667 assertions, toutes les suites JS/TS, format, lint, typecheck, builds, 2 scénarios E2E et `release:check` verts. L’archive vérifiée `fangabase-0.4.0-rc.1.zip` contient 439 entrées ; son SHA-256 final est publié dans le rapport d’exécution.
+Gates du dépôt : 104 tests CLI, 107 tests Laravel et 667 assertions, toutes les suites JS/TS, format, lint, typecheck, builds, 2 scénarios E2E et `release:check` verts. L’archive vérifiée `fangabase-0.4.0-rc.1.zip` contient 440 entrées ; son SHA-256 final est publié dans le rapport d’exécution.
 
 Avertissements connus : Google OAuth, SMTP/Resend/Brevo et fournisseurs de paiement exigent des comptes réels ; Moneroo reste `NEEDS_PROVIDER_CONTRACT` ; Orange Money Mali exige contrat marchand et sandbox officielle ; Docker/TLS/VPS et contraintes propres à chaque hébergeur mutualisé restent des UAT externes. L’audit Composer conserve l’avis faible déjà hérité de `firebase/php-jwt` via `google/apiclient`, sans avis haut ou critique.
 

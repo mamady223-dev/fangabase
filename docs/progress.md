@@ -10,7 +10,7 @@ Le questionnaire commun expose exactement cinq choix VPS et deux choix mutualis�
 
 Première UAT générée : installations Composer/pnpm vertes, migration SQLite des 13 migrations verte, 96 tests Laravel (641 assertions), 1 test React, typecheck, build Vite (777 modules), doctor ciblé et smoke auth avec nettoyage verts. PostgreSQL/MySQL restent couverts par les gates Laravel existantes et la CI.
 
-Gates finales : 104 tests CLI, 107 tests Laravel (667 assertions), toutes les suites JS/TS, format, lint, typecheck, builds, 2 E2E et `release:check` verts. Le package vérifié contient 439 entrées, dont les templates Inertia ; son SHA-256 final est publié dans le rapport d’exécution.
+Gates finales : 104 tests CLI, 107 tests Laravel (667 assertions), toutes les suites JS/TS, format, lint, typecheck, builds, 2 E2E et `release:check` verts. Le package vérifié contient 440 entrées, dont les templates Inertia ; son SHA-256 final est publié dans le rapport d’exécution.
 
 Prochain bloc exact : créer le commit dédié, pousser `main`, puis vérifier les workflows obligatoires sans tag ni modification de `stable`.
 

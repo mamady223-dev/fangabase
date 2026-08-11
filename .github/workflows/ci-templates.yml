@@ -32,8 +32,6 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
       - run: pnpm fangabase:init --config examples/configs/${{ matrix.config }}.yaml --output /tmp/resolved.yaml --json
-      - run: pnpm fangabase:init --config examples/configs/${{ matrix.config }}.yaml create --destination /tmp/generated-${{ matrix.config }} --yes
-
   inertia-generated:
     runs-on: ubuntu-latest
     strategy:

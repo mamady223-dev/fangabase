@@ -10,7 +10,7 @@
     "dev": "concurrently --kill-others-on-fail -n server,vite,worker \"php artisan serve\" \"vite\" \"php artisan fangabase:mail-worker\"",
     "lint": "tsc --noEmit && composer lint",
     "typecheck": "tsc --noEmit",
-    "test": "composer test && vitest run",
+    "test": "composer test && vitest run --config vitest.config.ts",
     "build": "vite build",
     "smoke:auth": "node tools/smoke-auth.mjs"
   },
