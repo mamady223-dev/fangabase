@@ -15,3 +15,5 @@ Les secrets OAuth, e-mail, paiement et stockage restent exclusivement côté ser
 Le contrat machine est dans `packages/contracts/openapi/openapi.yaml`. Les routes réellement exposées sont implémentées dans `apps/server/routes/api.php` et `packages/backend-next/src/router.ts`. Les webhooks sont réservés aux fournisseurs. Les fichiers restent privés.
 
 Les interfaces sous `examples/frontend-pages` sont des démonstrations facultatives, jamais le design officiel de FangaBase.
+
+Le projet généré contient uniquement le workflow choisi dans `docs/design/` : un README neutre pour `headless`, le guide Stitch, le guide Banani classé UAT externe, ou le guide d’import de maquettes/frontend fourni. Les autres workflows sont absents. Leur activation intervient seulement après setup, doctor, migrations, tests, build et smoke auth verts.

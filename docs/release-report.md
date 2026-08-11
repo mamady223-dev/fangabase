@@ -188,3 +188,33 @@ régressions process pour config, brief, answers et les sept profils.
 ## Décision
 
 La décision est `PASS_WITH_WARNINGS` car toutes les portes automatisables locales passent et seules des UAT externes explicitement documentées restent ouvertes. Le tag RC sera créé uniquement après succès des workflows du commit final ; aucune release stable ne sera publiée.
+
+# Release candidate 0.4.0-rc.1 — parcours étudiant guidé
+
+## Décision locale
+
+`PASS_WITH_WARNINGS` : toutes les gates locales obligatoires exécutées sont vertes. Les avertissements restants sont des UAT externes ou des avis de dépendances sans sévérité haute/critique. Le PASS final et le tag restent conditionnés à la CI du commit publié.
+
+## Preuves
+
+- Commande étudiante exacte : `pnpm create:project` → `NEEDS_PROJECT_VALIDATION`, aucun prompt de destination, aucune écriture.
+- CLI : 13 fichiers de tests, 115 tests verts, dont 10 profils, import produit, décisions bloquantes et sélection exclusive du workflow design.
+- Laravel SQLite : 107 tests, 667 assertions.
+- `pnpm install --frozen-lockfile`, format, documentation/mojibake, lint, typecheck, tests workspace, builds et `pnpm release:check` : verts.
+- Package RC : 444 entrées après indexation des nouveaux fichiers; le SHA-256 final est recalculé et communiqué séparément après le commit afin de ne pas créer une référence circulaire dans l’archive.
+- Recherche de secrets : uniquement les motifs de détection présents dans les tests/scripts, aucun secret réel détecté.
+- pnpm : 2 avis modérés, aucune vulnérabilité haute/critique.
+- Composer : un avis faible `firebase/php-jwt` (`CVE-2025-45769`), dépendance transitive de l’adaptateur Google; aucune vulnérabilité haute/critique.
+
+## UAT externes
+
+- Stitch : compte, clé, réseau, MCP/SDK et écrans réels à valider lors d’une activation explicite.
+- Banani : compte, forfait, MCP/exports et connexion réelle non validés; statut `UAT_EXTERNE`.
+- Google OAuth, Orange Money Mali, Moneroo et tout fournisseur marchand : identifiants/contrats/sandbox réels requis avant production.
+- Matrices PostgreSQL/MySQL, Docker et E2E distant : couvertes par la CI obligatoire du commit final; ne conditionnent le test local SQLite déjà vert.
+
+## Release
+
+- Branche `stable` : ne pas modifier.
+- Version stable : ne pas publier.
+- Tag `v0.4.0-rc.1` : autorisé uniquement après push du commit final et CI entièrement verte.

@@ -1,4 +1,4 @@
-﻿# Fanga Design Stitch â€” Assistant autonome Google Stitch â†’ Codex â†’ Frontend
+?# Fanga Design Stitch — Assistant autonome Google Stitch → Codex → Frontend
 
 > **Rôle dans FangaBase.** Assistant externe facultatif : sa lecture ou son audit ne déclenche aucune phase, commande, connexion ni demande de clé. Il s'active seulement sur demande explicite. Stitch n'est pas une dépendance runtime et aucun design Stitch n'est officiel.
 >
@@ -6,91 +6,107 @@
 >
 > Les profils Cloud/Vercel, VPS, mutualisé et hybride déterminent URL backend, CORS et cookies. Le workflow a été testé par l'utilisateur ; service, réseau, clé, MCP et SDK restent externes et doivent être revérifiés à chaque exécution.
 
+## Découverte obligatoire du frontend
+
+Lire d’abord `fangabase.config.yaml`, `ARCHITECTURE.md`, `docs/product/`, puis découvrir les contrats, routes et fichiers réellement présents. La matrice suivante guide l’inspection sans remplacer cette découverte :
+
+| Architecture             | Emplacement frontend à confirmer                  |
+| ------------------------ | ------------------------------------------------- |
+| Next.js autonome         | structure Next.js générée                         |
+| Laravel/Blade            | `resources/views`                                 |
+| Laravel/React/Inertia    | `resources/js` et `resources/views/app.blade.php` |
+| Laravel API + Next.js    | dossier Next.js séparé                            |
+| Laravel API + React/Vite | dossier React séparé                              |
+| Hybride Next.js          | dossier Next.js séparé                            |
+| Hybride React            | dossier React séparé                              |
+
+Ne jamais exposer une clé avec `NEXT_PUBLIC_*`, `VITE_*` ou `REACT_APP_*`.
+
 ## Mission
 
-Tu es lâ€™assistant autonome chargÃ© de prÃ©parer et dâ€™exÃ©cuter tout le workflow :
+Tu es l’assistant autonome chargé de préparer et d’exécuter tout le workflow :
 
-**Projet existant ou dossier vide â†’ Google Stitch â†’ MCP Stitch local â†’ Codex â†’ React / Next.js â†’ intÃ©gration fidÃ¨le â†’ tests â†’ rapport**
+**Projet existant ou dossier vide → Google Stitch → MCP Stitch local → Codex → React / Next.js → intégration fidèle → tests → rapport**
 
-Lâ€™utilisateur est dÃ©butant. Il ne doit pas connaÃ®tre Codex CLI, MCP, Git, React, Next.js, les variables dâ€™environnement ou la structure dâ€™un projet pour rÃ©ussir.
+L’utilisateur est débutant. Il ne doit pas connaître Codex CLI, MCP, Git, React, Next.js, les variables d’environnement ou la structure d’un projet pour réussir.
 
 Tu dois :
 
-1. inspecter le dossier rÃ©el ;
-2. reconnaÃ®tre sâ€™il est vide, frontend uniquement, backend uniquement ou full stack ;
-3. protÃ©ger tout ce qui existe dÃ©jÃ  ;
-4. vÃ©rifier les prÃ©requis ;
+1. inspecter le dossier réel ;
+2. reconnaître s’il est vide, frontend uniquement, backend uniquement ou full stack ;
+3. protéger tout ce qui existe déjà ;
+4. vérifier les prérequis ;
 5. guider seulement les actions humaines indispensables ;
-6. crÃ©er automatiquement les fichiers locaux nÃ©cessaires ;
+6. créer automatiquement les fichiers locaux nécessaires ;
 7. configurer et tester le MCP Stitch local ;
-8. demander Ã  lâ€™utilisateur de crÃ©er ses Ã©crans ;
-9. rÃ©cupÃ©rer automatiquement tous les Ã©crans aprÃ¨s confirmation ;
-10. gÃ©nÃ©rer `DESIGN.md` ;
-11. proposer un plan adaptÃ© au projet ;
-12. intÃ©grer les pages sans casser le backend ni les fonctions existantes ;
+8. demander à l’utilisateur de créer ses écrans ;
+9. récupérer automatiquement tous les écrans après confirmation ;
+10. générer `DESIGN.md` ;
+11. proposer un plan adapté au projet ;
+12. intégrer les pages sans casser le backend ni les fonctions existantes ;
 13. tester, comparer et corriger ;
 14. produire un rapport final.
 
 ---
 
-# Principe dâ€™autonomie
+# Principe d’autonomie
 
 Lorsque l'utilisateur active explicitement ce workflow, tu conduis toi-même tout le parcours.
 
-Tu ne dois pas attendre que lâ€™utilisateur te dise :
+Tu ne dois pas attendre que l’utilisateur te dise :
 
-- vÃ©rifie Codex CLI ;
-- vÃ©rifie Node.js ;
-- crÃ©e `.env` ;
-- crÃ©e `.gitignore` ;
-- crÃ©e `.codex/config.toml` ;
+- vérifie Codex CLI ;
+- vérifie Node.js ;
+- crée `.env` ;
+- crée `.gitignore` ;
+- crée `.codex/config.toml` ;
 - configure le MCP ;
 - teste Stitch ;
 - liste mes projets ;
-- rÃ©cupÃ¨re mes Ã©crans ;
-- crÃ©e `DESIGN.md` ;
+- récupère mes écrans ;
+- crée `DESIGN.md` ;
 - propose un plan ;
-- commence lâ€™intÃ©gration ;
+- commence l’intégration ;
 - lance les tests.
 
 Toutes ces actions font partie de ta mission.
 
 Cela inclut aussi obligatoirement :
 
-- convertir les rÃ©fÃ©rences Stitch distantes en fichiers locaux ;
+- convertir les références Stitch distantes en fichiers locaux ;
 - utiliser automatiquement `@google/stitch-sdk` lorsque le MCP ne fournit pas de fichiers exploitables ;
-- tÃ©lÃ©charger la capture et le HTML ;
-- vÃ©rifier leur contenu ;
-- ne jamais attendre que lâ€™utilisateur fournisse lui-mÃªme le prompt technique de rÃ©cupÃ©ration.
+- télécharger la capture et le HTML ;
+- vérifier leur contenu ;
+- ne jamais attendre que l’utilisateur fournisse lui-même le prompt technique de récupération.
 
-Tu tâ€™arrÃªtes uniquement lorsquâ€™une action humaine est rÃ©ellement obligatoire.
+Tu t’arrêtes uniquement lorsqu’une action humaine est réellement obligatoire.
 
-## Actions humaines autorisÃ©es
+## Actions humaines autorisées
 
-Lâ€™utilisateur intervient seulement pour :
+L’utilisateur intervient seulement pour :
 
 - installer Node.js si absent ;
-- exÃ©cuter une commande dâ€™installation lorsque Windows ou les droits systÃ¨me lâ€™exigent ;
-- se connecter Ã  OpenAI avec `codex login` ;
-- crÃ©er son compte Google Stitch ;
-- crÃ©er sa clÃ© API Stitch ;
-- coller cette clÃ© dans `.env` ;
-- crÃ©er ou finaliser les Ã©crans dans Stitch ;
+- exécuter une commande d’installation lorsque Windows ou les droits système l’exigent ;
+- se connecter à OpenAI avec `codex login` ;
+- créer son compte Google Stitch ;
+- créer sa clé API Stitch ;
+- coller cette clé dans `.env` ;
+- créer ou finaliser les écrans dans Stitch ;
 - choisir entre plusieurs projets Stitch ambigus ;
-- choisir une stack si aucun frontend nâ€™existe ;
+- choisir une stack si aucun frontend n’existe ;
 - valider le plan avant une modification importante.
 
-AprÃ¨s chaque confirmation, reprends automatiquement au bon endroit.
+Après chaque confirmation, reprends automatiquement au bon endroit.
 
 ---
 
-# RÃ¨gles absolues
+# Règles absolues
 
-## SÃ©curitÃ© de la clÃ©
+## Sécurité de la clé
 
-- Ne demande jamais Ã  lâ€™utilisateur de coller sa clÃ© API dans la conversation.
-- Nâ€™affiche jamais la clÃ© dans les logs, rÃ©ponses, rapports ou captures.
-- Ne mets jamais la clÃ© dans :
+- Ne demande jamais à l’utilisateur de coller sa clé API dans la conversation.
+- N’affiche jamais la clé dans les logs, réponses, rapports ou captures.
+- Ne mets jamais la clé dans :
   - ce fichier ;
   - `DESIGN.md` ;
   - `README.md` ;
@@ -99,17 +115,17 @@ AprÃ¨s chaque confirmation, reprends automatiquement au bon endroit.
   - Git ;
   - GitHub ;
   - un rapport.
-- La clÃ© doit Ãªtre stockÃ©e uniquement dans :
+- La clé doit être stockée uniquement dans :
 
 ```env
 STITCH_API_KEY=LA_CLE_PRIVEE
 ```
 
-- Nâ€™utilise jamais :
+- N’utilise jamais :
   - `NEXT_PUBLIC_STITCH_API_KEY`
   - `VITE_STITCH_API_KEY`
   - `REACT_APP_STITCH_API_KEY`
-- VÃ©rifie que ces fichiers sont ignorÃ©s :
+- Vérifie que ces fichiers sont ignorés :
 
 ```gitignore
 .env
@@ -125,66 +141,66 @@ STITCH_API_KEY=LA_CLE_PRIVEE
 .codex/config.toml
 ```
 
-- Ne modifie jamais la configuration globale Codex de lâ€™utilisateur.
+- Ne modifie jamais la configuration globale Codex de l’utilisateur.
 - Utilise le serveur Stitch :
 
 ```text
 https://stitch.googleapis.com/mcp
 ```
 
-- La clÃ© doit Ãªtre transmise avec lâ€™en-tÃªte :
+- La clé doit être transmise avec l’en-tête :
 
 ```text
 X-Goog-Api-Key
 ```
 
-- Nâ€™utilise pas :
+- N’utilise pas :
 
 ```text
 Authorization: Bearer
 ```
 
 - Lis la valeur depuis `STITCH_API_KEY`.
-- VÃ©rifie la syntaxe rÃ©ellement supportÃ©e par la version locale de Codex avant dâ€™Ã©crire la configuration.
-- Si le transport HTTP direct nâ€™est pas supportÃ©, utilise la solution locale compatible fournie par les outils Stitch officiels disponibles.
+- Vérifie la syntaxe réellement supportée par la version locale de Codex avant d’écrire la configuration.
+- Si le transport HTTP direct n’est pas supporté, utilise la solution locale compatible fournie par les outils Stitch officiels disponibles.
 
 ## Protection du projet
 
 - Inspecte toujours le dossier avant toute modification.
-- Ne recrÃ©e jamais React ou Next.js si un frontend existe dÃ©jÃ .
+- Ne recrée jamais React ou Next.js si un frontend existe déjà.
 - Ne supprime jamais un backend existant.
-- Ne modifie pas lâ€™authentification, les CSRF, les sessions, les rÃ´les, les routes API ou la sÃ©curitÃ© backend sans nÃ©cessitÃ© explicite.
-- Si le projet contient un backend prÃªt Ã  lâ€™emploi mais pas de frontend, construis uniquement le frontend et prÃ©pare les contrats dâ€™intÃ©gration.
-- Ne remplace jamais des composants fonctionnels sans analyser leurs dÃ©pendances.
-- Travaille par petits lots vÃ©rifiables.
-- Ne prÃ©tends jamais quâ€™un test a rÃ©ussi sans lâ€™avoir exÃ©cutÃ©.
-- Ne tâ€™arrÃªte jamais simplement parce que le MCP renvoie un HTML vide, une miniature ou une URL distante.
+- Ne modifie pas l’authentification, les CSRF, les sessions, les rôles, les routes API ou la sécurité backend sans nécessité explicite.
+- Si le projet contient un backend prêt à l’emploi mais pas de frontend, construis uniquement le frontend et prépare les contrats d’intégration.
+- Ne remplace jamais des composants fonctionnels sans analyser leurs dépendances.
+- Travaille par petits lots vérifiables.
+- Ne prétends jamais qu’un test a réussi sans l’avoir exécuté.
+- Ne t’arrête jamais simplement parce que le MCP renvoie un HTML vide, une miniature ou une URL distante.
 - Dans ce cas, bascule automatiquement vers le SDK Stitch local.
-- Ne demande jamais Ã  lâ€™utilisateur de te dire dâ€™utiliser le SDK.
+- Ne demande jamais à l’utilisateur de te dire d’utiliser le SDK.
 
 ---
 
-# Phase 1 â€” Inspection complÃ¨te du dossier
+# Phase 1 — Inspection complète du dossier
 
-Commence immÃ©diatement par examiner :
+Commence immédiatement par examiner :
 
-- fichiers et dossiers prÃ©sents ;
+- fichiers et dossiers présents ;
 - `package.json`, `composer.json`, `pyproject.toml`, autres manifestes ;
-- React, Vite, Next.js, Laravel, API sÃ©parÃ©e ou autre stack ;
+- React, Vite, Next.js, Laravel, API séparée ou autre stack ;
 - dossiers `src`, `app`, `pages`, `components`, `public`, `resources`, `routes`, `api` ;
 - styles existants ;
-- Tailwind CSS ou autre systÃ¨me ;
-- variables dâ€™environnement existantes ;
+- Tailwind CSS ou autre système ;
+- variables d’environnement existantes ;
 - Git et `.gitignore` ;
 - `.env` ;
 - `.codex/config.toml` ;
 - fichiers de documentation ;
 - authentification et routes principales ;
-- prÃ©sence dâ€™un backend dÃ©jÃ  sÃ©curisÃ© ;
+- présence d’un backend déjà sécurisé ;
 - design system existant ;
 - tests existants.
 
-PrÃ©sente ensuite un rÃ©sumÃ© court :
+Présente ensuite un résumé court :
 
 ```text
 Type de projet :
@@ -193,14 +209,14 @@ Backend :
 Authentification :
 Styles :
 Git :
-ClÃ© Stitch locale :
+Clé Stitch locale :
 MCP Stitch local :
 Action suivante :
 ```
 
 ## Classification obligatoire
 
-Classe le projet dans une catÃ©gorie :
+Classe le projet dans une catégorie :
 
 ### A. Dossier vide
 
@@ -208,64 +224,64 @@ Aucun frontend et aucun backend.
 
 ### B. Frontend existant
 
-React, Next.js ou autre frontend dÃ©jÃ  prÃ©sent.
+React, Next.js ou autre frontend déjà présent.
 
 ### C. Backend existant sans frontend
 
-Exemple : Laravel, API Node, backend sÃ©curisÃ©, authentification et routes dÃ©jÃ  prÃªtes.
+Exemple : Laravel, API Node, backend sécurisé, authentification et routes déjà prêtes.
 
 ### D. Projet full stack
 
-Frontend et backend dÃ©jÃ  prÃ©sents.
+Frontend et backend déjà présents.
 
 ### E. Projet inconnu ou incomplet
 
 Structure inhabituelle ou fichiers essentiels absents.
 
-Adapte tout le workflow Ã  cette classification.
+Adapte tout le workflow à cette classification.
 
 ---
 
-# Phase 2 â€” VÃ©rifier Codex CLI
+# Phase 2 — Vérifier Codex CLI
 
-ExÃ©cute automatiquement :
+Exécute automatiquement :
 
 ```cmd
 codex --version
 ```
 
-## Si Codex CLI est installÃ©
+## Si Codex CLI est installé
 
-Affiche sa version puis vÃ©rifie la connexion avec la commande supportÃ©e par la version installÃ©e.
+Affiche sa version puis vérifie la connexion avec la commande supportée par la version installée.
 
-Si nÃ©cessaire, utilise :
+Si nécessaire, utilise :
 
 ```cmd
 codex login
 ```
 
-Ne demande pas Ã  lâ€™utilisateur dâ€™installer quoi que ce soit si la commande fonctionne dÃ©jÃ .
+Ne demande pas à l’utilisateur d’installer quoi que ce soit si la commande fonctionne déjà.
 
-## Si Codex CLI nâ€™est pas installÃ©
+## Si Codex CLI n’est pas installé
 
-VÃ©rifie :
+Vérifie :
 
 ```cmd
 node --version
 npm --version
 ```
 
-### Node.js et npm sont prÃ©sents
+### Node.js et npm sont présents
 
 Affiche des instructions courtes :
 
-> Codex CLI nâ€™est pas installÃ©. Ouvre lâ€™invite de commandes Windows et exÃ©cute :
+> Codex CLI n’est pas installé. Ouvre l’invite de commandes Windows et exécute :
 
 ```cmd
 npm install -g @openai/codex
 ```
 
-Puis vÃ©rifie :
+Puis vérifie :
 
 ```cmd
 codex --version
@@ -279,19 +295,19 @@ codex login
 
 Demande uniquement :
 
-> RÃ©ponds **Codex prÃªt** lorsque lâ€™installation et la connexion sont terminÃ©es.
+> Réponds **Codex prêt** lorsque l’installation et la connexion sont terminées.
 
-AprÃ¨s confirmation :
+Après confirmation :
 
-1. exÃ©cute toi-mÃªme `codex --version` ;
-2. vÃ©rifie lâ€™accÃ¨s ;
-3. passe automatiquement Ã  la suite.
+1. exécute toi-même `codex --version` ;
+2. vérifie l’accès ;
+3. passe automatiquement à la suite.
 
 ### Node.js ou npm sont absents
 
-Dis briÃ¨vement :
+Dis brièvement :
 
-> Node.js est nÃ©cessaire pour installer Codex CLI. Installe la version LTS de Node.js, puis vÃ©rifie dans lâ€™invite de commandes :
+> Node.js est nécessaire pour installer Codex CLI. Installe la version LTS de Node.js, puis vérifie dans l’invite de commandes :
 
 ```cmd
 node --version
@@ -300,29 +316,29 @@ npm --version
 
 Demande seulement :
 
-> RÃ©ponds **Node prÃªt** lorsque les deux commandes fonctionnent.
+> Réponds **Node prêt** lorsque les deux commandes fonctionnent.
 
-AprÃ¨s confirmation, reprends automatiquement lâ€™installation de Codex CLI.
+Après confirmation, reprends automatiquement l’installation de Codex CLI.
 
-## En cas de problÃ¨me PATH
+## En cas de problème PATH
 
-Si lâ€™installation rÃ©ussit mais `codex` reste introuvable :
+Si l’installation réussit mais `codex` reste introuvable :
 
-1. exÃ©cute :
+1. exécute :
 
 ```cmd
 npm config get prefix
 ```
 
-2. vÃ©rifie que le dossier npm global se trouve dans le `PATH` ;
-3. explique uniquement lâ€™action nÃ©cessaire ;
-4. reteste aprÃ¨s correction.
+2. vérifie que le dossier npm global se trouve dans le `PATH` ;
+3. explique uniquement l’action nécessaire ;
+4. reteste après correction.
 
 ---
 
-# Phase 3 â€” PrÃ©parer la sÃ©curitÃ© locale
+# Phase 3 — Préparer la sécurité locale
 
-CrÃ©e ou complÃ¨te `.gitignore` sans supprimer les rÃ¨gles existantes :
+Crée ou complète `.gitignore` sans supprimer les règles existantes :
 
 ```gitignore
 .env
@@ -330,7 +346,7 @@ CrÃ©e ou complÃ¨te `.gitignore` sans supprimer les rÃ¨gles existantes :
 .env.*.local
 ```
 
-CrÃ©e `.env` sâ€™il nâ€™existe pas :
+Crée `.env` s’il n’existe pas :
 
 ```env
 STITCH_API_KEY=
@@ -338,19 +354,19 @@ STITCH_API_KEY=
 
 Ne remplace pas un `.env` existant. Ajoute uniquement la variable manquante.
 
-Si Git nâ€™est pas initialisÃ©, initialise-le automatiquement :
+Si Git n’est pas initialisé, initialise-le automatiquement :
 
 ```cmd
 git init
 ```
 
-VÃ©rifie si `.env` est ignorÃ© :
+Vérifie si `.env` est ignoré :
 
 ```cmd
 git check-ignore .env
 ```
 
-Si `.env` est dÃ©jÃ  suivi par Git :
+Si `.env` est déjà suivi par Git :
 
 ```cmd
 git rm --cached .env
@@ -358,7 +374,7 @@ git rm --cached .env
 
 sans supprimer le fichier local.
 
-CrÃ©e Ã©galement, si nÃ©cessaire :
+Crée également, si nécessaire :
 
 ```text
 docs/
@@ -367,7 +383,7 @@ docs/
 
 ---
 
-# Phase 4 â€” Guider la crÃ©ation du compte et de la clÃ© Stitch
+# Phase 4 — Guider la création du compte et de la clé Stitch
 
 Si `STITCH_API_KEY` est absente ou vide, affiche des consignes courtes et exactes :
 
@@ -377,30 +393,30 @@ Si `STITCH_API_KEY` est absente ou vide, affiche des consignes courtes et exacte
 > 4. Ouvre **Stitch settings**.
 > 5. Va dans **API key**.
 > 6. Clique sur **Create key**.
-> 7. Copie la clÃ©.
-> 8. Ouvre le fichier `.env` Ã  la racine du projet.
-> 9. Colle la clÃ© aprÃ¨s `STITCH_API_KEY=`.
+> 7. Copie la clé.
+> 8. Ouvre le fichier `.env` à la racine du projet.
+> 9. Colle la clé après `STITCH_API_KEY=`.
 > 10. Enregistre le fichier.  
->     Ne publie jamais cette clÃ© dans la conversation.
+>     Ne publie jamais cette clé dans la conversation.
 
 Demande uniquement :
 
-> RÃ©ponds **clÃ© Stitch ajoutÃ©e** lorsque câ€™est fait.
+> Réponds **clé Stitch ajoutée** lorsque c’est fait.
 
-AprÃ¨s confirmation :
+Après confirmation :
 
 1. relis `.env` sans afficher sa valeur ;
-2. vÃ©rifie que `STITCH_API_KEY` est non vide ;
-3. vÃ©rifie que `.env` est ignorÃ© ;
+2. vérifie que `STITCH_API_KEY` est non vide ;
+3. vérifie que `.env` est ignoré ;
 4. continue automatiquement.
 
-Si la clÃ© est dÃ©jÃ  prÃ©sente, annonce simplement :
+Si la clé est déjà présente, annonce simplement :
 
-> La clÃ© Stitch locale est prÃ©sente et protÃ©gÃ©e.
+> La clé Stitch locale est présente et protégée.
 
 ---
 
-# Phase 5 â€” VÃ©rifier ou crÃ©er le MCP Stitch local
+# Phase 5 — Vérifier ou créer le MCP Stitch local
 
 Inspecte :
 
@@ -410,19 +426,19 @@ Inspecte :
 
 ## Si la configuration Stitch existe
 
-VÃ©rifie quâ€™elle :
+Vérifie qu’elle :
 
 - est locale au projet ;
 - pointe vers `https://stitch.googleapis.com/mcp` ;
 - utilise `X-Goog-Api-Key` ;
 - lit la valeur depuis `STITCH_API_KEY` ;
-- ne contient pas la clÃ© en clair ;
-- nâ€™utilise pas Bearer ;
+- ne contient pas la clé en clair ;
+- n’utilise pas Bearer ;
 - ne casse pas les autres MCP locaux.
 
 Corrige automatiquement toute erreur.
 
-## Si la configuration nâ€™existe pas
+## Si la configuration n’existe pas
 
 1. consulte automatiquement :
 
@@ -430,15 +446,15 @@ Corrige automatiquement toute erreur.
 codex mcp --help
 ```
 
-2. identifie la syntaxe rÃ©ellement prise en charge ;
-3. crÃ©e `.codex/config.toml` ;
+2. identifie la syntaxe réellement prise en charge ;
+3. crée `.codex/config.toml` ;
 4. configure Stitch localement ;
 5. utilise `X-Goog-Api-Key` ;
-6. ne stocke jamais la clÃ© en clair.
+6. ne stocke jamais la clé en clair.
 
 ## Chargement de `.env`
 
-Un fichier `.env` nâ€™est pas toujours injectÃ© automatiquement dans un processus MCP.
+Un fichier `.env` n’est pas toujours injecté automatiquement dans un processus MCP.
 
 Choisis automatiquement la solution la plus simple compatible avec la machine :
 
@@ -447,7 +463,7 @@ Choisis automatiquement la solution la plus simple compatible avec la machine :
 3. petit lanceur PowerShell local ;
 4. proxy Stitch officiel compatible.
 
-Si un script est nÃ©cessaire, crÃ©e :
+Si un script est nécessaire, crée :
 
 ```text
 scripts/start-codex-stitch.ps1
@@ -457,11 +473,11 @@ Il doit :
 
 - lire `.env` ;
 - charger `STITCH_API_KEY` ;
-- ne jamais afficher la clÃ© ;
-- dÃ©marrer le processus nÃ©cessaire ;
+- ne jamais afficher la clé ;
+- démarrer le processus nécessaire ;
 - produire une erreur claire si la variable manque.
 
-Documente briÃ¨vement le fonctionnement dans :
+Documente brièvement le fonctionnement dans :
 
 ```text
 docs/stitch-setup.md
@@ -469,161 +485,161 @@ docs/stitch-setup.md
 
 ---
 
-# Phase 6 â€” Tester automatiquement le MCP
+# Phase 6 — Tester automatiquement le MCP
 
-Depuis la racine du projet, exÃ©cute :
+Depuis la racine du projet, exécute :
 
 ```cmd
 codex mcp list
 ```
 
-Puis utilise Stitch pour lancer lâ€™Ã©quivalent de :
+Puis utilise Stitch pour lancer l’équivalent de :
 
 ```text
 list_projects
 ```
 
-## Test rÃ©ussi
+## Test réussi
 
 Affiche :
 
 ```text
-MCP Stitch local : configurÃ©
-Authentification : validÃ©e
+MCP Stitch local : configuré
+Authentification : validée
 Projets Stitch : accessibles
-Action manuelle nÃ©cessaire : aucune
+Action manuelle nécessaire : aucune
 ```
 
-Puis passe automatiquement Ã  la phase suivante.
+Puis passe automatiquement à la phase suivante.
 
-## Test Ã©chouÃ©
+## Test échoué
 
 Diagnostique automatiquement :
 
 - Codex CLI absent ;
-- utilisateur non connectÃ© ;
+- utilisateur non connecté ;
 - mauvaise syntaxe TOML ;
-- mauvais en-tÃªte ;
-- variable non chargÃ©e ;
-- clÃ© vide ou invalide ;
-- configuration globale utilisÃ©e par erreur ;
-- problÃ¨me de transport ;
-- processus nÃ©cessitant un redÃ©marrage ;
-- rÃ©seau bloquÃ©.
+- mauvais en-tête ;
+- variable non chargée ;
+- clé vide ou invalide ;
+- configuration globale utilisée par erreur ;
+- problème de transport ;
+- processus nécessitant un redémarrage ;
+- réseau bloqué.
 
-Corrige ce qui peut lâ€™Ãªtre.
+Corrige ce qui peut l’être.
 
 Ne demande une action utilisateur que si :
 
 - Windows exige une autorisation ;
-- lâ€™utilisateur doit se reconnecter ;
-- la clÃ© est invalide ;
-- un redÃ©marrage manuel est nÃ©cessaire.
+- l’utilisateur doit se reconnecter ;
+- la clé est invalide ;
+- un redémarrage manuel est nécessaire.
 
 ---
 
-# Phase 7 â€” Analyser le besoin produit avant Stitch
+# Phase 7 — Analyser le besoin produit avant Stitch
 
-Avant de demander de crÃ©er les Ã©crans, pose toutes les questions utiles en un seul message :
+Avant de demander de créer les écrans, pose toutes les questions utiles en un seul message :
 
 1. Quel est le nom du produit ?
 2. Que permet-il de faire en une phrase ?
-3. Qui va lâ€™utiliser ?
-4. Quel problÃ¨me principal rÃ©sout-il ?
-5. Quelles pages faut-il crÃ©er ?
-6. Existe-t-il dÃ©jÃ  un backend ou des routes API Ã  respecter ?
-7. Quelle direction visuelle est souhaitÃ©e ?
-8. Quelle est lâ€™action principale attendue de lâ€™utilisateur ?
-9. Faut-il prÃ©voir mobile, tablette et ordinateur ?
-10. Y a-t-il des captures dâ€™inspiration ?
+3. Qui va l’utiliser ?
+4. Quel problème principal résout-il ?
+5. Quelles pages faut-il créer ?
+6. Existe-t-il déjà un backend ou des routes API à respecter ?
+7. Quelle direction visuelle est souhaitée ?
+8. Quelle est l’action principale attendue de l’utilisateur ?
+9. Faut-il prévoir mobile, tablette et ordinateur ?
+10. Y a-t-il des captures d’inspiration ?
 
-Si le projet contient dÃ©jÃ  un backend, dÃ©duis automatiquement :
+Si le projet contient déjà un backend, déduis automatiquement :
 
-- entitÃ©s principales ;
-- rÃ´les ;
+- entités principales ;
+- rôles ;
 - routes ;
-- pages nÃ©cessaires ;
-- donnÃ©es affichables ;
-- contraintes dâ€™authentification.
+- pages nécessaires ;
+- données affichables ;
+- contraintes d’authentification.
 
-Demande confirmation de ton rÃ©sumÃ© avant de proposer le prompt Stitch.
+Demande confirmation de ton résumé avant de proposer le prompt Stitch.
 
 ---
 
-# Phase 8 â€” PrÃ©parer le prompt Stitch
+# Phase 8 — Préparer le prompt Stitch
 
-Ã€ partir des rÃ©ponses et du projet existant, gÃ©nÃ¨re un prompt Stitch complet comprenant :
+À partir des réponses et du projet existant, génère un prompt Stitch complet comprenant :
 
 - nom du produit ;
 - cible ;
-- problÃ¨me ;
+- problème ;
 - objectif ;
-- liste des Ã©crans ;
-- contenu de chaque Ã©cran ;
-- identitÃ© visuelle ;
+- liste des écrans ;
+- contenu de chaque écran ;
+- identité visuelle ;
 - couleurs ;
 - typographie ;
-- composants partagÃ©s ;
-- Ã©tats vide, chargement, erreur et succÃ¨s ;
+- composants partagés ;
+- états vide, chargement, erreur et succès ;
 - responsive ;
-- accessibilitÃ© ;
-- cohÃ©rence entre toutes les pages ;
-- interdiction des templates gÃ©nÃ©riques.
+- accessibilité ;
+- cohérence entre toutes les pages ;
+- interdiction des templates génériques.
 
-Si un backend existe, le prompt doit reflÃ©ter ses fonctions rÃ©elles sans inventer un autre produit.
+Si un backend existe, le prompt doit refléter ses fonctions réelles sans inventer un autre produit.
 
-PrÃ©sente le prompt prÃªt Ã  copier dans Stitch.
+Présente le prompt prêt à copier dans Stitch.
 
 ---
 
-# Phase 9 â€” Demander la crÃ©ation des pages
+# Phase 9 — Demander la création des pages
 
-Quand le MCP est prÃªt et le prompt produit, dis :
+Quand le MCP est prêt et le prompt produit, dis :
 
-> Va maintenant dans Google Stitch. CrÃ©e un seul projet Web et utilise le prompt prÃ©parÃ©. Garde tous les Ã©crans dans ce mÃªme projet pour conserver une identitÃ© visuelle cohÃ©rente. Corrige les Ã©crans jusquâ€™Ã  ce quâ€™ils te conviennent.
+> Va maintenant dans Google Stitch. Crée un seul projet Web et utilise le prompt préparé. Garde tous les écrans dans ce même projet pour conserver une identité visuelle cohérente. Corrige les écrans jusqu’à ce qu’ils te conviennent.
 
-Demande Ã  lâ€™utilisateur de vÃ©rifier :
+Demande à l’utilisateur de vérifier :
 
-- noms dâ€™Ã©crans clairs ;
-- mÃªmes couleurs et typographies ;
-- mÃªmes composants ;
-- navigation cohÃ©rente ;
+- noms d’écrans clairs ;
+- mêmes couleurs et typographies ;
+- mêmes composants ;
+- navigation cohérente ;
 - vues mobiles importantes ;
-- textes suffisamment rÃ©alistes ;
+- textes suffisamment réalistes ;
 - formulaires ;
 - tableaux ;
-- Ã©tats vides ;
+- états vides ;
 - chargements ;
 - erreurs ;
 - confirmations.
 
 Demande uniquement :
 
-> RÃ©ponds **pages Stitch prÃªtes** lorsque tout est finalisÃ©.
+> Réponds **pages Stitch prêtes** lorsque tout est finalisé.
 
-Lâ€™utilisateur nâ€™a pas besoin :
+L’utilisateur n’a pas besoin :
 
-- de tÃ©lÃ©charger les pages ;
+- de télécharger les pages ;
 - de copier les identifiants ;
-- de sÃ©lectionner chaque Ã©cran manuellement ;
-- de demander lui-mÃªme la rÃ©cupÃ©ration.
+- de sélectionner chaque écran manuellement ;
+- de demander lui-même la récupération.
 
 ---
 
-# Phase 10 â€” RÃ©cupÃ©rer automatiquement les Ã©crans
+# Phase 10 — Récupérer automatiquement les écrans
 
-AprÃ¨s **pages Stitch prÃªtes** :
+Après **pages Stitch prêtes** :
 
 1. lance `list_projects` ;
 2. identifie le projet le plus pertinent ;
-3. sâ€™il nâ€™existe quâ€™un projet correspondant, sÃ©lectionne-le ;
-4. sâ€™il y en a plusieurs, prÃ©sente seulement les noms et demande un choix ;
-5. rÃ©cupÃ¨re lâ€™identifiant du projet ;
-6. rÃ©cupÃ¨re tous les Ã©crans ;
-7. rÃ©cupÃ¨re pour chaque Ã©cran, lorsque disponible :
+3. s’il n’existe qu’un projet correspondant, sélectionne-le ;
+4. s’il y en a plusieurs, présente seulement les noms et demande un choix ;
+5. récupère l’identifiant du projet ;
+6. récupère tous les écrans ;
+7. récupère pour chaque écran, lorsque disponible :
    - nom ;
    - identifiant ;
-   - aperÃ§u ;
+   - aperçu ;
    - structure ;
    - HTML ;
    - styles ;
@@ -631,14 +647,14 @@ AprÃ¨s **pages Stitch prÃªtes** :
    - composants ;
    - variantes ;
    - dimensions ;
-8. dÃ©tecte les doublons ;
+8. détecte les doublons ;
 9. affiche un inventaire court.
 
 Exemple :
 
 ```text
 Projet Stitch : SuguFlow
-Ã‰crans dÃ©tectÃ©s : 10
+Écrans détectés : 10
 1. Landing page
 2. Connexion
 3. Inscription
@@ -648,84 +664,84 @@ Projet Stitch : SuguFlow
 
 Demande uniquement :
 
-> Confirme lâ€™intÃ©gration de ces Ã©crans dans cet ordre.
+> Confirme l’intégration de ces écrans dans cet ordre.
 
 ---
 
-## Dossier de rÃ©fÃ©rences obligatoire
+## Dossier de références obligatoire
 
-Avant de coder, crÃ©e un dossier local de rÃ©fÃ©rence :
+Avant de coder, crée un dossier local de référence :
 
 ```text
 docs/stitch-reference/
 ```
 
-Pour chaque Ã©cran, conserve lorsque le MCP le permet :
+Pour chaque écran, conserve lorsque le MCP le permet :
 
 ```text
 docs/stitch-reference/<screen-id>/
-â”œâ”€â”€ metadata.json
-â”œâ”€â”€ source.html
-â”œâ”€â”€ reference.png
-â”œâ”€â”€ texts.json
-â””â”€â”€ assets/
+├── metadata.json
+├── source.html
+├── reference.png
+├── texts.json
+└── assets/
 ```
 
-RÃ¨gles :
+Règles :
 
-- `reference.png` est la rÃ©fÃ©rence visuelle exacte de lâ€™Ã©cran.
-- `source.html` est la rÃ©fÃ©rence de structure lorsquâ€™il est fourni.
+- `reference.png` est la référence visuelle exacte de l’écran.
+- `source.html` est la référence de structure lorsqu’il est fourni.
 - `texts.json` contient tous les textes visibles, CTA, labels, nombres et statuts.
-- `metadata.json` contient lâ€™identifiant, le nom, les dimensions et les informations rÃ©cupÃ©rÃ©es.
-- Ne commence pas lâ€™intÃ©gration si la capture de rÃ©fÃ©rence ou les textes exacts nâ€™ont pas Ã©tÃ© rÃ©cupÃ©rÃ©s, sauf limitation rÃ©elle du MCP clairement signalÃ©e.
-- Si un artefact nâ€™est pas disponible, indique prÃ©cisÃ©ment lequel manque et utilise la meilleure source restante sans inventer.
+- `metadata.json` contient l’identifiant, le nom, les dimensions et les informations récupérées.
+- Ne commence pas l’intégration si la capture de référence ou les textes exacts n’ont pas été récupérés, sauf limitation réelle du MCP clairement signalée.
+- Si un artefact n’est pas disponible, indique précisément lequel manque et utilise la meilleure source restante sans inventer.
 
-## HiÃ©rarchie des sources de vÃ©ritÃ©
+## Hiérarchie des sources de vérité
 
 Utilise toujours cet ordre :
 
-1. **Capture exacte de lâ€™Ã©cran Stitch** : vÃ©ritÃ© pour la composition et lâ€™apparence de cette page.
-2. **HTML, textes et assets rÃ©cupÃ©rÃ©s de Stitch** : vÃ©ritÃ© pour le contenu, la structure et les ressources.
-3. **`DESIGN.md`** : vÃ©ritÃ© pour les tokens et composants communs.
-4. **Code et backend existants** : vÃ©ritÃ© pour les fonctions, routes, donnÃ©es, sÃ©curitÃ© et comportements mÃ©tiers.
+1. **Capture exacte de l’écran Stitch** : vérité pour la composition et l’apparence de cette page.
+2. **HTML, textes et assets récupérés de Stitch** : vérité pour le contenu, la structure et les ressources.
+3. **`DESIGN.md`** : vérité pour les tokens et composants communs.
+4. **Code et backend existants** : vérité pour les fonctions, routes, données, sécurité et comportements métiers.
 
-`DESIGN.md` ne remplace jamais la capture, le HTML ou les textes dâ€™un Ã©cran prÃ©cis.
+`DESIGN.md` ne remplace jamais la capture, le HTML ou les textes d’un écran précis.
 
-# Phase 10.5 â€” MatÃ©rialiser automatiquement les artefacts Stitch
+# Phase 10.5 — Matérialiser automatiquement les artefacts Stitch
 
-Cette phase est obligatoire et doit Ãªtre exÃ©cutÃ©e sans intervention de lâ€™utilisateur.
+Cette phase est obligatoire et doit être exécutée sans intervention de l’utilisateur.
 
-AprÃ¨s avoir rÃ©cupÃ©rÃ© le Project ID et le Screen ID, tu dois obtenir localement :
+Après avoir récupéré le Project ID et le Screen ID, tu dois obtenir localement :
 
 ```text
 docs/stitch-reference/<screen-id>/
-â”œâ”€â”€ reference.png
-â”œâ”€â”€ source.html
-â”œâ”€â”€ metadata.json
-â”œâ”€â”€ texts.json
-â””â”€â”€ assets/
+├── reference.png
+├── source.html
+├── metadata.json
+├── texts.json
+└── assets/
 ```
 
 ## Ordre automatique obligatoire
 
-### Tentative 1 â€” MCP Stitch
+### Tentative 1 — MCP Stitch
 
-Utilise dâ€™abord le MCP Stitch pour rÃ©cupÃ©rer :
+Utilise d’abord le MCP Stitch pour récupérer :
 
-- la capture de lâ€™Ã©cran ;
+- la capture de l’écran ;
 - le HTML ;
-- les mÃ©tadonnÃ©es ;
+- les métadonnées ;
 - les assets disponibles.
 
-VÃ©rifie rÃ©ellement les fichiers :
+Vérifie réellement les fichiers :
 
-- `reference.png` doit Ãªtre une vraie image lisible ;
+- `reference.png` doit être une vraie image lisible ;
 - `source.html` doit contenir un document HTML exploitable ;
-- les fichiers ne doivent pas Ãªtre vides ;
-- un simple `<body></body>` est considÃ©rÃ© comme un Ã©chec ;
-- une miniature trop petite nâ€™est pas une rÃ©fÃ©rence acceptable.
+- les fichiers ne doivent pas être vides ;
+- un simple `<body></body>` est considéré comme un échec ;
+- une miniature trop petite n’est pas une référence acceptable.
 
-### Tentative 2 â€” SDK Stitch automatique
+### Tentative 2 — SDK Stitch automatique
 
 Si le MCP retourne seulement :
 
@@ -733,7 +749,7 @@ Si le MCP retourne seulement :
 - une URL distante ;
 - un HTML vide ;
 - une miniature ;
-- une rÃ©fÃ©rence non tÃ©lÃ©chargeable ;
+- une référence non téléchargeable ;
 - ou aucun fichier local exploitable ;
 
 alors installe ou utilise automatiquement :
@@ -744,84 +760,84 @@ alors installe ou utilise automatiquement :
 
 avec `STITCH_API_KEY`.
 
-Sans demander dâ€™instruction supplÃ©mentaire Ã  lâ€™utilisateur :
+Sans demander d’instruction supplémentaire à l’utilisateur :
 
 1. ouvre le projet exact ;
-2. ouvre lâ€™Ã©cran exact ;
+2. ouvre l’écran exact ;
 3. appelle `screen.getImage()` ;
 4. appelle `screen.getHtml()` ;
-5. tÃ©lÃ©charge rÃ©ellement les URLs retournÃ©es ;
-6. applique, si nÃ©cessaire, le suffixe FIFE fourni par le SDK afin dâ€™obtenir lâ€™image complÃ¨te ;
-7. convertis proprement lâ€™image en PNG si le format reÃ§u est JPEG ou WebP ;
+5. télécharge réellement les URLs retournées ;
+6. applique, si nécessaire, le suffixe FIFE fourni par le SDK afin d’obtenir l’image complète ;
+7. convertis proprement l’image en PNG si le format reçu est JPEG ou WebP ;
 8. enregistre les fichiers dans `docs/stitch-reference/<screen-id>/` ;
-9. crÃ©e `metadata.json` avec le Project ID, le Screen ID, les dimensions, les URLs, les tailles, les formats et les chemins locaux ;
+9. crée `metadata.json` avec le Project ID, le Screen ID, les dimensions, les URLs, les tailles, les formats et les chemins locaux ;
 10. extrait tous les textes visibles dans `texts.json`.
 
 ## Validation obligatoire
 
-Ne passe Ã  `DESIGN.md` que si :
+Ne passe à `DESIGN.md` que si :
 
 - `reference.png` est une vraie image non vide ;
-- sa rÃ©solution est suffisante pour reprÃ©senter lâ€™Ã©cran ;
+- sa résolution est suffisante pour représenter l’écran ;
 - `source.html` contient un vrai document ;
-- les textes ont Ã©tÃ© extraits ;
-- les chemins locaux sont enregistrÃ©s ;
-- aucun secret nâ€™est prÃ©sent dans les fichiers.
+- les textes ont été extraits ;
+- les chemins locaux sont enregistrés ;
+- aucun secret n’est présent dans les fichiers.
 
-## En cas dâ€™Ã©chec
+## En cas d’échec
 
-Ne demande pas immÃ©diatement un export manuel.
+Ne demande pas immédiatement un export manuel.
 
-Tu dois dâ€™abord :
+Tu dois d’abord :
 
 1. retenter le MCP ;
 2. retenter le SDK ;
-3. vÃ©rifier la clÃ© ;
-4. vÃ©rifier la connexion rÃ©seau ;
-5. vÃ©rifier les URLs ;
-6. vÃ©rifier le suffixe FIFE ;
-7. vÃ©rifier les permissions dâ€™Ã©criture ;
-8. consigner lâ€™erreur exacte.
+3. vérifier la clé ;
+4. vérifier la connexion réseau ;
+5. vérifier les URLs ;
+6. vérifier le suffixe FIFE ;
+7. vérifier les permissions d’écriture ;
+8. consigner l’erreur exacte.
 
-Tu ne demandes un export manuel Ã  lâ€™utilisateur quâ€™en dernier recours, aprÃ¨s lâ€™Ã©chec documentÃ© du MCP et du SDK.
+Tu ne demandes un export manuel à l’utilisateur qu’en dernier recours, après l’échec documenté du MCP et du SDK.
 
 Dans ce cas seulement, pose une question simple :
 
-> Je nâ€™ai pas pu tÃ©lÃ©charger automatiquement la rÃ©fÃ©rence Stitch malgrÃ© les deux mÃ©thodes. Peux-tu exporter la capture de cet Ã©cran et lâ€™ajouter au dossier du projet ?
+> Je n’ai pas pu télécharger automatiquement la référence Stitch malgré les deux méthodes. Peux-tu exporter la capture de cet écran et l’ajouter au dossier du projet ?
 
-Lâ€™utilisateur ne doit jamais avoir Ã  connaÃ®tre ou Ã  demander lui-mÃªme cette phase.
+L’utilisateur ne doit jamais avoir à connaître ou à demander lui-même cette phase.
 
 ---
 
-# Phase 11 â€” GÃ©nÃ©rer `DESIGN.md`
+# Phase 11 — Générer `DESIGN.md`
 
-AprÃ¨s confirmation, analyse tous les Ã©crans puis crÃ©e :
+Après confirmation, analyse tous les écrans puis crée :
 
 ```text
 DESIGN.md
 ```
 
-Le fichier doit contenir les rÃ¨gles partagÃ©es du systÃ¨me visuel.
+Le fichier doit contenir les règles partagées du système visuel.
 
 Important :
 
-- `DESIGN.md` dÃ©crit lâ€™identitÃ© et les tokens communs.
-- Il ne doit pas rÃ©sumer, rÃ©Ã©crire ou remplacer le contenu exact des Ã©crans.
-- Les textes, CTA, images, ordre des blocs et proportions propres Ã  chaque Ã©cran restent dÃ©finis par ses rÃ©fÃ©rences Stitch.
+- `DESIGN.md` décrit l’identité et les tokens communs.
+- Il ne doit pas résumer, réécrire ou remplacer le contenu exact des écrans.
+- Les textes, CTA, images, ordre des blocs et proportions propres à chaque écran restent définis par ses références Stitch.
 
 Le fichier doit contenir :
 
-## IdentitÃ©
+## Identité
 
 - nom du produit ;
-- personnalitÃ© ;
+- personnalité ;
 - ton ;
 - principes visuels.
 
 ## Tokens
 
 - palette exacte ;
-- couleurs sÃ©mantiques ;
+- couleurs sémantiques ;
 - typographies ;
 - tailles ;
 - graisses ;
@@ -832,13 +848,13 @@ Le fichier doit contenir :
 - rayons ;
 - bordures ;
 - ombres ;
-- opacitÃ©s ;
+- opacités ;
 - transitions.
 
 ## Composants
 
-- boutons et Ã©tats ;
-- champs et Ã©tats ;
+- boutons et états ;
+- champs et états ;
 - cartes ;
 - tableaux ;
 - badges ;
@@ -848,7 +864,7 @@ Le fichier doit contenir :
 - modales ;
 - notifications ;
 - chargements ;
-- Ã©tats vides ;
+- états vides ;
 - erreurs ;
 - confirmations.
 
@@ -862,25 +878,25 @@ Le fichier doit contenir :
 - tailles de texte ;
 - zones tactiles.
 
-## AccessibilitÃ©
+## Accessibilité
 
 - contraste ;
 - focus visible ;
 - navigation clavier ;
 - labels ;
-- hiÃ©rarchie HTML ;
-- rÃ©duction des animations.
+- hiérarchie HTML ;
+- réduction des animations.
 
-## Ã‰crans
+## Écrans
 
-- liste complÃ¨te ;
-- fonction de chaque Ã©cran ;
-- composants partagÃ©s ;
-- diffÃ©rences mobile/desktop.
+- liste complète ;
+- fonction de chaque écran ;
+- composants partagés ;
+- différences mobile/desktop.
 
 Utilise les valeurs exactes fournies par Stitch.
 
-Si lâ€™outil est disponible, valide :
+Si l’outil est disponible, valide :
 
 ```cmd
 npx @google/design.md lint DESIGN.md
@@ -890,7 +906,7 @@ Corrige automatiquement les erreurs.
 
 ---
 
-# Phase 12 â€” DÃ©terminer la stratÃ©gie selon le projet
+# Phase 12 — Déterminer la stratégie selon le projet
 
 ## Dossier vide
 
@@ -901,12 +917,12 @@ Demande une seule fois :
 2. React avec Vite
 ```
 
-Explique briÃ¨vement :
+Explique brièvement :
 
-- Next.js : application complÃ¨te, routes, fonctions serveur possibles.
-- React + Vite : frontend sÃ©parÃ© ou application cliente simple.
+- Next.js : application complète, routes, fonctions serveur possibles.
+- React + Vite : frontend séparé ou application cliente simple.
 
-CrÃ©e ensuite automatiquement le projet choisi.
+Crée ensuite automatiquement le projet choisi.
 
 ## Frontend existant
 
@@ -917,14 +933,14 @@ Respecte :
 - composants ;
 - design system ;
 - conventions ;
-- dÃ©pendances ;
+- dépendances ;
 - tests.
 
-Nâ€™installe rien sans nÃ©cessitÃ©.
+N’installe rien sans nécessité.
 
 ## Backend seul
 
-Ne touche pas au backend sÃ©curisÃ©.
+Ne touche pas au backend sécurisé.
 
 Analyse :
 
@@ -932,120 +948,120 @@ Analyse :
 - authentification ;
 - CSRF ;
 - sessions ou tokens ;
-- rÃ´les ;
-- format des rÃ©ponses ;
-- entitÃ©s ;
+- rôles ;
+- format des réponses ;
+- entités ;
 - validations ;
 - erreurs.
 
-CrÃ©e un frontend sÃ©parÃ© ou intÃ©grÃ© selon lâ€™architecture dÃ©tectÃ©e.
+Crée un frontend séparé ou intégré selon l’architecture détectée.
 
-PrÃ©pare :
+Prépare :
 
 - client API ;
 - gestion de session ;
 - gestion CSRF ;
-- variables dâ€™environnement frontend ;
+- variables d’environnement frontend ;
 - types ;
 - services ;
-- Ã©tats de chargement et erreur.
+- états de chargement et erreur.
 
-Ne simule pas une authentification diffÃ©rente de celle du backend.
+Ne simule pas une authentification différente de celle du backend.
 
 ## Full stack existant
 
-IntÃ¨gre les Ã©crans dans le frontend existant et prÃ©serve toutes les fonctions dÃ©jÃ  reliÃ©es au backend.
+Intègre les écrans dans le frontend existant et préserve toutes les fonctions déjà reliées au backend.
 
 ---
 
-# Phase 13 â€” PrÃ©parer le plan dâ€™intÃ©gration
+# Phase 13 — Préparer le plan d’intégration
 
-PrÃ©sente un plan court mais complet :
+Présente un plan court mais complet :
 
 - classification du projet ;
 - stack ;
 - routes ;
 - layouts ;
-- composants partagÃ©s ;
+- composants partagés ;
 - tokens ;
-- stratÃ©gie responsive ;
+- stratégie responsive ;
 - connexion au backend ;
-- Ã©crans Ã  intÃ©grer ;
+- écrans à intégrer ;
 - ordre des lots ;
 - tests ;
 - risques ;
-- fichiers sensibles Ã  ne pas casser.
+- fichiers sensibles à ne pas casser.
 
-Ordre recommandÃ© :
+Ordre recommandé :
 
-1. sauvegarde et Ã©tat initial ;
+1. sauvegarde et état initial ;
 2. tokens et styles globaux ;
 3. composants de base ;
 4. layouts et navigation ;
 5. pages publiques ;
 6. authentification ;
 7. dashboard ;
-8. pages mÃ©tier ;
-9. Ã©tats vide, chargement et erreur ;
-10. connexion aux donnÃ©es ;
+8. pages métier ;
+9. états vide, chargement et erreur ;
+10. connexion aux données ;
 11. responsive ;
 12. comparaison visuelle ;
 13. tests finaux.
 
-Le plan doit Ã©galement contenir un tableau de contrÃ´le Ã©cran par Ã©cran :
+Le plan doit également contenir un tableau de contrôle écran par écran :
 
 ```text
-Ã‰cran | Screen ID | RÃ©fÃ©rence PNG | HTML | Textes | Route cible | Statut
+Écran | Screen ID | Référence PNG | HTML | Textes | Route cible | Statut
 ```
 
-Pour chaque Ã©cran, dÃ©finis obligatoirement :
+Pour chaque écran, définis obligatoirement :
 
 - largeur de comparaison ;
 - route locale ;
-- composants rÃ©utilisÃ©s ;
-- textes Ã  prÃ©server sans modification ;
+- composants réutilisés ;
+- textes à préserver sans modification ;
 - assets requis ;
-- critÃ¨res dâ€™acceptation ;
-- commande ou mÃ©thode de capture locale ;
-- seuil de validation avant passage Ã  lâ€™Ã©cran suivant.
+- critères d’acceptation ;
+- commande ou méthode de capture locale ;
+- seuil de validation avant passage à l’écran suivant.
 
 Demande uniquement :
 
-> Valides-tu ce plan dâ€™intÃ©gration ?
+> Valides-tu ce plan d’intégration ?
 
 ---
 
-# Phase 14 â€” IntÃ©gration fidÃ¨le Ã©cran par Ã©cran
+# Phase 14 — Intégration fidèle écran par écran
 
-AprÃ¨s validation du plan, commence automatiquement, mais nâ€™intÃ¨gre jamais plusieurs Ã©crans sans contrÃ´le intermÃ©diaire.
+Après validation du plan, commence automatiquement, mais n’intègre jamais plusieurs écrans sans contrôle intermédiaire.
 
 ## Mode de travail obligatoire
 
-Pour chaque Ã©cran, suis exactement cette boucle :
+Pour chaque écran, suis exactement cette boucle :
 
 1. identifier son nom et son `screen-id` ;
 2. ouvrir sa capture Stitch exacte ;
 3. lire son HTML, ses textes et ses assets disponibles ;
-4. inventorier tous les Ã©lÃ©ments visibles avant de coder ;
-5. implÃ©menter cet Ã©cran uniquement ;
-6. lancer lâ€™application ;
-7. produire une capture locale Ã  la mÃªme largeur et, si possible, Ã  la mÃªme hauteur ;
-8. comparer la capture locale Ã  la rÃ©fÃ©rence Stitch ;
-9. corriger les Ã©carts ;
+4. inventorier tous les éléments visibles avant de coder ;
+5. implémenter cet écran uniquement ;
+6. lancer l’application ;
+7. produire une capture locale à la même largeur et, si possible, à la même hauteur ;
+8. comparer la capture locale à la référence Stitch ;
+9. corriger les écarts ;
 10. recommencer la capture et la comparaison ;
-11. valider lâ€™Ã©cran ;
+11. valider l’écran ;
 12. seulement ensuite passer au suivant.
 
-## FidÃ©litÃ© de contenu â€” tolÃ©rance zÃ©ro
+## Fidélité de contenu — tolérance zéro
 
-Les Ã©lÃ©ments suivants doivent Ãªtre repris sans reformulation :
+Les éléments suivants doivent être repris sans reformulation :
 
 - titres ;
 - sous-titres ;
 - paragraphes ;
 - CTA ;
 - labels ;
-- Ã©lÃ©ments de navigation ;
+- éléments de navigation ;
 - nombres ;
 - devises ;
 - noms ;
@@ -1055,28 +1071,28 @@ Les Ã©lÃ©ments suivants doivent Ãªtre repris sans reformulation :
 Interdictions :
 
 - inventer un nouveau titre ;
-- raccourcir ou amÃ©liorer un texte ;
+- raccourcir ou améliorer un texte ;
 - remplacer un CTA ;
 - supprimer une preuve sociale ;
-- remplacer une illustration par une carte gÃ©nÃ©rique ;
-- changer lâ€™ordre des blocs ;
+- remplacer une illustration par une carte générique ;
+- changer l’ordre des blocs ;
 - ajouter un composant absent ;
-- supprimer un composant jugÃ© Â« inutile Â» ;
+- supprimer un composant jugé « inutile » ;
 - utiliser seulement `DESIGN.md` pour reconstruire une page ;
 - traiter Stitch comme une simple inspiration.
 
-Si une modification de contenu est nÃ©cessaire pour une raison fonctionnelle, demande lâ€™autorisation avant de la faire.
+Si une modification de contenu est nécessaire pour une raison fonctionnelle, demande l’autorisation avant de la faire.
 
-## FidÃ©litÃ© visuelle
+## Fidélité visuelle
 
-Reproduis au plus prÃ¨s :
+Reproduis au plus près :
 
 - dimensions ;
 - largeur des conteneurs ;
 - hauteur des sections ;
 - espacements ;
 - alignements ;
-- retours Ã  la ligne ;
+- retours à la ligne ;
 - tailles de police ;
 - graisses ;
 - styles italique ou normal ;
@@ -1085,71 +1101,71 @@ Reproduis au plus prÃ¨s :
 - bordures ;
 - rayons ;
 - ombres ;
-- icÃ´nes ;
+- icônes ;
 - images ;
 - avatars ;
 - mockups ;
 - boutons ;
 - positions relatives.
 
-Ne remplace pas une police sans vÃ©rifier dâ€™abord si elle est disponible. Si elle ne lâ€™est pas, signale-le et utilise la meilleure alternative seulement aprÃ¨s justification.
+Ne remplace pas une police sans vérifier d’abord si elle est disponible. Si elle ne l’est pas, signale-le et utilise la meilleure alternative seulement après justification.
 
 ## Responsive
 
-- Une capture mobile Stitch est la rÃ©fÃ©rence mobile.
-- Une capture desktop Stitch est la rÃ©fÃ©rence desktop.
-- Nâ€™invente pas le desktop en agrandissant simplement le mobile.
-- Si Stitch ne fournit quâ€™une taille, prÃ©serve cette taille exactement, puis construis les autres tailles sans altÃ©rer la composition originale.
-- VÃ©rifie 320 px, la largeur exacte de la rÃ©fÃ©rence mobile, 768 px et 1440 px.
+- Une capture mobile Stitch est la référence mobile.
+- Une capture desktop Stitch est la référence desktop.
+- N’invente pas le desktop en agrandissant simplement le mobile.
+- Si Stitch ne fournit qu’une taille, préserve cette taille exactement, puis construis les autres tailles sans altérer la composition originale.
+- Vérifie 320 px, la largeur exacte de la référence mobile, 768 px et 1440 px.
 
 ## Architecture du code
 
-La fidÃ©litÃ© nâ€™autorise pas un code sale :
+La fidélité n’autorise pas un code sale :
 
-- crÃ©e des composants partagÃ©s ;
+- crée des composants partagés ;
 - centralise les tokens ;
-- Ã©vite les duplications ;
+- évite les duplications ;
 - respecte la stack existante ;
-- prÃ©serve le backend ;
-- conserve lâ€™authentification, les CSRF, les rÃ´les et les routes ;
-- nâ€™expose aucun secret.
+- préserve le backend ;
+- conserve l’authentification, les CSRF, les rôles et les routes ;
+- n’expose aucun secret.
 
-## ArrÃªt obligatoire
+## Arrêt obligatoire
 
-Si la capture, le HTML ou les textes dâ€™un Ã©cran nâ€™ont pas pu Ãªtre rÃ©cupÃ©rÃ©s correctement :
+Si la capture, le HTML ou les textes d’un écran n’ont pas pu être récupérés correctement :
 
 - ne reconstruis pas librement la page ;
 - explique exactement ce qui manque ;
-- tente une nouvelle rÃ©cupÃ©ration ;
-- demande une rÃ©fÃ©rence manuelle seulement en dernier recours.
+- tente une nouvelle récupération ;
+- demande une référence manuelle seulement en dernier recours.
 
-# Phase 15 â€” Validation visuelle obligatoire
+# Phase 15 — Validation visuelle obligatoire
 
-La validation ne doit pas Ãªtre une impression gÃ©nÃ©rale. Elle doit Ãªtre effectuÃ©e Ã©cran par Ã©cran, Ã  partir des rÃ©fÃ©rences conservÃ©es dans `docs/stitch-reference/`.
+La validation ne doit pas être une impression générale. Elle doit être effectuée écran par écran, à partir des références conservées dans `docs/stitch-reference/`.
 
-## ProcÃ©dure
+## Procédure
 
-Pour chaque Ã©cran :
+Pour chaque écran :
 
-1. ouvre la rÃ©fÃ©rence Stitch ;
-2. ouvre la page locale Ã  la mÃªme largeur ;
+1. ouvre la référence Stitch ;
+2. ouvre la page locale à la même largeur ;
 3. prends une capture pleine page ;
-4. place les deux captures cÃ´te Ã  cÃ´te ;
+4. place les deux captures côte à côte ;
 5. compare chaque zone de haut en bas ;
-6. consigne les diffÃ©rences ;
+6. consigne les différences ;
 7. corrige ;
 8. reprends une capture ;
-9. rÃ©pÃ¨te jusquâ€™Ã  validation.
+9. répète jusqu’à validation.
 
-Si les outils disponibles permettent une comparaison dâ€™images ou un diff visuel, utilise-les. Sinon, rÃ©alise une comparaison structurÃ©e manuelle.
+Si les outils disponibles permettent une comparaison d’images ou un diff visuel, utilise-les. Sinon, réalise une comparaison structurée manuelle.
 
 ## Grille de comparaison
 
-VÃ©rifie obligatoirement :
+Vérifie obligatoirement :
 
-- tous les textes, caractÃ¨re par caractÃ¨re ;
+- tous les textes, caractère par caractère ;
 - ordre des blocs ;
-- retours Ã  la ligne des titres ;
+- retours à la ligne des titres ;
 - dimensions et proportions ;
 - marges et paddings ;
 - alignements ;
@@ -1161,50 +1177,50 @@ VÃ©rifie obligatoirement :
 - rayons ;
 - bordures ;
 - ombres ;
-- icÃ´nes ;
+- icônes ;
 - navigation ;
 - responsive ;
 - hover ;
 - focus ;
 - active ;
 - animations ;
-- dÃ©bordements.
+- débordements.
 
-## Niveaux dâ€™Ã©carts
+## Niveaux d’écarts
 
-- **Bloquant** : texte modifiÃ©, bloc absent, ordre incorrect, asset remplacÃ©, structure diffÃ©rente.
-- **Majeur** : police, taille, couleur, dimension ou espacement visiblement diffÃ©rent.
-- **Mineur** : diffÃ©rence discrÃ¨te ne changeant pas la perception globale.
+- **Bloquant** : texte modifié, bloc absent, ordre incorrect, asset remplacé, structure différente.
+- **Majeur** : police, taille, couleur, dimension ou espacement visiblement différent.
+- **Mineur** : différence discrète ne changeant pas la perception globale.
 
-Un Ã©cran ne peut pas Ãªtre validÃ© sâ€™il reste un Ã©cart bloquant ou majeur.
+Un écran ne peut pas être validé s’il reste un écart bloquant ou majeur.
 
-## Rapport de validation par Ã©cran
+## Rapport de validation par écran
 
 Ajoute dans le rapport :
 
 ```text
-Ã‰cran :
+Écran :
 Screen ID :
-Largeur de rÃ©fÃ©rence :
+Largeur de référence :
 Capture locale :
 Textes identiques : oui/non
 Structure identique : oui/non
 Assets identiques : oui/non
-Ã‰carts bloquants :
-Ã‰carts majeurs :
-Ã‰carts mineurs :
-Statut : validÃ© / Ã  corriger
+Écarts bloquants :
+Écarts majeurs :
+Écarts mineurs :
+Statut : validé / à corriger
 ```
 
-Ne dÃ©clare jamais une page Â« fidÃ¨le Â» sans avoir produit et comparÃ© une capture locale.
+Ne déclare jamais une page « fidèle » sans avoir produit et comparé une capture locale.
 
-# Phase 16 â€” Tests obligatoires
+# Phase 16 — Tests obligatoires
 
-ExÃ©cute ce qui est disponible :
+Exécute ce qui est disponible :
 
-- installation des dÃ©pendances ;
+- installation des dépendances ;
 - lint ;
-- vÃ©rification TypeScript ;
+- vérification TypeScript ;
 - build de production ;
 - tests existants ;
 - navigation ;
@@ -1213,25 +1229,25 @@ ExÃ©cute ce qui est disponible :
 - formulaires ;
 - authentification ;
 - CSRF si applicable ;
-- rÃ´les si applicable ;
+- rôles si applicable ;
 - erreurs API ;
 - focus clavier ;
 - largeur 320 px ;
 - largeur 768 px ;
 - largeur 1440 px ;
-- absence de dÃ©bordement horizontal ;
-- images chargÃ©es ;
+- absence de débordement horizontal ;
+- images chargées ;
 - console sans erreur ;
 - contraste ;
 - `prefers-reduced-motion`.
 
-Ne dÃ©clare jamais le travail terminÃ© si le build Ã©choue.
+Ne déclare jamais le travail terminé si le build échoue.
 
 ---
 
-# Phase 17 â€” Rapport final
+# Phase 17 — Rapport final
 
-CrÃ©e :
+Crée :
 
 ```text
 docs/stitch-integration-report.md
@@ -1242,31 +1258,31 @@ Le rapport doit contenir :
 - classification du projet ;
 - projet Stitch ;
 - identifiant ;
-- Ã©crans rÃ©cupÃ©rÃ©s ;
-- Ã©crans intÃ©grÃ©s ;
-- composants crÃ©Ã©s ;
-- routes crÃ©Ã©es ;
-- connexions backend rÃ©alisÃ©es ;
+- écrans récupérés ;
+- écrans intégrés ;
+- composants créés ;
+- routes créées ;
+- connexions backend réalisées ;
 - fichiers importants ;
-- tests exÃ©cutÃ©s ;
-- Ã©carts restants ;
-- dÃ©cisions prises ;
-- mÃ©thode de synchronisation future.
+- tests exécutés ;
+- écarts restants ;
+- décisions prises ;
+- méthode de synchronisation future.
 
-Ne mets jamais la clÃ© dans le rapport.
+Ne mets jamais la clé dans le rapport.
 
 Affiche ensuite :
 
 ```text
 Projet Stitch :
-Ã‰crans rÃ©cupÃ©rÃ©s :
-Ã‰crans intÃ©grÃ©s :
+Écrans récupérés :
+Écrans intégrés :
 Stack :
-Backend prÃ©servÃ© :
+Backend préservé :
 DESIGN.md :
 MCP local :
-Tests rÃ©ussis :
-Ã‰carts restants :
+Tests réussis :
+Écarts restants :
 Prochaine action :
 ```
 
@@ -1274,39 +1290,39 @@ Prochaine action :
 
 # Synchronisation future
 
-Lorsquâ€™un Ã©cran est modifiÃ© dans Stitch :
+Lorsqu’un écran est modifié dans Stitch :
 
-1. reliste les projets et Ã©crans ;
+1. reliste les projets et écrans ;
 2. identifie les changements ;
 3. compare avec le code existant ;
-4. modifie uniquement les composants concernÃ©s ;
-5. prÃ©serve les donnÃ©es et fonctions dÃ©jÃ  connectÃ©es ;
+4. modifie uniquement les composants concernés ;
+5. préserve les données et fonctions déjà connectées ;
 6. actualise `DESIGN.md` seulement si les tokens changent ;
 7. relance les tests ;
-8. produit un rÃ©sumÃ© prÃ©cis.
+8. produit un résumé précis.
 
 Ne remplace jamais tout le frontend pour une petite modification.
 
 ---
 
-# Engagement de qualitÃ©
+# Engagement de qualité
 
-Lâ€™objectif est une fidÃ©litÃ© maximale contrÃ´lÃ©e, et non une interprÃ©tation crÃ©ative.
+L’objectif est une fidélité maximale contrôlée, et non une interprétation créative.
 
-Tu ne dois jamais promettre Â« 100 % pixel-perfect Â» avant vÃ©rification. En revanche, tu dois garantir le processus suivant :
+Tu ne dois jamais promettre « 100 % pixel-perfect » avant vérification. En revanche, tu dois garantir le processus suivant :
 
 - textes strictement identiques ;
 - structure strictement identique ;
-- assets principaux prÃ©servÃ©s ;
-- comparaison visuelle effectuÃ©e ;
-- aucun Ã©cart bloquant ou majeur avant validation.
+- assets principaux préservés ;
+- comparaison visuelle effectuée ;
+- aucun écart bloquant ou majeur avant validation.
 
-Si une limitation de Stitch, du MCP, de la police ou dâ€™un asset empÃªche une reproduction exacte, indique-la clairement au lieu dâ€™inventer.
+Si une limitation de Stitch, du MCP, de la police ou d’un asset empêche une reproduction exacte, indique-la clairement au lieu d’inventer.
 
 # Première réponse après activation explicite
 
 Après une demande explicite d'intégration Stitch, réponds dans cet esprit :
 
-> Je vais piloter automatiquement le workflow Google Stitch pour ce projet. Je commence par identifier le type de projet, vÃ©rifier Codex CLI, la sÃ©curitÃ© locale et le MCP Stitch. Je ne te demanderai dâ€™intervenir que lorsquâ€™une action humaine est indispensable, et je ne te demanderai jamais de publier ta clÃ© API dans la conversation.
+> Je vais piloter automatiquement le workflow Google Stitch pour ce projet. Je commence par identifier le type de projet, vérifier Codex CLI, la sécurité locale et le MCP Stitch. Je ne te demanderai d’intervenir que lorsqu’une action humaine est indispensable, et je ne te demanderai jamais de publier ta clé API dans la conversation.
 
-Puis commence immÃ©diatement lâ€™inspection, sans attendre une nouvelle instruction.
+Puis commence immédiatement l’inspection, sans attendre une nouvelle instruction.

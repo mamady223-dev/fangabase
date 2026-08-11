@@ -13,7 +13,7 @@ const files = execFileSync(
 )
   .trim()
   .split(/\r?\n/)
-  .filter((file) => file && !file.startsWith("Fanga_design_"));
+  .filter((file) => file);
 const errors = [];
 for (const file of files) {
   const content = await readFile(file, "utf8");

@@ -177,3 +177,19 @@ aucun secret dans les fichiers modifiés.
 ## Règle durable du jalon 9
 
 Le jalon 9 ne construit aucun design FangaBase. Il fournit uniquement le workflow d'intégration du design choisi par l'étudiant. Banani et les exemples frontend restent facultatifs. Responsive, accessibilité et tests s'appliquent seulement au design effectivement choisi ou fourni.
+
+# 2026-08-11 — Parcours étudiant guidé 0.4
+
+- [x] `pnpm create:project` sans TTY commence par `NEEDS_PROJECT_VALIDATION` et ne demande aucune destination.
+- [x] Source officielle `docs/getting-started/student-journey.md` avec les 19 états stables, transitions, actions humaines et interdictions.
+- [x] Décisions `NO_GO_TEMPORAIRE` et `PIVOT` bloquées avant import/génération; `GO_CONDITIONNEL` transmet les documents au projet.
+- [x] Questionnaire technique limité à une prochaine question, sans valeur choisie par l’agent; brief valide vers `READY_FOR_DRY_RUN`.
+- [x] `FANGABASE_INPUT.md` ramené à un exemple contenant exactement un bloc `yaml fangabase` validable.
+- [x] Relais produit enrichi et rapport final initial généré sans faux PASS.
+- [x] Workflow design copié exclusivement selon `headless`, `stitch`, `banani`, `provided_mockups` ou `custom_frontend`; 10 profils préservés.
+- [x] Stitch/Banani corrigés en UTF-8, matrice des architectures ajoutée et gate mojibake étendue à ces documents.
+- [x] CLI : 115 tests verts; Laravel : 107 tests, 667 assertions; typecheck, lint, build et `release:check` verts.
+- [x] Audit pnpm : 0 haute/critique, 2 modérées; audit Composer : 0 haute/critique, 1 faible transitive `firebase/php-jwt` via Google.
+- [ ] Commit, push, CI du commit final et tag annoté `v0.4.0-rc.1`.
+
+Prochain point exact : créer le commit du parcours guidé, pousser `main`, attendre toutes les gates CI, puis créer le tag RC uniquement si elles sont vertes.

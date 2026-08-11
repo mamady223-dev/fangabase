@@ -7,25 +7,27 @@ FangaBase expose automatiquement un protocole JSON officiel pour les agents et l
 Lorsqu’un utilisateur demande à Codex de créer un projet FangaBase :
 
 1. Exécuter simplement `pnpm create:project`.
-2. Si `stdin` n’est pas un TTY et qu’aucune configuration complète n’est fournie, lire la réponse JSON automatique `NEEDS_ANSWERS`.
-3. Lire la liste ordonnée des questions et leurs identifiants stables.
-4. Dire « Je vais te poser les questions FangaBase une par une. » puis afficher uniquement la question actuelle et ses choix.
-5. Ne jamais choisir une réponse à la place de l’utilisateur, même lorsqu’une valeur par défaut existe.
-6. Respecter les conditions d’affichage et ne pas poser une question inapplicable.
-7. Enregistrer les réponses dans un objet JSON indexé par les identifiants retournés et relancer `pnpm create:project --agent --json --answers <fichier.json>` jusqu’au statut `READY` ; ces options sont internes au parcours agent et ne sont pas demandées à l’étudiant.
-8. Construire depuis `config_yaml` un fichier YAML temporaire validé par le schéma FangaBase, puis demander séparément le dossier de destination.
-9. Exécuter d’abord `pnpm create:project --config <fichier-temporaire.yaml> --destination <chemin> --dry-run --json`.
-10. Présenter le nom, la destination, l’architecture, le backend, le frontend, la base, l’e-mail, le paiement, la facturation, le design, les fonctionnalités et les composants inclus et exclus.
-11. Attendre une confirmation explicite `OUI`.
-12. Exécuter seulement après confirmation `pnpm create:project --config <fichier-temporaire.yaml> --destination <chemin> --yes --json`.
-13. Supprimer ensuite le fichier temporaire, à condition qu’il ne contienne aucun secret.
-14. Ne jamais créer le projet à l’intérieur du dépôt FangaBase.
-15. Après génération, poursuivre avec setup, doctor, migrations et smoke selon les commandes du projet ; ne jamais utiliser `--force` sans demande explicite.
+2. Si `stdin` n’est pas un TTY et qu’aucun brief explicite n’est fourni, lire la réponse JSON automatique `NEEDS_PROJECT_VALIDATION` et suivre intégralement `Fanga_validation_projet.md`.
+3. Après une décision `GO_CONDITIONNEL`, produire les documents obligatoires et un `FANGABASE_INPUT.md` contenant exactement un bloc `yaml fangabase` valide.
+4. Relancer en interne avec le brief; lire la prochaine question technique et son identifiant stable.
+5. Dire « Je vais te poser les questions FangaBase une par une. » puis afficher uniquement la question actuelle et ses choix.
+6. Ne jamais choisir une réponse à la place de l’utilisateur, même lorsqu’une valeur par défaut existe.
+7. Respecter les conditions d’affichage et ne pas poser une question inapplicable.
+8. Enregistrer les réponses dans un objet JSON indexé par les identifiants retournés et relancer `pnpm create:project --agent --json --answers <fichier.json>` jusqu’au statut `READY` ; ces options sont internes au parcours agent et ne sont pas demandées à l’étudiant.
+9. Construire depuis `config_yaml` un fichier YAML temporaire validé par le schéma FangaBase, puis demander séparément le dossier de destination.
+10. Exécuter d’abord `pnpm create:project --config <fichier-temporaire.yaml> --destination <chemin> --dry-run --json`.
+11. Présenter le nom, la destination, l’architecture, le backend, le frontend, la base, l’e-mail, le paiement, la facturation, le design, les fonctionnalités et les composants inclus et exclus.
+12. Attendre une confirmation explicite `OUI`.
+13. Exécuter seulement après confirmation `pnpm create:project --config <fichier-temporaire.yaml> --destination <chemin> --yes --json`.
+14. Supprimer ensuite le fichier temporaire, à condition qu’il ne contienne aucun secret.
+15. Ne jamais créer le projet à l’intérieur du dépôt FangaBase.
+16. Après génération, poursuivre avec setup, doctor, migrations et smoke selon les commandes du projet ; ne jamais utiliser `--force` sans demande explicite.
 
 ## États du protocole
 
-- `NEEDS_ANSWERS` retourne uniquement les questions visibles qui n’ont pas encore de réponse.
+- `NEEDS_PROJECT_VALIDATION` bloque les questions techniques tant que le projet n’a pas reçu un GO conditionnel et ses documents.
+- `NEEDS_TECHNICAL_ANSWERS` retourne uniquement la prochaine question visible qui n’a pas encore de réponse.
 - `INVALID_ANSWERS` retourne des erreurs rattachées précisément à leurs identifiants.
-- `READY` retourne le YAML résolu et un résumé des choix, fonctionnalités et composants.
+- `READY_FOR_DRY_RUN` retourne le YAML résolu et un résumé des choix, fonctionnalités et composants.
 
 Sans TTY, `pnpm create:project` produit exactement la même réponse que `pnpm create:project --agent --json`. Le mode automatique ne s’active pas avec `--config`, `--brief`, `--answers` ou une génération explicitement demandée. `--agent` reste disponible pour les tests et la CI et exige `--json`. Le questionnaire PowerShell interactif, `--brief`, `--product-docs`, `--config`, `--destination`, `--dry-run`, `--yes` et la génération atomique restent disponibles sans changement de parcours.

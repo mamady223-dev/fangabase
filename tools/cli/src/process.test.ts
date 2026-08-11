@@ -32,15 +32,14 @@ describe("CLI FangaBase", () => {
     const response = JSON.parse(automatic.stdout);
     expect(response).toEqual(JSON.parse(explicit.stdout));
     expect(response).toEqual(
-      expect.objectContaining({ status: "NEEDS_ANSWERS", protocol_version: 1 }),
-    );
-    expect(response).not.toHaveProperty("config_yaml");
-    expect(response.next_action).toEqual(
       expect.objectContaining({
-        actor: "coding_agent",
-        instruction: expect.stringContaining("une seule question à la fois"),
+        status: "NEEDS_PROJECT_VALIDATION",
+        protocol_version: 1,
+        workflow_file: "Fanga_validation_projet.md",
       }),
     );
+    expect(response).not.toHaveProperty("config_yaml");
+    expect(response.next_action).toContain("blocs de cinq questions maximum");
     expect(automatic.stdout).not.toContain("Dossier de destination:");
     expect(automatic.stdout).not.toContain(
       "What destination path should I use?",
@@ -109,6 +108,30 @@ describe("CLI FangaBase", () => {
     expect(await readdir(directory)).toEqual(["brief.md"]);
   });
 
+  it("passe un brief produit valide au dry-run dans le protocole agent", () => {
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve(import.meta.dirname, "index.ts"),
+        "create",
+        "--agent",
+        "--json",
+        "--brief",
+        join(root, "FANGABASE_INPUT.md"),
+      ],
+      { encoding: "utf8", env: { ...process.env, INIT_CWD: root } },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(
+      expect.objectContaining({
+        status: "READY_FOR_DRY_RUN",
+        config_yaml: expect.any(String),
+      }),
+    );
+  });
+
   it("résout un fichier de réponses complet sans générer de projet", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-agent-ready-"));
     const answers = join(directory, "answers.json");
@@ -143,7 +166,7 @@ describe("CLI FangaBase", () => {
     expect(result.status, result.stderr).toBe(0);
     expect(JSON.parse(result.stdout)).toEqual(
       expect.objectContaining({
-        status: "READY",
+        status: "READY_FOR_DRY_RUN",
         config_yaml: expect.any(String),
       }),
     );

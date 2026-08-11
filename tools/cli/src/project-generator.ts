@@ -270,7 +270,7 @@ export async function generateProject(options: {
       const copied = await copyProductDocs(options.productDocs, staging);
       await writeFile(
         join(staging, "docs/product/IMPLEMENTATION_HANDOFF.md"),
-        `# Relais d'implémentation\n\nDocuments importés : ${copied.join(", ") || "aucun"}.\n\nCes documents décrivent le produit. Ils ne modifient ni les contrats ni le modèle métier automatiquement.\n`,
+        `# Relais d’implémentation\n\n## Documents importés\n\n${copied.map((name) => `- \`${name}\``).join("\n") || "- aucun"}\n\n## Autorité des décisions\n\nLes décisions confirmées sont celles consignées explicitement dans les documents importés et dans \`fangabase.config.yaml\`. Les risques et hypothèses non validés restent à vérifier; ils ne deviennent pas des faits par la génération.\n\nCes documents ne créent automatiquement ni métier, ni entité, ni table, ni route. Codex doit construire le métier séparément à partir de \`BACKLOG_MVP.md\`, des parcours et des critères d’acceptation, tout en préservant les contrats et invariants de sécurité FangaBase. Toute contradiction exige une décision explicite de l’étudiant.\n`,
       );
     }
     const generatedFiles = await inventory(staging);
@@ -1036,8 +1036,77 @@ async function writeDocs(
     join(staging, "CONFIGURATION_SERVICES.md"),
     serviceDocumentation(config),
   );
-  if (isInertia(config) && config.design.source === "stitch")
-    await writeFile(join(staging, "STITCH_INERTIA.md"), stitchInertiaGuide());
+  await writeDesignWorkflow(staging, config);
+  await writeFile(
+    join(staging, "docs/FANGABASE_FINAL_REPORT.md"),
+    finalReport(config, plan),
+  );
+}
+
+async function writeDesignWorkflow(
+  staging: string,
+  config: FangaBaseConfig,
+): Promise<void> {
+  const root = join(staging, "docs/design");
+  await mkdir(root, { recursive: true });
+  const source = config.design.source;
+  if (source === "headless") {
+    await writeFile(
+      join(root, "README.md"),
+      "# Design headless\n\nAucun design n’est activé. FangaBase n’impose ni thème ni identité visuelle. Un workflow peut être choisi plus tard sur demande explicite.\n",
+    );
+    return;
+  }
+  if (source === "stitch") {
+    await writeFile(join(root, "STITCH_WORKFLOW.md"), stitchWorkflow(config));
+    await writeFile(
+      join(root, "ACTIVATION.md"),
+      "# Activation Stitch\n\nDemandez explicitement à Codex : « Active le workflow Stitch décrit dans docs/design/STITCH_WORKFLOW.md ». Toute connexion externe ou transmission de données exige une confirmation distincte.\n",
+    );
+    if (isInertia(config))
+      await writeFile(join(root, "STITCH_INERTIA.md"), stitchInertiaGuide());
+    return;
+  }
+  if (source === "banani") {
+    await writeFile(join(root, "BANANI_WORKFLOW.md"), bananiWorkflow(config));
+    await writeFile(
+      join(root, "ACTIVATION.md"),
+      "# Activation Banani\n\nDemandez explicitement à Codex : « Active le workflow Banani décrit dans docs/design/BANANI_WORKFLOW.md ». Le compte, le forfait, le MCP et les exports restent UAT_EXTERNE jusqu’à leur vérification réelle.\n",
+    );
+    return;
+  }
+  await writeFile(
+    join(root, "PROVIDED_DESIGN_WORKFLOW.md"),
+    providedDesignWorkflow(config),
+  );
+}
+
+function frontendLocation(config: FangaBaseConfig): string {
+  if (config.architecture.integration === "inertia") return "resources/js";
+  if (config.architecture.frontend === "blade") return "resources/views";
+  if (config.architecture.frontend === "next")
+    return config.architecture.backend === "next" ? "apps/web" : "frontend";
+  return "frontend";
+}
+
+function designSafety(config: FangaBaseConfig): string {
+  return `Architecture : \`${config.architecture.integration}\`. Frontend détecté : \`${frontendLocation(config)}\`. Lire d’abord \`fangabase.config.yaml\`, \`ARCHITECTURE.md\`, \`docs/product/\`, puis découvrir les contrats et routes réellement présents. Ne jamais inventer de route ni affaiblir authentification, sessions, cookies, CSRF, CORS, rôles, permissions, anti-IDOR, organisations, finance, webhooks ou stockage privé. Aucun secret ne doit utiliser \`NEXT_PUBLIC_*\`, \`VITE_*\` ou \`REACT_APP_*\`.`;
+}
+
+function stitchWorkflow(config: FangaBaseConfig): string {
+  return `# Workflow Stitch facultatif\n\n${designSafety(config)}\n\nStitch n’est pas une dépendance runtime. Utiliser uniquement un projet Stitch réellement fourni, confirmer séparément toute connexion externe, conserver localement captures, HTML, textes et assets, puis intégrer écran par écran avec contrôles responsive, accessibilité et sécurité.\n`;
+}
+
+function bananiWorkflow(config: FangaBaseConfig): string {
+  return `# Workflow Banani facultatif\n\n${designSafety(config)}\n\nStatut : UAT_EXTERNE. Ne jamais inventer URL MCP, clé, commande, package ou capacité Banani. Utiliser uniquement les instructions du compte réel; sinon importer les exports HTML/CSS et images fournis, puis vérifier chaque écran.\n`;
+}
+
+function providedDesignWorkflow(config: FangaBaseConfig): string {
+  return `# Workflow de design fourni\n\n${designSafety(config)}\n\nInventorier les écrans et références fournis, mapper chaque écran vers une route existante, conserver les textes et assets, intégrer écran par écran, puis tester fidélité, responsive, accessibilité et autorisations.\n`;
+}
+
+function finalReport(config: FangaBaseConfig, plan: ProjectPlan): string {
+  return `# Rapport final FangaBase\n\n- Produit : ${config.product.name}\n- Architecture : ${config.architecture.target}\n- Backend : ${config.architecture.backend}\n- Frontend : ${config.architecture.frontend}\n- Base : ${config.database.provider}\n- Services : e-mail ${config.email.provider}; paiements ${config.payments.providers.join(", ") || "aucun"}\n- Composants installés : ${plan.included.join(", ")}\n- Documents produit : à vérifier dans \`docs/product/\`\n- Variables restantes : voir \`.env.example\`\n- Migrations : À EXÉCUTER\n- Tests : À EXÉCUTER\n- Build : À EXÉCUTER\n- Smoke authentification : À EXÉCUTER\n- Design : ${config.design.source}\n- UAT externes : ${plan.warnings.join(" ") || "aucune sélectionnée"}\n- Décision : FAIL tant que les gates locales obligatoires ne sont pas exécutées\n\nActualiser ce rapport après setup, doctor, migrations, tests, build et smoke. Ne jamais déclarer PASS lorsqu’une gate obligatoire échoue.\n`;
 }
 
 function serviceDocumentation(config: FangaBaseConfig): string {

@@ -1,4 +1,4 @@
-﻿# Fanga Design Banani â€” Assistant autonome Banani â†’ MCP â†’ Codex â†’ Frontend
+?# Fanga Design Banani — Assistant autonome Banani → MCP → Codex → Frontend
 
 > **Rôle dans FangaBase.** Assistant externe facultatif : sa lecture ou son audit ne lance aucune phase, connexion ou demande utilisateur. Il s'active seulement sur demande explicite. Banani n'est ni obligatoire, ni une dépendance runtime, ni un design officiel. MCP et abonnement restent non validés/UAT.
 >
@@ -6,32 +6,48 @@
 >
 > Les profils Cloud/Vercel, VPS, mutualisé et hybride déterminent origines, URL backend et cookies. Utiliser uniquement les instructions affichées par Banani. Ne jamais inventer URL MCP, clé, package, commande ou capacité. Sans MCP, conserver le secours HTML/CSS ou images.
 
+## Découverte obligatoire du frontend
+
+Lire d’abord `fangabase.config.yaml`, `ARCHITECTURE.md`, `docs/product/`, puis découvrir les contrats, routes et fichiers réellement présents. La matrice suivante guide l’inspection sans remplacer cette découverte :
+
+| Architecture             | Emplacement frontend à confirmer                  |
+| ------------------------ | ------------------------------------------------- |
+| Next.js autonome         | structure Next.js générée                         |
+| Laravel/Blade            | `resources/views`                                 |
+| Laravel/React/Inertia    | `resources/js` et `resources/views/app.blade.php` |
+| Laravel API + Next.js    | dossier Next.js séparé                            |
+| Laravel API + React/Vite | dossier React séparé                              |
+| Hybride Next.js          | dossier Next.js séparé                            |
+| Hybride React            | dossier React séparé                              |
+
+Ne jamais exposer un secret avec `NEXT_PUBLIC_*`, `VITE_*` ou `REACT_APP_*`.
+
 ## Mission
 
-Tu es lâ€™assistant autonome chargÃ© de prÃ©parer et dâ€™exÃ©cuter tout le workflow :
+Tu es l’assistant autonome chargé de préparer et d’exécuter tout le workflow :
 
-**Projet existant ou dossier vide â†’ Banani AI â†’ MCP Banani ou export HTML/CSS â†’ Codex â†’ React / Next.js â†’ intÃ©gration fidÃ¨le â†’ validation visuelle â†’ rapport final**
+**Projet existant ou dossier vide → Banani AI → MCP Banani ou export HTML/CSS → Codex → React / Next.js → intégration fidèle → validation visuelle → rapport final**
 
-Lâ€™utilisateur est dÃ©butant. Il ne doit pas connaÃ®tre Codex CLI, MCP, Git, React, Next.js, les variables dâ€™environnement ou la structure dâ€™un projet pour rÃ©ussir.
+L’utilisateur est débutant. Il ne doit pas connaître Codex CLI, MCP, Git, React, Next.js, les variables d’environnement ou la structure d’un projet pour réussir.
 
 Tu dois :
 
-1. inspecter le dossier rÃ©el ;
-2. reconnaÃ®tre sâ€™il est vide, frontend uniquement, backend uniquement ou full stack ;
-3. protÃ©ger tout ce qui existe dÃ©jÃ  ;
-4. vÃ©rifier les prÃ©requis ;
+1. inspecter le dossier réel ;
+2. reconnaître s’il est vide, frontend uniquement, backend uniquement ou full stack ;
+3. protéger tout ce qui existe déjà ;
+4. vérifier les prérequis ;
 5. guider uniquement les actions humaines indispensables ;
-6. prÃ©parer automatiquement les fichiers et dossiers locaux ;
-7. guider la crÃ©ation du compte et du projet Banani ;
-8. produire un prompt Banani adaptÃ© au produit et au code existant ;
-9. guider la connexion officielle Banani MCP Ã  Codex sans inventer de clÃ© ni dâ€™endpoint ;
-10. utiliser automatiquement lâ€™export HTML/CSS ou image comme solution de secours si le MCP nâ€™est pas disponible ;
-11. rÃ©cupÃ©rer et matÃ©rialiser toutes les rÃ©fÃ©rences localement ;
-12. crÃ©er `DESIGN.md` ;
-13. proposer un plan adaptÃ© au projet ;
-14. intÃ©grer les Ã©crans sans casser le backend ni les fonctions existantes ;
-15. comparer chaque Ã©cran au design Banani ;
-16. corriger les Ã©carts ;
+6. préparer automatiquement les fichiers et dossiers locaux ;
+7. guider la création du compte et du projet Banani ;
+8. produire un prompt Banani adapté au produit et au code existant ;
+9. guider la connexion officielle Banani MCP à Codex sans inventer de clé ni d’endpoint ;
+10. utiliser automatiquement l’export HTML/CSS ou image comme solution de secours si le MCP n’est pas disponible ;
+11. récupérer et matérialiser toutes les références localement ;
+12. créer `DESIGN.md` ;
+13. proposer un plan adapté au projet ;
+14. intégrer les écrans sans casser le backend ni les fonctions existantes ;
+15. comparer chaque écran au design Banani ;
+16. corriger les écarts ;
 17. produire un rapport final.
 
 ---
@@ -40,100 +56,100 @@ Tu dois :
 
 Banani permet de :
 
-- gÃ©nÃ©rer des interfaces multi-Ã©crans depuis un prompt, une rÃ©fÃ©rence ou un PRD ;
-- modifier les Ã©crans par conversation ou directement dans lâ€™Ã©diteur ;
-- conserver une identitÃ© visuelle entre plusieurs Ã©crans ;
+- générer des interfaces multi-écrans depuis un prompt, une référence ou un PRD ;
+- modifier les écrans par conversation ou directement dans l’éditeur ;
+- conserver une identité visuelle entre plusieurs écrans ;
 - exporter vers Figma, en images ou en code ;
-- copier le HTML/CSS dâ€™un Ã©cran ;
-- connecter un agent de code Ã  Banani via MCP.
+- copier le HTML/CSS d’un écran ;
+- connecter un agent de code à Banani via MCP.
 
-La connexion MCP est accessible depuis le menu dâ€™export de Banani. Selon le forfait et lâ€™interface actuelle, Banani peut afficher :
+La connexion MCP est accessible depuis le menu d’export de Banani. Selon le forfait et l’interface actuelle, Banani peut afficher :
 
-- une option de connexion Ã  un agent ;
-- un choix dâ€™agent comme Codex, Claude Code ou Cursor ;
-- une commande Ã  exÃ©cuter ;
-- un prompt Ã  copier ;
-- une fenÃªtre dâ€™autorisation ;
+- une option de connexion à un agent ;
+- un choix d’agent comme Codex, Claude Code ou Cursor ;
+- une commande à exécuter ;
+- un prompt à copier ;
+- une fenêtre d’autorisation ;
 - ou un lien de connexion.
 
-Tu dois toujours utiliser les instructions gÃ©nÃ©rÃ©es par lâ€™interface Banani elle-mÃªme.
+Tu dois toujours utiliser les instructions générées par l’interface Banani elle-même.
 
-## Interdiction dâ€™inventer la configuration
+## Interdiction d’inventer la configuration
 
 Ne suppose jamais :
 
 - une URL MCP Banani ;
 - un nom de package npm ;
-- une clÃ© API Banani ;
+- une clé API Banani ;
 - un format de token ;
-- une commande dâ€™installation ;
+- une commande d’installation ;
 - une syntaxe `config.toml`.
 
 Si Banani affiche une commande, une URL, un token, une autorisation ou une configuration, utilise exactement cette information.
 
-Si Banani ne fournit pas de MCP au compte de lâ€™utilisateur, utilise le workflow officiel de secours :
+Si Banani ne fournit pas de MCP au compte de l’utilisateur, utilise le workflow officiel de secours :
 
-**Banani â†’ Copy HTML/CSS ou export dâ€™image â†’ rÃ©fÃ©rences locales â†’ Codex.**
+**Banani → Copy HTML/CSS ou export d’image → références locales → Codex.**
 
 ---
 
-# Principe dâ€™autonomie
+# Principe d’autonomie
 
 Lorsque l'utilisateur active explicitement ce workflow, tu conduis toi-même le parcours.
 
-Tu ne dois pas attendre que lâ€™utilisateur te dise :
+Tu ne dois pas attendre que l’utilisateur te dise :
 
-- vÃ©rifie Codex CLI ;
-- vÃ©rifie Node.js ;
-- crÃ©e Git ;
-- prÃ©pare les dossiers ;
+- vérifie Codex CLI ;
+- vérifie Node.js ;
+- crée Git ;
+- prépare les dossiers ;
 - analyse mon backend ;
 - pose les questions produit ;
-- gÃ©nÃ¨re le prompt Banani ;
-- vÃ©rifie le MCP ;
-- importe mes Ã©crans ;
+- génère le prompt Banani ;
+- vérifie le MCP ;
+- importe mes écrans ;
 - copie le HTML ;
-- crÃ©e `DESIGN.md` ;
+- crée `DESIGN.md` ;
 - propose un plan ;
-- commence lâ€™intÃ©gration ;
+- commence l’intégration ;
 - compare les rendus ;
 - lance les tests.
 
 Toutes ces actions font partie de ta mission.
 
-Tu tâ€™arrÃªtes uniquement lorsquâ€™une action humaine est rÃ©ellement obligatoire.
+Tu t’arrêtes uniquement lorsqu’une action humaine est réellement obligatoire.
 
-## Actions humaines autorisÃ©es
+## Actions humaines autorisées
 
-Lâ€™utilisateur intervient seulement pour :
+L’utilisateur intervient seulement pour :
 
 - installer Node.js si absent ;
-- installer Codex CLI si Windows ou les droits systÃ¨me lâ€™exigent ;
-- se connecter Ã  OpenAI avec `codex login` ;
-- crÃ©er ou ouvrir son compte Banani ;
-- choisir ou souscrire un forfait si lâ€™accÃ¨s MCP est payant ;
-- crÃ©er ou finaliser les Ã©crans dans Banani ;
-- sÃ©lectionner les Ã©crans dans lâ€™interface Banani ;
-- cliquer dans le menu dâ€™export ;
-- choisir Codex ou lâ€™option MCP ;
-- accepter lâ€™autorisation Banani ;
-- exÃ©cuter une commande officielle fournie par Banani si elle doit Ãªtre lancÃ©e manuellement ;
-- copier un HTML/CSS ou exporter une image si le MCP nâ€™est pas disponible ;
-- choisir une stack si aucun frontend nâ€™existe ;
+- installer Codex CLI si Windows ou les droits système l’exigent ;
+- se connecter à OpenAI avec `codex login` ;
+- créer ou ouvrir son compte Banani ;
+- choisir ou souscrire un forfait si l’accès MCP est payant ;
+- créer ou finaliser les écrans dans Banani ;
+- sélectionner les écrans dans l’interface Banani ;
+- cliquer dans le menu d’export ;
+- choisir Codex ou l’option MCP ;
+- accepter l’autorisation Banani ;
+- exécuter une commande officielle fournie par Banani si elle doit être lancée manuellement ;
+- copier un HTML/CSS ou exporter une image si le MCP n’est pas disponible ;
+- choisir une stack si aucun frontend n’existe ;
 - valider le plan avant une modification importante.
 
-AprÃ¨s chaque confirmation, reprends automatiquement au bon endroit.
+Après chaque confirmation, reprends automatiquement au bon endroit.
 
 ---
 
-# RÃ¨gles absolues
+# Règles absolues
 
 ## Secrets et autorisations
 
-- Ne demande jamais Ã  lâ€™utilisateur de publier un token, une clÃ© ou un secret Banani dans la conversation.
-- Nâ€™invente jamais une variable `BANANI_API_KEY`.
-- Nâ€™ajoute une variable dâ€™environnement Banani que si lâ€™interface ou la documentation officielle Banani en fournit explicitement une.
-- Si Banani utilise une autorisation OAuth ou une session liÃ©e au MCP, laisse lâ€™utilisateur valider cette autorisation dans son navigateur.
+- Ne demande jamais à l’utilisateur de publier un token, une clé ou un secret Banani dans la conversation.
+- N’invente jamais une variable `BANANI_API_KEY`.
+- N’ajoute une variable d’environnement Banani que si l’interface ou la documentation officielle Banani en fournit explicitement une.
+- Si Banani utilise une autorisation OAuth ou une session liée au MCP, laisse l’utilisateur valider cette autorisation dans son navigateur.
 - Ne stocke jamais un token en clair dans :
   - ce fichier ;
   - `DESIGN.md` ;
@@ -143,63 +159,63 @@ AprÃ¨s chaque confirmation, reprends automatiquement au bon endroit.
   - un rapport ;
   - le code frontend.
 - Si Banani fournit une commande contenant un secret temporaire, ne la recopie pas dans les rapports.
-- VÃ©rifie que les Ã©ventuels fichiers secrets sont ignorÃ©s par Git.
+- Vérifie que les éventuels fichiers secrets sont ignorés par Git.
 
 ## Configuration MCP
 
 - Le MCP Banani doit rester local au projet lorsque Codex permet une configuration locale.
-- Ne modifie pas la configuration globale Codex sans lâ€™accord explicite de lâ€™utilisateur.
-- Utilise exactement la commande, lâ€™URL ou la configuration fournie par Banani.
-- Ne transforme pas une instruction Banani destinÃ©e Ã  Claude Code en configuration Codex sans vÃ©rifier quâ€™elle est compatible.
+- Ne modifie pas la configuration globale Codex sans l’accord explicite de l’utilisateur.
+- Utilise exactement la commande, l’URL ou la configuration fournie par Banani.
+- Ne transforme pas une instruction Banani destinée à Claude Code en configuration Codex sans vérifier qu’elle est compatible.
 - Si Banani propose directement **Codex**, choisis cette option.
-- Si Banani propose seulement une commande MCP gÃ©nÃ©rique, consulte `codex mcp --help` et adapte uniquement selon la syntaxe rÃ©ellement supportÃ©e.
-- Si lâ€™intÃ©gration directe Ã©choue, passe automatiquement au workflow HTML/CSS plutÃ´t que de bloquer lâ€™Ã©tudiant.
+- Si Banani propose seulement une commande MCP générique, consulte `codex mcp --help` et adapte uniquement selon la syntaxe réellement supportée.
+- Si l’intégration directe échoue, passe automatiquement au workflow HTML/CSS plutôt que de bloquer l’étudiant.
 
-## FidÃ©litÃ©
+## Fidélité
 
-- Banani est une spÃ©cification visuelle, pas une simple inspiration.
-- Les textes, CTA, labels, nombres et ordre des sections doivent Ãªtre conservÃ©s.
-- Le HTML/CSS fourni par Banani doit Ãªtre utilisÃ© comme rÃ©fÃ©rence structurelle.
-- Les images ou captures Banani doivent Ãªtre utilisÃ©es comme rÃ©fÃ©rences visuelles.
-- Ne rÃ©Ã©cris pas les textes.
-- Nâ€™invente pas de composants.
-- Ne remplace pas une illustration par une carte gÃ©nÃ©rique.
-- Ne dÃ©clare pas une page fidÃ¨le sans comparaison visuelle.
+- Banani est une spécification visuelle, pas une simple inspiration.
+- Les textes, CTA, labels, nombres et ordre des sections doivent être conservés.
+- Le HTML/CSS fourni par Banani doit être utilisé comme référence structurelle.
+- Les images ou captures Banani doivent être utilisées comme références visuelles.
+- Ne réécris pas les textes.
+- N’invente pas de composants.
+- Ne remplace pas une illustration par une carte générique.
+- Ne déclare pas une page fidèle sans comparaison visuelle.
 
 ## Protection du projet
 
 - Inspecte le projet avant toute modification.
-- Ne recrÃ©e jamais React ou Next.js si un frontend existe dÃ©jÃ .
+- Ne recrée jamais React ou Next.js si un frontend existe déjà.
 - Ne supprime jamais un backend existant.
-- Ne modifie pas lâ€™authentification, le CSRF, les sessions, les rÃ´les, les routes API ou la sÃ©curitÃ© backend sans nÃ©cessitÃ© explicite.
-- Si le projet contient un backend prÃªt Ã  lâ€™emploi mais pas de frontend, construis uniquement le frontend et respecte les contrats du backend.
-- Travaille par petits lots vÃ©rifiables.
-- Ne prÃ©tends jamais quâ€™un test a rÃ©ussi sans lâ€™avoir exÃ©cutÃ©.
+- Ne modifie pas l’authentification, le CSRF, les sessions, les rôles, les routes API ou la sécurité backend sans nécessité explicite.
+- Si le projet contient un backend prêt à l’emploi mais pas de frontend, construis uniquement le frontend et respecte les contrats du backend.
+- Travaille par petits lots vérifiables.
+- Ne prétends jamais qu’un test a réussi sans l’avoir exécuté.
 
 ---
 
-# Phase 1 â€” Inspection complÃ¨te du projet
+# Phase 1 — Inspection complète du projet
 
-Commence immÃ©diatement par examiner :
+Commence immédiatement par examiner :
 
-- fichiers et dossiers prÃ©sents ;
+- fichiers et dossiers présents ;
 - `package.json`, `composer.json`, `pyproject.toml`, autres manifestes ;
-- React, Vite, Next.js, Laravel, API sÃ©parÃ©e ou autre stack ;
+- React, Vite, Next.js, Laravel, API séparée ou autre stack ;
 - dossiers `src`, `app`, `pages`, `components`, `public`, `resources`, `routes`, `api` ;
 - styles existants ;
-- Tailwind CSS ou autre systÃ¨me ;
+- Tailwind CSS ou autre système ;
 - Git et `.gitignore` ;
 - `.codex/config.toml` ;
-- MCP dÃ©jÃ  configurÃ©s ;
-- fichiers Banani prÃ©cÃ©demment exportÃ©s ;
+- MCP déjà configurés ;
+- fichiers Banani précédemment exportés ;
 - authentification ;
-- rÃ´les ;
+- rôles ;
 - routes backend ;
-- schÃ©mas ou types ;
+- schémas ou types ;
 - tests ;
 - design system existant.
 
-PrÃ©sente un rÃ©sumÃ© court :
+Présente un résumé court :
 
 ```text
 Type de projet :
@@ -210,7 +226,7 @@ Styles :
 Git :
 Codex CLI :
 MCP Banani :
-RÃ©fÃ©rences Banani locales :
+Références Banani locales :
 Action suivante :
 ```
 
@@ -224,37 +240,37 @@ Aucun frontend ni backend.
 
 ### B. Frontend existant
 
-React, Next.js ou autre frontend dÃ©jÃ  prÃ©sent.
+React, Next.js ou autre frontend déjà présent.
 
 ### C. Backend existant sans frontend
 
-Backend sÃ©curisÃ©, routes, authentification ou API dÃ©jÃ  disponibles.
+Backend sécurisé, routes, authentification ou API déjà disponibles.
 
 ### D. Projet full stack
 
-Frontend et backend prÃ©sents.
+Frontend et backend présents.
 
 ### E. Projet incomplet ou inconnu
 
-Structure inhabituelle ou Ã©lÃ©ments essentiels manquants.
+Structure inhabituelle ou éléments essentiels manquants.
 
-Adapte tout le workflow Ã  cette classification.
+Adapte tout le workflow à cette classification.
 
 ---
 
-# Phase 2 â€” VÃ©rifier Codex CLI
+# Phase 2 — Vérifier Codex CLI
 
-ExÃ©cute automatiquement :
+Exécute automatiquement :
 
 ```cmd
 codex --version
 ```
 
-## Codex CLI installÃ©
+## Codex CLI installé
 
-Affiche la version puis vÃ©rifie que lâ€™utilisateur est connectÃ©.
+Affiche la version puis vérifie que l’utilisateur est connecté.
 
-Utilise, si nÃ©cessaire :
+Utilise, si nécessaire :
 
 ```cmd
 codex login
@@ -262,7 +278,7 @@ codex login
 
 ## Codex CLI absent
 
-VÃ©rifie :
+Vérifie :
 
 ```cmd
 node --version
@@ -273,13 +289,13 @@ npm --version
 
 Dis :
 
-> Codex CLI nâ€™est pas encore installÃ©. Ouvre lâ€™invite de commandes Windows et exÃ©cute :
+> Codex CLI n’est pas encore installé. Ouvre l’invite de commandes Windows et exécute :
 
 ```cmd
 npm install -g @openai/codex
 ```
 
-Puis vÃ©rifie :
+Puis vérifie :
 
 ```cmd
 codex --version
@@ -293,13 +309,13 @@ codex login
 
 Demande uniquement :
 
-> RÃ©ponds **Codex prÃªt** lorsque lâ€™installation et la connexion sont terminÃ©es.
+> Réponds **Codex prêt** lorsque l’installation et la connexion sont terminées.
 
-AprÃ¨s confirmation, vÃ©rifie automatiquement et continue.
+Après confirmation, vérifie automatiquement et continue.
 
 ### Node.js ou npm absents
 
-Demande lâ€™installation de Node.js LTS, puis la vÃ©rification :
+Demande l’installation de Node.js LTS, puis la vérification :
 
 ```cmd
 node --version
@@ -308,25 +324,25 @@ npm --version
 
 Demande uniquement :
 
-> RÃ©ponds **Node prÃªt** lorsque les deux commandes fonctionnent.
+> Réponds **Node prêt** lorsque les deux commandes fonctionnent.
 
 Reprends ensuite automatiquement.
 
-## ProblÃ¨me de PATH
+## Problème de PATH
 
-Si `npm install -g` rÃ©ussit mais que `codex` reste introuvable :
+Si `npm install -g` réussit mais que `codex` reste introuvable :
 
 ```cmd
 npm config get prefix
 ```
 
-VÃ©rifie le dossier npm global dans le `PATH`, explique seulement lâ€™action nÃ©cessaire et reteste.
+Vérifie le dossier npm global dans le `PATH`, explique seulement l’action nécessaire et reteste.
 
 ---
 
-# Phase 3 â€” PrÃ©parer le projet local
+# Phase 3 — Préparer le projet local
 
-CrÃ©e ou complÃ¨te `.gitignore` sans supprimer les rÃ¨gles existantes :
+Crée ou complète `.gitignore` sans supprimer les règles existantes :
 
 ```gitignore
 .env
@@ -335,15 +351,15 @@ CrÃ©e ou complÃ¨te `.gitignore` sans supprimer les rÃ¨gles existantes :
 docs/banani-private/
 ```
 
-Nâ€™ajoute `docs/banani-private/` que si ce dossier contient des informations dâ€™autorisation ou des exports non destinÃ©s Ã  Git.
+N’ajoute `docs/banani-private/` que si ce dossier contient des informations d’autorisation ou des exports non destinés à Git.
 
-Si Git nâ€™est pas initialisÃ© :
+Si Git n’est pas initialisé :
 
 ```cmd
 git init
 ```
 
-CrÃ©e les dossiers nÃ©cessaires :
+Crée les dossiers nécessaires :
 
 ```text
 .codex/
@@ -353,7 +369,7 @@ docs/banani-export/
 scripts/
 ```
 
-CrÃ©e :
+Crée :
 
 ```text
 docs/banani-setup.md
@@ -361,17 +377,17 @@ docs/banani-setup.md
 
 Ce fichier doit documenter uniquement :
 
-- Ã©tat de Codex CLI ;
-- mÃ©thode de connexion Banani utilisÃ©e ;
-- mÃ©thode MCP ou export ;
-- Ã©crans rÃ©cupÃ©rÃ©s ;
-- aucune donnÃ©e secrÃ¨te.
+- état de Codex CLI ;
+- méthode de connexion Banani utilisée ;
+- méthode MCP ou export ;
+- écrans récupérés ;
+- aucune donnée secrète.
 
 ---
 
-# Phase 4 â€” VÃ©rifier un MCP Banani existant
+# Phase 4 — Vérifier un MCP Banani existant
 
-ExÃ©cute :
+Exécute :
 
 ```cmd
 codex mcp list
@@ -379,310 +395,310 @@ codex mcp list
 
 Inspecte aussi la configuration locale du projet.
 
-## MCP Banani dÃ©tectÃ©
+## MCP Banani détecté
 
-1. ne le recrÃ©e pas ;
-2. vÃ©rifie quâ€™il est actif ;
-3. tente de lister ou dâ€™accÃ©der aux designs Banani ;
-4. vÃ©rifie quâ€™il peut rÃ©cupÃ©rer lâ€™Ã©cran sÃ©lectionnÃ© ;
-5. continue automatiquement si le test rÃ©ussit.
+1. ne le recrée pas ;
+2. vérifie qu’il est actif ;
+3. tente de lister ou d’accéder aux designs Banani ;
+4. vérifie qu’il peut récupérer l’écran sélectionné ;
+5. continue automatiquement si le test réussit.
 
 Annonce :
 
 ```text
-MCP Banani : dÃ©tectÃ©
-Connexion : en cours de vÃ©rification
+MCP Banani : détecté
+Connexion : en cours de vérification
 ```
 
 ## MCP Banani absent
 
-Ne crÃ©e aucune configuration inventÃ©e.
+Ne crée aucune configuration inventée.
 
-Passe Ã  la crÃ©ation du compte et du design Banani, car la connexion officielle se fait depuis lâ€™interface dâ€™export Banani.
+Passe à la création du compte et du design Banani, car la connexion officielle se fait depuis l’interface d’export Banani.
 
 ---
 
-# Phase 5 â€” Analyser le besoin produit
+# Phase 5 — Analyser le besoin produit
 
-Avant dâ€™envoyer lâ€™utilisateur dans Banani, pose toutes les questions utiles en un seul message :
+Avant d’envoyer l’utilisateur dans Banani, pose toutes les questions utiles en un seul message :
 
 1. Quel est le nom du produit ?
 2. Que permet-il de faire en une phrase ?
-3. Qui va lâ€™utiliser ?
-4. Quel problÃ¨me principal rÃ©sout-il ?
-5. Quelles pages ou quels Ã©crans faut-il crÃ©er ?
-6. Existe-t-il dÃ©jÃ  un backend ou des routes API Ã  respecter ?
-7. Quels rÃ´les utilisateurs existent ?
-8. Quelle direction visuelle est souhaitÃ©e ?
-9. Quelle est lâ€™action principale attendue ?
+3. Qui va l’utiliser ?
+4. Quel problème principal résout-il ?
+5. Quelles pages ou quels écrans faut-il créer ?
+6. Existe-t-il déjà un backend ou des routes API à respecter ?
+7. Quels rôles utilisateurs existent ?
+8. Quelle direction visuelle est souhaitée ?
+9. Quelle est l’action principale attendue ?
 10. Faut-il mobile, tablette et ordinateur ?
-11. Y a-t-il des captures ou rÃ©fÃ©rences visuelles ?
-12. Quels Ã©tats faut-il prÃ©voir : vide, chargement, erreur, succÃ¨s ?
+11. Y a-t-il des captures ou références visuelles ?
+12. Quels états faut-il prévoir : vide, chargement, erreur, succès ?
 13. Quelle langue, devise et format de date utiliser ?
 14. Y a-t-il des contenus ou textes obligatoires ?
 
-Si un backend existe, dÃ©duis automatiquement :
+Si un backend existe, déduis automatiquement :
 
-- entitÃ©s ;
-- rÃ´les ;
+- entités ;
+- rôles ;
 - routes ;
 - formulaires ;
 - tableaux ;
 - statuts ;
-- flux dâ€™authentification ;
-- pages nÃ©cessaires ;
+- flux d’authentification ;
+- pages nécessaires ;
 - contraintes API.
 
-PrÃ©sente ensuite un rÃ©sumÃ© et demande une seule confirmation.
+Présente ensuite un résumé et demande une seule confirmation.
 
 ---
 
-# Phase 6 â€” GÃ©nÃ©rer le prompt Banani
+# Phase 6 — Générer le prompt Banani
 
-Ã€ partir des rÃ©ponses et du projet existant, gÃ©nÃ¨re un prompt Banani complet comprenant :
+À partir des réponses et du projet existant, génère un prompt Banani complet comprenant :
 
 - nom du produit ;
 - cible ;
-- problÃ¨me ;
+- problème ;
 - objectif ;
-- liste des Ã©crans ;
-- contenu de chaque Ã©cran ;
+- liste des écrans ;
+- contenu de chaque écran ;
 - navigation ;
 - actions principales ;
-- identitÃ© visuelle ;
+- identité visuelle ;
 - palette ;
 - typographie ;
-- composants partagÃ©s ;
+- composants partagés ;
 - tableaux ;
 - formulaires ;
 - badges ;
-- Ã©tats vide, chargement, erreur et succÃ¨s ;
+- états vide, chargement, erreur et succès ;
 - responsive ;
-- accessibilitÃ© ;
-- cohÃ©rence entre les pages ;
+- accessibilité ;
+- cohérence entre les pages ;
 - langue, devise et dates ;
-- interdiction des templates gÃ©nÃ©riques ;
-- interdiction dâ€™inventer des fonctions absentes du backend.
+- interdiction des templates génériques ;
+- interdiction d’inventer des fonctions absentes du backend.
 
-Si lâ€™utilisateur fournit une rÃ©fÃ©rence visuelle, indique de lâ€™importer dans Banani avec le prompt.
+Si l’utilisateur fournit une référence visuelle, indique de l’importer dans Banani avec le prompt.
 
-PrÃ©sente le prompt prÃªt Ã  copier.
+Présente le prompt prêt à copier.
 
 ---
 
-# Phase 7 â€” Guider la crÃ©ation du compte Banani
+# Phase 7 — Guider la création du compte Banani
 
-Si aucune session Banani nâ€™est confirmÃ©e, indique :
+Si aucune session Banani n’est confirmée, indique :
 
 > 1. Ouvre Banani AI dans ton navigateur.
-> 2. Clique sur **Start designing** ou crÃ©e un compte.
+> 2. Clique sur **Start designing** ou crée un compte.
 > 3. Connecte-toi avec Google ou avec ton adresse email.
-> 4. CrÃ©e un nouveau projet.
-> 5. Choisis un projet Web si lâ€™interface le demande.
-> 6. Colle le prompt prÃ©parÃ©.
-> 7. Garde tous les Ã©crans dans le mÃªme projet.
+> 4. Crée un nouveau projet.
+> 5. Choisis un projet Web si l’interface le demande.
+> 6. Colle le prompt préparé.
+> 7. Garde tous les écrans dans le même projet.
 
 Demande uniquement :
 
-> RÃ©ponds **projet Banani crÃ©Ã©** lorsque le projet est ouvert.
+> Réponds **projet Banani créé** lorsque le projet est ouvert.
 
-AprÃ¨s confirmation, demande Ã  lâ€™utilisateur de crÃ©er et finaliser les Ã©crans.
+Après confirmation, demande à l’utilisateur de créer et finaliser les écrans.
 
 ---
 
-# Phase 8 â€” Finaliser les Ã©crans dans Banani
+# Phase 8 — Finaliser les écrans dans Banani
 
-Demande Ã  lâ€™utilisateur de vÃ©rifier :
+Demande à l’utilisateur de vérifier :
 
-- tous les Ã©crans appartiennent au mÃªme projet ;
-- les Ã©crans portent des noms clairs ;
-- les couleurs sont cohÃ©rentes ;
-- la typographie est cohÃ©rente ;
-- les boutons et champs utilisent les mÃªmes styles ;
-- les textes sont dÃ©finitifs ;
+- tous les écrans appartiennent au même projet ;
+- les écrans portent des noms clairs ;
+- les couleurs sont cohérentes ;
+- la typographie est cohérente ;
+- les boutons et champs utilisent les mêmes styles ;
+- les textes sont définitifs ;
 - les CTA sont exacts ;
-- les vues mobiles nÃ©cessaires sont prÃ©sentes ;
-- les Ã©tats vides, chargement, erreur et succÃ¨s existent ;
-- le prototype et la navigation sont cohÃ©rents ;
-- les pages correspondent aux fonctions rÃ©elles du backend.
+- les vues mobiles nécessaires sont présentes ;
+- les états vides, chargement, erreur et succès existent ;
+- le prototype et la navigation sont cohérents ;
+- les pages correspondent aux fonctions réelles du backend.
 
 Demande uniquement :
 
-> RÃ©ponds **Ã©crans Banani prÃªts** lorsque le design est finalisÃ©.
+> Réponds **écrans Banani prêts** lorsque le design est finalisé.
 
 ---
 
-# Phase 9 â€” Connexion officielle Banani MCP Ã  Codex
+# Phase 9 — Connexion officielle Banani MCP à Codex
 
-AprÃ¨s **Ã©crans Banani prÃªts**, guide lâ€™utilisateur avec des Ã©tapes simples.
+Après **écrans Banani prêts**, guide l’utilisateur avec des étapes simples.
 
-## Ã‰tapes dans Banani
+## Étapes dans Banani
 
 Dis :
 
-> 1. Dans le projet Banani, sÃ©lectionne lâ€™Ã©cran Ã  intÃ©grer.
+> 1. Dans le projet Banani, sélectionne l’écran à intégrer.
 > 2. Ouvre le menu **Export** ou **Export to**.
-> 3. Cherche lâ€™option **MCP**, **Connect to coding agent** ou une formulation Ã©quivalente.
-> 4. SÃ©lectionne **Codex** si Banani le propose.
-> 5. Si Banani affiche une commande, un prompt ou un lien dâ€™autorisation, ne le modifie pas.
-> 6. ExÃ©cute la commande dans lâ€™invite de commandes ouverte Ã  la racine de ce projet, ou accepte lâ€™autorisation dans le navigateur.
+> 3. Cherche l’option **MCP**, **Connect to coding agent** ou une formulation équivalente.
+> 4. Sélectionne **Codex** si Banani le propose.
+> 5. Si Banani affiche une commande, un prompt ou un lien d’autorisation, ne le modifie pas.
+> 6. Exécute la commande dans l’invite de commandes ouverte à la racine de ce projet, ou accepte l’autorisation dans le navigateur.
 > 7. Ne copie aucun secret dans la conversation.
 
 Demande uniquement :
 
-> RÃ©ponds **connexion Banani lancÃ©e** lorsque tu as exÃ©cutÃ© la commande ou acceptÃ© lâ€™autorisation.
+> Réponds **connexion Banani lancée** lorsque tu as exécuté la commande ou accepté l’autorisation.
 
-## AprÃ¨s confirmation
+## Après confirmation
 
 Tu dois automatiquement :
 
-1. exÃ©cuter `codex mcp list` ;
+1. exécuter `codex mcp list` ;
 2. identifier le serveur Banani ;
-3. vÃ©rifier son statut ;
-4. tenter dâ€™accÃ©der au design ou Ã  lâ€™Ã©cran sÃ©lectionnÃ© ;
-5. enregistrer la mÃ©thode rÃ©ellement utilisÃ©e dans `docs/banani-setup.md`.
+3. vérifier son statut ;
+4. tenter d’accéder au design ou à l’écran sélectionné ;
+5. enregistrer la méthode réellement utilisée dans `docs/banani-setup.md`.
 
-## Si Banani affiche une instruction destinÃ©e Ã  un autre agent
+## Si Banani affiche une instruction destinée à un autre agent
 
-Si lâ€™interface affiche seulement Claude Code ou Cursor :
+Si l’interface affiche seulement Claude Code ou Cursor :
 
 - ne suppose pas que la commande fonctionne avec Codex ;
-- cherche une option Codex ou MCP gÃ©nÃ©rique dans Banani ;
-- si une commande MCP gÃ©nÃ©rique est fournie, consulte `codex mcp --help` et adapte selon la syntaxe locale ;
-- si aucune mÃ©thode Codex compatible nâ€™est proposÃ©e, utilise le workflow dâ€™export HTML/CSS.
+- cherche une option Codex ou MCP générique dans Banani ;
+- si une commande MCP générique est fournie, consulte `codex mcp --help` et adapte selon la syntaxe locale ;
+- si aucune méthode Codex compatible n’est proposée, utilise le workflow d’export HTML/CSS.
 
 ## Forfait MCP indisponible
 
-Lâ€™accÃ¨s MCP peut dÃ©pendre du forfait Banani.
+L’accès MCP peut dépendre du forfait Banani.
 
-Si le compte ne propose pas lâ€™option MCP :
+Si le compte ne propose pas l’option MCP :
 
-- ne bloque pas lâ€™Ã©tudiant ;
+- ne bloque pas l’étudiant ;
 - ne lui impose pas de payer ;
-- explique briÃ¨vement que lâ€™export HTML/CSS reste disponible ;
-- passe automatiquement Ã  la phase de secours.
+- explique brièvement que l’export HTML/CSS reste disponible ;
+- passe automatiquement à la phase de secours.
 
 ---
 
-# Phase 10 â€” RÃ©cupÃ©ration automatique par MCP
+# Phase 10 — Récupération automatique par MCP
 
 Si le MCP Banani fonctionne :
 
-1. rÃ©cupÃ¨re le projet Banani ;
-2. rÃ©cupÃ¨re les Ã©crans sÃ©lectionnÃ©s ou disponibles ;
-3. rÃ©cupÃ¨re pour chaque Ã©cran, selon ce que Banani expose :
+1. récupère le projet Banani ;
+2. récupère les écrans sélectionnés ou disponibles ;
+3. récupère pour chaque écran, selon ce que Banani expose :
    - nom ;
    - identifiant ;
    - structure ;
    - HTML/CSS ;
    - textes ;
-   - image ou aperÃ§u ;
+   - image ou aperçu ;
    - dimensions ;
    - assets ;
    - composants ;
-4. matÃ©rialise les rÃ©fÃ©rences dans :
+4. matérialise les références dans :
 
 ```text
 docs/banani-reference/<screen-name-or-id>/
-â”œâ”€â”€ reference.png
-â”œâ”€â”€ source.html
-â”œâ”€â”€ source.css
-â”œâ”€â”€ texts.json
-â”œâ”€â”€ metadata.json
-â””â”€â”€ assets/
+├── reference.png
+├── source.html
+├── source.css
+├── texts.json
+├── metadata.json
+└── assets/
 ```
 
-5. vÃ©rifie rÃ©ellement les fichiers ;
-6. ne passe pas Ã  la suite avec un HTML vide, une image miniature ou des textes manquants.
+5. vérifie réellement les fichiers ;
+6. ne passe pas à la suite avec un HTML vide, une image miniature ou des textes manquants.
 
 ## Si le MCP expose seulement le design sans fichiers locaux
 
 Tente automatiquement de :
 
-- tÃ©lÃ©charger les URLs fournies ;
-- rÃ©cupÃ©rer le HTML/CSS ;
+- télécharger les URLs fournies ;
+- récupérer le HTML/CSS ;
 - enregistrer les captures ;
 - extraire les textes ;
 - enregistrer les assets.
 
-Ne demande pas Ã  lâ€™utilisateur de le faire si Codex peut tÃ©lÃ©charger les ressources.
+Ne demande pas à l’utilisateur de le faire si Codex peut télécharger les ressources.
 
-## Ã‰chec MCP
+## Échec MCP
 
 Avant de demander une action manuelle :
 
 1. retente la connexion ;
-2. vÃ©rifie lâ€™autorisation ;
-3. vÃ©rifie le serveur dans `codex mcp list` ;
-4. vÃ©rifie le projet et lâ€™Ã©cran sÃ©lectionnÃ© ;
-5. vÃ©rifie les permissions du forfait ;
-6. vÃ©rifie les erreurs rÃ©seau ;
-7. consigne lâ€™erreur exacte.
+2. vérifie l’autorisation ;
+3. vérifie le serveur dans `codex mcp list` ;
+4. vérifie le projet et l’écran sélectionné ;
+5. vérifie les permissions du forfait ;
+6. vérifie les erreurs réseau ;
+7. consigne l’erreur exacte.
 
-Si le MCP reste inexploitable, bascule automatiquement vers lâ€™export HTML/CSS.
+Si le MCP reste inexploitable, bascule automatiquement vers l’export HTML/CSS.
 
 ---
 
-# Phase 11 â€” Workflow de secours HTML/CSS
+# Phase 11 — Workflow de secours HTML/CSS
 
 Le workflow de secours est officiel et doit rester simple.
 
-## Instructions pour lâ€™utilisateur
+## Instructions pour l’utilisateur
 
 Dis :
 
-> 1. Dans Banani, survole lâ€™Ã©cran concernÃ©.
-> 2. Clique sur lâ€™icÃ´ne de code `<>`.
+> 1. Dans Banani, survole l’écran concerné.
+> 2. Clique sur l’icône de code `<>`.
 > 3. Choisis **Copy HTML/CSS**.
-> 4. Colle le contenu dans le fichier prÃ©parÃ© par Codex :  
+> 4. Colle le contenu dans le fichier préparé par Codex :
 >    `docs/banani-export/<nom-ecran>.html`
-> 5. Depuis le menu dâ€™export, exporte aussi lâ€™Ã©cran en image si cette option est disponible et place-le dans :  
+> 5. Depuis le menu d’export, exporte aussi l’écran en image si cette option est disponible et place-le dans :
 >    `docs/banani-export/<nom-ecran>.png`
 
-CrÃ©e automatiquement les fichiers vides avant de demander le collage.
+Crée automatiquement les fichiers vides avant de demander le collage.
 
 Demande uniquement :
 
-> RÃ©ponds **export Banani ajoutÃ©** lorsque le HTML/CSS et, si possible, lâ€™image sont enregistrÃ©s.
+> Réponds **export Banani ajouté** lorsque le HTML/CSS et, si possible, l’image sont enregistrés.
 
-## AprÃ¨s confirmation
+## Après confirmation
 
 Tu dois :
 
-1. vÃ©rifier que le HTML/CSS nâ€™est pas vide ;
-2. vÃ©rifier quâ€™il contient les textes exacts ;
-3. vÃ©rifier lâ€™image ;
-4. sÃ©parer le CSS si nÃ©cessaire ;
+1. vérifier que le HTML/CSS n’est pas vide ;
+2. vérifier qu’il contient les textes exacts ;
+3. vérifier l’image ;
+4. séparer le CSS si nécessaire ;
 5. extraire `texts.json` ;
-6. crÃ©er `metadata.json` ;
-7. copier les rÃ©fÃ©rences validÃ©es vers :
+6. créer `metadata.json` ;
+7. copier les références validées vers :
 
 ```text
 docs/banani-reference/<screen-name>/
 ```
 
-## Plusieurs Ã©crans
+## Plusieurs écrans
 
-Pour plusieurs Ã©crans :
+Pour plusieurs écrans :
 
-- prÃ©pare un fichier par Ã©cran ;
-- demande Ã  lâ€™utilisateur de les exporter dans le mÃªme ordre que lâ€™inventaire ;
-- nâ€™oblige pas lâ€™utilisateur Ã  coller tous les Ã©crans dans un seul Ã©norme fichier ;
-- vÃ©rifie chaque export avant de continuer.
+- prépare un fichier par écran ;
+- demande à l’utilisateur de les exporter dans le même ordre que l’inventaire ;
+- n’oblige pas l’utilisateur à coller tous les écrans dans un seul énorme fichier ;
+- vérifie chaque export avant de continuer.
 
 ---
 
-# Phase 12 â€” Inventaire des Ã©crans
+# Phase 12 — Inventaire des écrans
 
-Une fois les rÃ©fÃ©rences rÃ©cupÃ©rÃ©es, affiche :
+Une fois les références récupérées, affiche :
 
 ```text
 Projet Banani :
-MÃ©thode : MCP / HTML-CSS
-Ã‰crans rÃ©cupÃ©rÃ©s :
+Méthode : MCP / HTML-CSS
+Écrans récupérés :
 1. ...
 2. ...
-RÃ©fÃ©rences visuelles :
+Références visuelles :
 HTML/CSS :
 Textes exacts :
 Assets :
@@ -690,27 +706,27 @@ Assets :
 
 Demande uniquement :
 
-> Confirme lâ€™intÃ©gration de ces Ã©crans dans cet ordre.
+> Confirme l’intégration de ces écrans dans cet ordre.
 
 ---
 
-# Phase 13 â€” HiÃ©rarchie des sources de vÃ©ritÃ©
+# Phase 13 — Hiérarchie des sources de vérité
 
 Utilise toujours cet ordre :
 
-1. **Capture ou image exacte Banani** : vÃ©ritÃ© pour la composition visuelle.
-2. **HTML/CSS Banani** : vÃ©ritÃ© pour la structure, les textes et les styles fournis.
-3. **Assets Banani** : vÃ©ritÃ© pour les illustrations et icÃ´nes.
-4. **`DESIGN.md`** : vÃ©ritÃ© pour les tokens et composants communs.
-5. **Projet et backend existants** : vÃ©ritÃ© pour les fonctions, routes, donnÃ©es et sÃ©curitÃ©.
+1. **Capture ou image exacte Banani** : vérité pour la composition visuelle.
+2. **HTML/CSS Banani** : vérité pour la structure, les textes et les styles fournis.
+3. **Assets Banani** : vérité pour les illustrations et icônes.
+4. **`DESIGN.md`** : vérité pour les tokens et composants communs.
+5. **Projet et backend existants** : vérité pour les fonctions, routes, données et sécurité.
 
-`DESIGN.md` ne remplace jamais la capture ou le HTML/CSS dâ€™un Ã©cran.
+`DESIGN.md` ne remplace jamais la capture ou le HTML/CSS d’un écran.
 
 ---
 
-# Phase 14 â€” GÃ©nÃ©rer `DESIGN.md`
+# Phase 14 — Générer `DESIGN.md`
 
-Analyse tous les Ã©crans puis crÃ©e :
+Analyse tous les écrans puis crée :
 
 ```text
 DESIGN.md
@@ -718,17 +734,17 @@ DESIGN.md
 
 Il doit contenir :
 
-## IdentitÃ©
+## Identité
 
 - nom ;
-- personnalitÃ© ;
+- personnalité ;
 - ton ;
 - principes visuels.
 
 ## Tokens
 
 - palette exacte ;
-- couleurs sÃ©mantiques ;
+- couleurs sémantiques ;
 - polices ;
 - tailles ;
 - graisses ;
@@ -739,7 +755,7 @@ Il doit contenir :
 - rayons ;
 - bordures ;
 - ombres ;
-- opacitÃ©s ;
+- opacités ;
 - transitions.
 
 ## Composants
@@ -755,9 +771,9 @@ Il doit contenir :
 - modales ;
 - notifications ;
 - chargements ;
-- Ã©tats vides ;
+- états vides ;
 - erreurs ;
-- succÃ¨s.
+- succès.
 
 ## Responsive
 
@@ -769,32 +785,32 @@ Il doit contenir :
 - tailles de texte ;
 - zones tactiles.
 
-## AccessibilitÃ©
+## Accessibilité
 
 - contraste ;
 - focus ;
 - clavier ;
 - labels ;
-- hiÃ©rarchie HTML ;
-- rÃ©duction des animations.
+- hiérarchie HTML ;
+- réduction des animations.
 
-## Ã‰crans
+## Écrans
 
 - liste ;
 - fonction ;
-- composants partagÃ©s ;
-- diffÃ©rences mobile/desktop.
+- composants partagés ;
+- différences mobile/desktop.
 
 Important :
 
 - ne reformule pas les textes ;
-- ne rÃ©sume pas les Ã©crans ;
-- utilise les valeurs exactes lorsquâ€™elles sont disponibles ;
-- `DESIGN.md` dÃ©crit le systÃ¨me partagÃ©, pas le contenu exact de chaque page.
+- ne résume pas les écrans ;
+- utilise les valeurs exactes lorsqu’elles sont disponibles ;
+- `DESIGN.md` décrit le système partagé, pas le contenu exact de chaque page.
 
 ---
 
-# Phase 15 â€” DÃ©terminer la stratÃ©gie du projet
+# Phase 15 — Déterminer la stratégie du projet
 
 ## Dossier vide
 
@@ -807,10 +823,10 @@ Demande une seule fois :
 
 Explique :
 
-- Next.js : application complÃ¨te avec routes et fonctions serveur possibles.
-- React + Vite : frontend sÃ©parÃ© ou application cliente simple.
+- Next.js : application complète avec routes et fonctions serveur possibles.
+- React + Vite : frontend séparé ou application cliente simple.
 
-CrÃ©e ensuite automatiquement le projet.
+Crée ensuite automatiquement le projet.
 
 ## Frontend existant
 
@@ -825,7 +841,7 @@ Respecte :
 
 ## Backend seul
 
-Ne touche pas au backend sÃ©curisÃ©.
+Ne touche pas au backend sécurisé.
 
 Analyse :
 
@@ -833,30 +849,30 @@ Analyse :
 - authentification ;
 - CSRF ;
 - sessions ou tokens ;
-- rÃ´les ;
-- rÃ©ponses ;
+- rôles ;
+- réponses ;
 - validations ;
 - erreurs.
 
-PrÃ©pare le frontend pour utiliser exactement ces contrats.
+Prépare le frontend pour utiliser exactement ces contrats.
 
 ## Full stack
 
-IntÃ¨gre les Ã©crans dans le frontend existant et prÃ©serve toutes les fonctions reliÃ©es au backend.
+Intègre les écrans dans le frontend existant et préserve toutes les fonctions reliées au backend.
 
 ---
 
-# Phase 16 â€” Plan dâ€™intÃ©gration
+# Phase 16 — Plan d’intégration
 
-PrÃ©sente un plan comprenant :
+Présente un plan comprenant :
 
 - classification du projet ;
 - stack ;
-- mÃ©thode de rÃ©cupÃ©ration Banani ;
-- Ã©crans ;
+- méthode de récupération Banani ;
+- écrans ;
 - routes ;
 - layouts ;
-- composants partagÃ©s ;
+- composants partagés ;
 - tokens ;
 - responsive ;
 - connexion au backend ;
@@ -868,50 +884,50 @@ PrÃ©sente un plan comprenant :
 Ajoute un tableau :
 
 ```text
-Ã‰cran | RÃ©fÃ©rence PNG | HTML/CSS | Textes | Route cible | Statut
+Écran | Référence PNG | HTML/CSS | Textes | Route cible | Statut
 ```
 
-Ordre recommandÃ© :
+Ordre recommandé :
 
-1. Ã©tat initial et sauvegarde ;
+1. état initial et sauvegarde ;
 2. tokens ;
 3. composants de base ;
 4. layouts ;
 5. pages publiques ;
 6. authentification ;
 7. dashboard ;
-8. pages mÃ©tier ;
-9. Ã©tats ;
-10. donnÃ©es ;
+8. pages métier ;
+9. états ;
+10. données ;
 11. responsive ;
 12. comparaison ;
 13. tests.
 
 Demande uniquement :
 
-> Valides-tu ce plan dâ€™intÃ©gration ?
+> Valides-tu ce plan d’intégration ?
 
 ---
 
-# Phase 17 â€” IntÃ©gration fidÃ¨le Ã©cran par Ã©cran
+# Phase 17 — Intégration fidèle écran par écran
 
-AprÃ¨s validation, commence automatiquement.
+Après validation, commence automatiquement.
 
-Pour chaque Ã©cran :
+Pour chaque écran :
 
 1. ouvre la capture Banani ;
 2. ouvre le HTML/CSS Banani ;
 3. ouvre les textes et assets ;
-4. inventorie les Ã©lÃ©ments visibles ;
-5. implÃ©mente un seul Ã©cran ;
-6. lance lâ€™application ;
-7. produit une capture locale Ã  la mÃªme largeur ;
-8. compare avec la rÃ©fÃ©rence ;
+4. inventorie les éléments visibles ;
+5. implémente un seul écran ;
+6. lance l’application ;
+7. produit une capture locale à la même largeur ;
+8. compare avec la référence ;
 9. corrige ;
-10. rÃ©pÃ¨te jusquâ€™Ã  validation ;
+10. répète jusqu’à validation ;
 11. passe au suivant.
 
-## TolÃ©rance zÃ©ro sur le contenu
+## Tolérance zéro sur le contenu
 
 Conserve exactement :
 
@@ -930,44 +946,44 @@ Interdictions :
 
 - reformuler ;
 - raccourcir ;
-- amÃ©liorer le texte ;
+- améliorer le texte ;
 - changer un CTA ;
 - supprimer un bloc ;
 - inventer une carte ;
 - remplacer un mockup ;
-- changer lâ€™ordre ;
+- changer l’ordre ;
 - utiliser Banani comme simple inspiration.
 
 ## Architecture propre
 
-La fidÃ©litÃ© nâ€™autorise pas un code sale :
+La fidélité n’autorise pas un code sale :
 
-- composants partagÃ©s ;
-- tokens centralisÃ©s ;
+- composants partagés ;
+- tokens centralisés ;
 - pas de duplication massive ;
 - respect de la stack ;
-- backend prÃ©servÃ© ;
-- aucun secret exposÃ©.
+- backend préservé ;
+- aucun secret exposé.
 
 ---
 
-# Phase 18 â€” Validation visuelle obligatoire
+# Phase 18 — Validation visuelle obligatoire
 
-Pour chaque Ã©cran :
+Pour chaque écran :
 
-1. ouvre la rÃ©fÃ©rence ;
-2. ouvre la page locale Ã  la mÃªme largeur ;
-3. prends une capture complÃ¨te ;
-4. compare cÃ´te Ã  cÃ´te ;
-5. consigne les Ã©carts ;
+1. ouvre la référence ;
+2. ouvre la page locale à la même largeur ;
+3. prends une capture complète ;
+4. compare côte à côte ;
+5. consigne les écarts ;
 6. corrige ;
 7. reprends la capture.
 
-VÃ©rifie :
+Vérifie :
 
-- textes caractÃ¨re par caractÃ¨re ;
+- textes caractère par caractère ;
 - ordre ;
-- retours Ã  la ligne ;
+- retours à la ligne ;
 - dimensions ;
 - marges ;
 - paddings ;
@@ -976,7 +992,7 @@ VÃ©rifie :
 - polices ;
 - graisses ;
 - images ;
-- icÃ´nes ;
+- icônes ;
 - boutons ;
 - rayons ;
 - bordures ;
@@ -987,19 +1003,19 @@ VÃ©rifie :
 
 Niveaux :
 
-- **Bloquant** : contenu ou structure diffÃ©rent.
-- **Majeur** : diffÃ©rence visuelle Ã©vidente.
-- **Mineur** : finition discrÃ¨te.
+- **Bloquant** : contenu ou structure différent.
+- **Majeur** : différence visuelle évidente.
+- **Mineur** : finition discrète.
 
-Aucun Ã©cran nâ€™est validÃ© avec un Ã©cart bloquant ou majeur.
+Aucun écran n’est validé avec un écart bloquant ou majeur.
 
 ---
 
-# Phase 19 â€” Tests obligatoires
+# Phase 19 — Tests obligatoires
 
-ExÃ©cute ce qui est disponible :
+Exécute ce qui est disponible :
 
-- installation des dÃ©pendances ;
+- installation des dépendances ;
 - lint ;
 - TypeScript ;
 - build ;
@@ -1010,26 +1026,26 @@ ExÃ©cute ce qui est disponible :
 - formulaires ;
 - authentification ;
 - CSRF ;
-- rÃ´les ;
+- rôles ;
 - erreurs API ;
 - focus clavier ;
 - 320 px ;
 - largeur mobile Banani ;
 - 768 px ;
 - 1440 px ;
-- absence de dÃ©bordement ;
+- absence de débordement ;
 - images ;
 - console ;
 - contraste ;
 - `prefers-reduced-motion`.
 
-Ne dÃ©clare jamais le travail terminÃ© si le build Ã©choue.
+Ne déclare jamais le travail terminé si le build échoue.
 
 ---
 
-# Phase 20 â€” Rapport final
+# Phase 20 — Rapport final
 
-CrÃ©e :
+Crée :
 
 ```text
 docs/banani-integration-report.md
@@ -1039,33 +1055,33 @@ Il doit contenir :
 
 - classification du projet ;
 - projet Banani ;
-- mÃ©thode MCP ou HTML/CSS ;
-- Ã©crans rÃ©cupÃ©rÃ©s ;
-- Ã©crans intÃ©grÃ©s ;
+- méthode MCP ou HTML/CSS ;
+- écrans récupérés ;
+- écrans intégrés ;
 - composants ;
 - routes ;
 - connexions backend ;
 - fichiers importants ;
 - tests ;
-- Ã©carts ;
-- dÃ©cisions ;
+- écarts ;
+- décisions ;
 - synchronisation future.
 
-Nâ€™inclus aucun token ou secret.
+N’inclus aucun token ou secret.
 
 Affiche :
 
 ```text
 Projet Banani :
-MÃ©thode :
-Ã‰crans rÃ©cupÃ©rÃ©s :
-Ã‰crans intÃ©grÃ©s :
+Méthode :
+Écrans récupérés :
+Écrans intégrés :
 Stack :
-Backend prÃ©servÃ© :
+Backend préservé :
 DESIGN.md :
 MCP :
 Tests :
-Ã‰carts :
+Écarts :
 Prochaine action :
 ```
 
@@ -1073,16 +1089,16 @@ Prochaine action :
 
 # Synchronisation future
 
-Lorsquâ€™un Ã©cran change dans Banani :
+Lorsqu’un écran change dans Banani :
 
-1. rÃ©cupÃ¨re le nouvel Ã©cran via MCP ;
-2. si MCP indisponible, demande le nouvel HTML/CSS et lâ€™image ;
-3. compare avec les rÃ©fÃ©rences prÃ©cÃ©dentes ;
-4. modifie uniquement les composants concernÃ©s ;
-5. conserve les fonctions et donnÃ©es ;
+1. récupère le nouvel écran via MCP ;
+2. si MCP indisponible, demande le nouvel HTML/CSS et l’image ;
+3. compare avec les références précédentes ;
+4. modifie uniquement les composants concernés ;
+5. conserve les fonctions et données ;
 6. actualise `DESIGN.md` uniquement si les tokens changent ;
 7. relance les tests ;
-8. rÃ©sume les changements.
+8. résume les changements.
 
 Ne remplace jamais tout le frontend pour une petite modification.
 
@@ -1092,6 +1108,6 @@ Ne remplace jamais tout le frontend pour une petite modification.
 
 Après une demande explicite d'intégration Banani, réponds :
 
-> Je vais piloter automatiquement le workflow Banani pour ce projet. Je commence par identifier le type de projet, vÃ©rifier Codex CLI, les MCP disponibles et les rÃ©fÃ©rences locales. Je nâ€™inventerai aucune clÃ© ni configuration Banani, et je ne te demanderai dâ€™intervenir que lorsquâ€™une action humaine est indispensable.
+> Je vais piloter automatiquement le workflow Banani pour ce projet. Je commence par identifier le type de projet, vérifier Codex CLI, les MCP disponibles et les références locales. Je n’inventerai aucune clé ni configuration Banani, et je ne te demanderai d’intervenir que lorsqu’une action humaine est indispensable.
 
-Puis commence immÃ©diatement lâ€™inspection.
+Puis commence immédiatement l’inspection.

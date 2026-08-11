@@ -73,12 +73,9 @@ describe("questionnaire agent", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("publie les valeurs par défaut du parcours PowerShell", async () => {
+  it("publie les valeurs par défaut du registre sans les choisir", async () => {
     const { response } = await run({ "deployment.family": "cloud" });
-    expect(
-      response.questions.find((question) => question.id === "database.provider")
-        ?.default,
-    ).toBe("neon");
+    expect(response.questions).toHaveLength(1);
     expect(
       questionRegistry.find((question) => question.id === "design.source")
         ?.default,
@@ -140,15 +137,14 @@ describe("questionnaire agent", () => {
     expect(config.deployment?.family).toBe("shared");
   });
 
-  it("retourne uniquement les questions manquantes après des réponses partielles", async () => {
+  it("retourne uniquement la prochaine question après des réponses partielles", async () => {
     const { response } = await run({
       "product.name": "Campus Mali",
       "deployment.family": "vps",
     });
     expect(response.status).toBe("NEEDS_ANSWERS");
-    expect(response.questions.map((question) => question.id)).toContain(
-      "architecture.vps_variant",
-    );
+    expect(response.questions).toHaveLength(1);
+    expect(response.questions[0]?.id).toBe("product.description");
     expect(response.questions.map((question) => question.id)).not.toContain(
       "product.name",
     );

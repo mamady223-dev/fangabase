@@ -19,7 +19,13 @@ pnpm install --frozen-lockfile
 pnpm create:project
 ```
 
-Le générateur accepte aussi un fichier déterministe :
+Codex accompagne ensuite automatiquement : idée → validation → cahier des charges → choix techniques → génération → configuration → smoke auth → design facultatif → tests → rapport final. Le protocole complet est décrit dans [le parcours étudiant officiel](docs/getting-started/student-journey.md).
+
+## Automatisation avancée et CI
+
+Les options suivantes sont internes aux agents, aux utilisateurs avancés et à la CI; l’étudiant n’a pas à les saisir pendant le parcours guidé.
+
+Le générateur accepte un fichier déterministe :
 
 ```sh
 pnpm create:project --config fangabase.config.example.yaml --destination ../mon-projet --dry-run --json

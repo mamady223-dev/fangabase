@@ -1,4 +1,4 @@
-import { cp, lstat, mkdir, readdir } from "node:fs/promises";
+import { cp, lstat, mkdir, readFile, readdir } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 
 const MAX_DOCUMENT_BYTES = 2 * 1024 * 1024;
@@ -25,6 +25,15 @@ export async function copyProductDocs(
       throw new Error(`Document produit non sûr ou refusé: ${name}.`);
     if (/^(?:\.env|.*(?:secret|credential|private[-_]?key).*)/i.test(name))
       throw new Error(`Document produit sensible refusé: ${name}.`);
+    const content = await readFile(path, "utf8");
+    if (/décision\s*:\s*NO_GO_TEMPORAIRE/iu.test(content))
+      throw new Error(
+        "La décision NO_GO_TEMPORAIRE interdit la génération du projet.",
+      );
+    if (/décision\s*:\s*PIVOT/iu.test(content))
+      throw new Error(
+        "La décision PIVOT exige une nouvelle validation avant génération.",
+      );
     accepted.push(name);
   }
   const target = join(destinationRoot, "docs/product");

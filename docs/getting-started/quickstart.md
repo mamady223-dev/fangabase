@@ -9,6 +9,8 @@ pnpm install --frozen-lockfile
 pnpm create:project
 ```
 
+Ces quatre commandes lancent le [parcours étudiant officiel](student-journey.md). Sans TTY et sans brief explicite, la première réponse machine est `NEEDS_PROJECT_VALIDATION`; les questions techniques ne commencent qu’après une décision `GO_CONDITIONNEL` et un brief produit valide.
+
 Node.js 22 et pnpm 11 sont communs à tous les profils. PHP 8.2 et Composer 2.8 ne sont requis que pour Laravel ou un profil hybride. Docker est facultatif.
 
 Le questionnaire choisit le déploiement, l’autorité backend, le frontend, la base, l’e-mail, les paiements, la facturation et la source frontend. Le type de produit reste descriptif. Avant toute écriture, le CLI affiche la destination, les inclusions, les exclusions, les commandes et les avertissements.

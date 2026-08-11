@@ -457,4 +457,65 @@ describe("générateur de projet ciblé", () => {
     const env = await readFile(join(destination, ".env.example"), "utf8");
     expect(env).not.toMatch(/STRIPE_|FEDAPAY_|ORANGE_MONEY_|MONEROO_/);
   });
+
+  it.each([
+    ["headless", "README.md"],
+    ["stitch", "STITCH_WORKFLOW.md"],
+    ["banani", "BANANI_WORKFLOW.md"],
+    ["provided_mockups", "PROVIDED_DESIGN_WORKFLOW.md"],
+    ["custom_frontend", "PROVIDED_DESIGN_WORKFLOW.md"],
+  ] as const)(
+    "copie uniquement le workflow design %s",
+    async (source, expected) => {
+      const directory = await mkdtemp(join(tmpdir(), "fangabase-design-"));
+      const destination = join(directory, "application");
+      await generateProject({
+        config: configSchema.parse({ ...base, design: { source } }),
+        destination,
+        sourceRoot,
+        confirmed: true,
+      });
+      expect(await readdir(join(destination, "docs/design"))).toEqual(
+        source === "stitch" || source === "banani"
+          ? ["ACTIVATION.md", expected]
+          : [expected],
+      );
+      expect(
+        await readFile(
+          join(destination, "docs/FANGABASE_FINAL_REPORT.md"),
+          "utf8",
+        ),
+      ).toContain(`- Design : ${source}`);
+    },
+  );
+
+  it("importe les documents produit et crée un relais explicite", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-handoff-"));
+    const productDocs = join(directory, "product-docs");
+    const destination = join(directory, "application");
+    await import("node:fs/promises").then(({ mkdir }) => mkdir(productDocs));
+    await writeFile(
+      join(productDocs, "BACKLOG_MVP.md"),
+      "# Backlog\n\nDécision : GO_CONDITIONNEL\n",
+    );
+    await writeFile(join(productDocs, "PRD.md"), "# PRD\n");
+    await generateProject({
+      config: base,
+      destination,
+      sourceRoot,
+      productDocs,
+      confirmed: true,
+    });
+    expect(await readdir(join(destination, "docs/product"))).toEqual([
+      "BACKLOG_MVP.md",
+      "IMPLEMENTATION_HANDOFF.md",
+      "PRD.md",
+    ]);
+    expect(
+      await readFile(
+        join(destination, "docs/product/IMPLEMENTATION_HANDOFF.md"),
+        "utf8",
+      ),
+    ).toContain("ne créent automatiquement ni métier, ni entité, ni table");
+  });
 });

@@ -29,6 +29,11 @@ import { readBrief } from "./brief.js";
 import { runAgentQuestionnaire } from "./agent-questionnaire.js";
 import { generatorVersion } from "./questions.js";
 import { shouldUseAutomaticAgentMode } from "./create-mode.js";
+import {
+  journeyQuestionnaireResult,
+  needsProjectValidation,
+  readyFromBrief,
+} from "./student-journey.js";
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -163,8 +168,6 @@ program
         );
       const incompatible = [
         "config",
-        "brief",
-        "productDocs",
         "destination",
         "force",
         "yes",
@@ -191,12 +194,29 @@ program
         );
         return;
       }
+      if (!options.answers && !options.brief) {
+        process.stdout.write(
+          `${JSON.stringify(needsProjectValidation(generatorVersion))}\n`,
+        );
+        return;
+      }
+      if (options.brief) {
+        const config = await readBrief(
+          resolve(invocationDirectory, options.brief),
+        );
+        process.stdout.write(
+          `${JSON.stringify(readyFromBrief(config, generatorVersion))}\n`,
+        );
+        return;
+      }
       process.stdout.write(
         `${JSON.stringify(
-          await runAgentQuestionnaire({
-            invocationDirectory,
-            ...(options.answers ? { answersPath: options.answers } : {}),
-          }),
+          journeyQuestionnaireResult(
+            await runAgentQuestionnaire({
+              invocationDirectory,
+              ...(options.answers ? { answersPath: options.answers } : {}),
+            }),
+          ),
         )}\n`,
       );
       return;

@@ -22,7 +22,12 @@ type QuestionnaireError = {
 export type AgentQuestionnaireResult = {
   protocol_version: number;
   generator_version: string;
-  status: "INVALID_ANSWERS" | "NEEDS_ANSWERS" | "READY";
+  status:
+    | "INVALID_ANSWERS"
+    | "NEEDS_ANSWERS"
+    | "NEEDS_TECHNICAL_ANSWERS"
+    | "READY"
+    | "READY_FOR_DRY_RUN";
   questions: ReturnType<typeof publicQuestion>[];
   errors: QuestionnaireError[];
   config_yaml?: string;
@@ -38,7 +43,7 @@ export async function runAgentQuestionnaire(options: {
   invocationDirectory: string;
 }): Promise<AgentQuestionnaireResult> {
   if (!options.answersPath)
-    return result("NEEDS_ANSWERS", questionRegistry, []);
+    return result("NEEDS_ANSWERS", questionRegistry.slice(0, 1), []);
   let rawAnswers: unknown = {};
   if (options.answersPath) {
     const path = resolve(options.invocationDirectory, options.answersPath);
@@ -73,7 +78,7 @@ export async function runAgentQuestionnaire(options: {
 
   const missing = missingQuestions(validated.answers);
   if (missing.length)
-    return result("NEEDS_ANSWERS", missing, [], validated.answers);
+    return result("NEEDS_ANSWERS", missing.slice(0, 1), [], validated.answers);
 
   try {
     const config = configFromAnswers(validated.answers);
