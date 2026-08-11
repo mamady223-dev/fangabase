@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
+import { validationBlocks } from "./student-journey.js";
 
 const root = resolve(import.meta.dirname, "../../..");
 const example = join(root, "fangabase.config.example.yaml");
@@ -95,6 +96,72 @@ describe("CLI FangaBase", () => {
       expect.objectContaining({ destination, generatedFiles: [] }),
     );
     expect(await readdir(directory)).toEqual([]);
+  });
+
+  it("reprend le questionnaire technique après un override sans choisir l’architecture", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-override-cli-"));
+    const answers = Object.fromEntries(
+      Object.values(validationBlocks)
+        .flat()
+        .map(({ id }) => [id, `réponse ${id}`]),
+    );
+    await writeFile(
+      join(directory, "validation.json"),
+      JSON.stringify(answers),
+    );
+    const command = (args: string[]) =>
+      spawnSync(
+        process.execPath,
+        [
+          "--import",
+          "tsx",
+          resolve(import.meta.dirname, "index.ts"),
+          "create",
+          "--agent",
+          "--json",
+          ...args,
+        ],
+        { encoding: "utf8", env: { ...process.env, INIT_CWD: directory } },
+      );
+    expect(command([]).status).toBe(0);
+    expect(command(["--validation-answers", "validation.json"]).status).toBe(0);
+    expect(
+      command(["--decision", "NO_GO_TEMPORAIRE", "--validation-score", "48"])
+        .status,
+    ).toBe(0);
+    const override = command(["--override-unvalidated"]);
+    expect(override.status, override.stderr).toBe(0);
+    expect(JSON.parse(override.stdout)).toEqual(
+      expect.objectContaining({
+        status: "NEEDS_TECHNICAL_ANSWERS",
+        student_decision: "USER_OVERRIDE_UNVALIDATED",
+        validation_score: 48,
+      }),
+    );
+    const technical = command([]);
+    expect(technical.status, technical.stderr).toBe(0);
+    const technicalResponse = JSON.parse(technical.stdout);
+    expect(technicalResponse.status).toBe("NEEDS_TECHNICAL_ANSWERS");
+    expect(technicalResponse.questions).toHaveLength(1);
+    expect(technicalResponse.questions[0].id).toBe("product.name");
+    expect(technicalResponse.questions[0]).not.toHaveProperty("default");
+    expect(technicalResponse).not.toHaveProperty("config_yaml");
+    expect(await readdir(directory)).toEqual(
+      expect.arrayContaining([".fangabase", "validation.json"]),
+    );
+  });
+
+  it("ne contient aucun chemin de remplacement par un starter extérieur", async () => {
+    const orchestration = await readFile(
+      resolve(import.meta.dirname, "index.ts"),
+      "utf8",
+    );
+    for (const forbidden of [
+      "composer create-project",
+      "npm create",
+      "npx create-",
+    ])
+      expect(orchestration).not.toContain(forbidden);
   });
 
   it("refuse la génération avant validation, dry-run et confirmation", async () => {

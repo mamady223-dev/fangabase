@@ -232,3 +232,19 @@ Preuve réelle : un profil Laravel/Inertia a été généré hors du dépôt pui
 Gates du dépôt : 122 tests CLI et 107 tests Laravel (667 assertions), suites JS/TS, lint, typecheck, builds et `release:check` verts. Aucun secret réel n’a été détecté. Les audits conservent uniquement deux avis pnpm modérés et l’avis Composer faible transitive `firebase/php-jwt` déjà documenté; aucun avis haut ou critique.
 
 Le tag `v0.4.0-rc.1` est préservé et ne sera jamais déplacé. Aucun `v0.4.0-rc.2` ne sera créé dans ce lot sans test réel complet, CI verte et confirmation explicite de l’utilisateur. La branche `stable` reste inchangée.
+
+# Correctif post-`v0.4.0-rc.1` — override de validation
+
+Décision locale : **PASS_WITH_WARNINGS, CI requise avant clôture**.
+
+Cause : `resumeJourney` transformait directement `NO_GO_TEMPORAIRE` en `FAIL`, tandis que `recordBriefReady` exigeait exclusivement `GO_CONDITIONNEL`. La décision analytique et la volonté de l’étudiant partageaient donc un seul verrou; reporter une preuve terrain ne pouvait pas rester dans le parcours.
+
+Correction : la session sépare désormais `validation_decision`, `validation_score` et `student_decision`. `VALIDATION_STEP_SKIPPED` conserve une inconnue et poursuit le bloc; `TERRAIN_VALIDATION_DEFERRED` conserve les preuves et le plan manquants; `USER_OVERRIDE_UNVALIDATED` garde le score et le NO-GO/PIVOT, démarre le questionnaire technique sans valeur préremplie et autorise ensuite uniquement le générateur FangaBase avec avertissements. Le dry-run JSON expose le statut de validation et le texte de confirmation spécifique.
+
+La sortie complète exige une demande `QUITTER FANGABASE`, puis `QUITTER`. `OK` et les autres mots de continuation ne confirment ni sortie, ni architecture, ni génération. L’orchestrateur ne contient aucune commande `composer create-project`, `npm create` ou `npx create-*`; une session abandonnée ne produit aucun remplacement.
+
+Preuves : 129 tests CLI, dont les scénarios A à F et la matrice des dix profils; 107 tests Laravel avec 667 assertions; 2 E2E; parité comportementale; setup, format, lint, typecheck, suites JS/TS, builds et `release:check` verts. Le package final est reproductible et vérifié; son SHA-256 est communiqué après la dernière régénération afin d’éviter une référence circulaire.
+
+Sécurité : aucun secret réel détecté et aucune vulnérabilité haute ou critique. Deux avis pnpm modérés et l’avis Composer faible transitif `firebase/php-jwt` restent documentés. Les validations terrain reportées sont des UAT explicites et conduisent à `PASS_WITH_WARNINGS`, jamais à un faux PASS marché.
+
+Publication : commit et CI encore requis. Le tag `v0.4.0-rc.1` et la branche `stable` restent inchangés; aucun `v0.4.0-rc.2` n’est créé sans confirmation explicite.

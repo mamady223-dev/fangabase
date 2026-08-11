@@ -219,14 +219,6 @@ function result(
 function publicQuestion(question: QuestionDefinition, answers: Answers = {}) {
   const family = answers["deployment.family"];
   const vps = answers["architecture.vps_variant"];
-  const defaultValue =
-    question.id === "database.provider"
-      ? family === "cloud"
-        ? "neon"
-        : family === "shared"
-          ? "mysql"
-          : "postgres"
-      : question.default;
   const choices =
     question.id !== "database.provider"
       ? question.choices
@@ -246,7 +238,6 @@ function publicQuestion(question: QuestionDefinition, answers: Answers = {}) {
     label: question.label,
     type: question.type,
     required: question.required,
-    ...(defaultValue !== undefined ? { default: defaultValue } : {}),
     ...(choices
       ? {
           choices: choices.map(({ value, label }) => ({

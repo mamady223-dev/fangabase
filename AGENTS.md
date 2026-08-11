@@ -30,3 +30,6 @@ Construire et maintenir une base applicative originale pour les profils Cloud, V
 - L’agent demande `OUI` ou `NON`, génère uniquement après `OUI`, puis poursuit avec setup, doctor, migrations et smoke selon le profil généré.
 - `--force` n’est jamais utilisé sans demande explicite de l’utilisateur.
 - Toute affirmation « projet prêt » exige `completion_claim_allowed: true`, la destination générée, son manifeste/configuration et les preuves persistées de setup, doctor, migrations, tests, build, smoke applicable et rapport final.
+- La validation marché conseille et protège sans emprisonner : une étape sautée ou une validation terrain reportée reste dans FangaBase et conserve honnêtement inconnues, risques et preuves manquantes.
+- Après `NO_GO_TEMPORAIRE` ou `PIVOT`, un `USER_OVERRIDE_UNVALIDATED` explicite conserve le score et la décision analytique, puis poursuit le questionnaire technique sans choisir à la place de l’étudiant.
+- Quitter FangaBase exige `QUITTER FANGABASE`, puis la confirmation exacte `QUITTER`; cette sortie arrête le parcours et ne lance jamais un starter ou générateur extérieur.

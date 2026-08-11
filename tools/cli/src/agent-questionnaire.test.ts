@@ -73,9 +73,10 @@ describe("questionnaire agent", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("publie les valeurs par défaut du registre sans les choisir", async () => {
+  it("conserve les défauts interactifs sans les préremplir pour l’agent", async () => {
     const { response } = await run({ "deployment.family": "cloud" });
     expect(response.questions).toHaveLength(1);
+    expect(response.questions[0]).not.toHaveProperty("default");
     expect(
       questionRegistry.find((question) => question.id === "design.source")
         ?.default,

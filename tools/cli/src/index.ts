@@ -37,6 +37,7 @@ import {
   recordBriefReady,
   recordGeneration,
   recordJourneyEvidence,
+  recordTechnicalQuestionnaire,
   readyFromBrief,
   resumeJourney,
 } from "./student-journey.js";
@@ -158,6 +159,13 @@ program
     "--decision <decision>",
     "GO_CONDITIONNEL, PIVOT ou NO_GO_TEMPORAIRE (usage agent interne)",
   )
+  .option("--validation-score <number>", "score analytique sur 100")
+  .option("--skip-step <id>", "reporte une question de validation précise")
+  .option("--skip-reason <text>", "raison du saut limité")
+  .option("--defer-terrain <text>", "validation terrain reportée")
+  .option("--override-unvalidated", "continue malgré les preuves manquantes")
+  .option("--quit-fangabase", "demande protégée de sortie complète")
+  .option("--confirm-exit <text>", "QUITTER ou CONTINUER")
   .option("--brief <path>", "brief Markdown contenant un bloc yaml fangabase")
   .option("--product-docs <path>", "dossier de documents produit Markdown")
   .option("--destination <path>", "nouveau dossier indépendant")
@@ -210,7 +218,16 @@ program
         );
         return;
       }
-      if (options.resume || options.validationAnswers || options.decision) {
+      if (
+        options.resume ||
+        options.validationAnswers ||
+        options.decision ||
+        options.skipStep ||
+        options.deferTerrain ||
+        options.overrideUnvalidated ||
+        options.quitFangabase ||
+        options.confirmExit
+      ) {
         if (
           options.decision &&
           !["GO_CONDITIONNEL", "PIVOT", "NO_GO_TEMPORAIRE"].includes(
@@ -218,6 +235,19 @@ program
           )
         )
           throw new Error("Décision de projet invalide.");
+        const validationScore =
+          options.validationScore === undefined
+            ? undefined
+            : Number(options.validationScore);
+        if (
+          validationScore !== undefined &&
+          (!Number.isInteger(validationScore) ||
+            validationScore < 0 ||
+            validationScore > 100)
+        )
+          throw new Error(
+            "Le score de validation doit être un entier de 0 à 100.",
+          );
         process.stdout.write(
           `${JSON.stringify(
             await resumeJourney({
@@ -229,12 +259,36 @@ program
                 ? { validationAnswersPath: options.validationAnswers }
                 : {}),
               ...(options.decision ? { decision: options.decision } : {}),
+              ...(validationScore !== undefined ? { validationScore } : {}),
+              ...(options.skipStep ? { skipStep: options.skipStep } : {}),
+              ...(options.skipReason ? { skipReason: options.skipReason } : {}),
+              ...(options.deferTerrain
+                ? { deferTerrain: options.deferTerrain }
+                : {}),
+              ...(options.overrideUnvalidated
+                ? { overrideUnvalidated: true }
+                : {}),
+              ...(options.quitFangabase ? { requestExit: true } : {}),
+              ...(options.confirmExit
+                ? { confirmExit: options.confirmExit }
+                : {}),
             }),
           )}\n`,
         );
         return;
       }
       if (!options.answers && !options.brief) {
+        const currentSession = await readJourneySession(invocationDirectory);
+        if (currentSession?.technical_questionnaire_started) {
+          process.stdout.write(
+            `${JSON.stringify(
+              journeyQuestionnaireResult(
+                await runAgentQuestionnaire({ invocationDirectory }),
+              ),
+            )}\n`,
+          );
+          return;
+        }
         process.stdout.write(
           `${JSON.stringify(
             await needsProjectValidation(
@@ -258,12 +312,20 @@ program
       }
       process.stdout.write(
         `${JSON.stringify(
-          journeyQuestionnaireResult(
-            await runAgentQuestionnaire({
+          await (async () => {
+            const result = journeyQuestionnaireResult(
+              await runAgentQuestionnaire({
+                invocationDirectory,
+                ...(options.answers ? { answersPath: options.answers } : {}),
+              }),
+            );
+            await recordTechnicalQuestionnaire({
               invocationDirectory,
+              result,
               ...(options.answers ? { answersPath: options.answers } : {}),
-            }),
-          ),
+            });
+            return result;
+          })(),
         )}\n`,
       );
       return;
@@ -333,9 +395,27 @@ program
       generated: !options.dryRun,
       configYaml: stringify(config),
     });
+    const journey = await readJourneySession(invocationDirectory);
+    const journeyContext = journey
+      ? {
+          validation_decision: journey.validation_decision,
+          validation_score: journey.validation_score,
+          student_decision: journey.student_decision,
+          terrain_validation: journey.terrain_validation,
+          warnings: journey.warnings,
+          generation_allowed_with_warnings:
+            journey.generation_allowed_with_warnings,
+          ...(journey.student_decision === "USER_OVERRIDE_UNVALIDATED"
+            ? {
+                confirmation_prompt:
+                  "Le projet n’a pas été validé sur le terrain, mais tu as choisi de continuer en connaissance de cause. Réponds exactement OUI pour générer avec FangaBase, ou NON pour annuler.",
+              }
+            : {}),
+        }
+      : null;
     process.stdout.write(
       options.json
-        ? `${JSON.stringify(result)}\n`
+        ? `${JSON.stringify({ ...result, ...(journeyContext ? { journey: journeyContext } : {}) })}\n`
         : options.dryRun
           ? `Dry-run: ${result.files.length} sources prévues, aucune écriture.\n`
           : `Projet créé: ${result.destination}\nCommandes:\n${result.commands.join("\n")}\n`,

@@ -211,3 +211,19 @@ Prochain point exact : créer le commit du parcours guidé, pousser `main`, atte
 - [ ] Commit `fix: enforce continuous guided student journey`, push de `main` et CI.
 
 Prochain point exact : publier uniquement le commit correctif sur `main`, attendre la CI, sans créer de tag ni modifier `stable`.
+
+# 2026-08-11 — Liberté de continuation après validation
+
+- [x] Cause corrigée : `NO_GO_TEMPORAIRE` ne devient plus `FAIL` et ne quitte plus FangaBase.
+- [x] Nouveaux états stables : `VALIDATION_STEP_SKIPPED`, `TERRAIN_VALIDATION_DEFERRED`, `USER_OVERRIDE_UNVALIDATED`, `EXIT_CONFIRMATION_REQUIRED` et `ABANDONED`.
+- [x] Session enrichie : décision et score analytiques, décision volontaire, terrain reporté, inconnues, étapes sautées, avertissements, activité FangaBase et démarrage du questionnaire technique.
+- [x] Une étape sautée reste limitée à sa question; les autres questions du bloc continuent.
+- [x] Un override conserve `NO_GO_TEMPORAIRE` ou `PIVOT`, exige le questionnaire technique complet et autorise seulement une génération FangaBase avec avertissements.
+- [x] Sortie complète protégée par `QUITTER FANGABASE`, puis `QUITTER`; `OK` ne quitte jamais et aucun starter extérieur n’est invoqué.
+- [x] Rapport d’un parcours non validé obligé de conserver « Marché non validé sur le terrain », « Développement volontaire » et « UAT terrain restante » avant `PASS_WITH_WARNINGS`.
+- [x] Régressions A à F : 129 tests CLI verts; matrice des dix profils inchangée.
+- [x] Gates locales : setup, format, lint, typecheck, suites JS/TS, 107 tests Laravel (667 assertions), 2 E2E, parité, builds et `release:check` verts.
+- [x] Audits : 0 haute/critique; 2 avis pnpm modérés et 1 avis Composer faible transitif déjà documentés; aucun secret réel détecté.
+- [ ] Commit `fix: preserve FangaBase after validation override`, push de `main` et 12 workflows.
+
+Prochain point exact : publier le correctif sur `origin/main`, attendre les 12 workflows, sans toucher `v0.4.0-rc.1`, créer `v0.4.0-rc.2` ni modifier `stable`.

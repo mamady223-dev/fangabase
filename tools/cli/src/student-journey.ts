@@ -1,6 +1,7 @@
 import type { AgentQuestionnaireResult } from "./agent-questionnaire.js";
 import type { FangaBaseConfig } from "./config.js";
 import { componentRegistry, resolveComponents } from "./project-generator.js";
+import { missingQuestions } from "./questions.js";
 import { stringify } from "yaml";
 
 export const studentJourneyStates = [
@@ -8,6 +9,9 @@ export const studentJourneyStates = [
   "PROJECT_VALIDATION_IN_PROGRESS",
   "NEEDS_PRODUCT_RESEARCH",
   "NEEDS_PROJECT_DECISION",
+  "VALIDATION_STEP_SKIPPED",
+  "TERRAIN_VALIDATION_DEFERRED",
+  "USER_OVERRIDE_UNVALIDATED",
   "NEEDS_TECHNICAL_ANSWERS",
   "INVALID_ANSWERS",
   "READY_FOR_DRY_RUN",
@@ -22,6 +26,8 @@ export const studentJourneyStates = [
   "READY_FOR_FINAL_VALIDATION",
   "PASS",
   "PASS_WITH_WARNINGS",
+  "EXIT_CONFIRMATION_REQUIRED",
+  "ABANDONED",
   "FAIL",
 ] as const;
 
@@ -36,6 +42,18 @@ export type JourneySession = {
   completed_blocks: string[];
   generated_documents: string[];
   project_decision: "GO_CONDITIONNEL" | "PIVOT" | "NO_GO_TEMPORAIRE" | null;
+  validation_decision: "GO_CONDITIONNEL" | "PIVOT" | "NO_GO_TEMPORAIRE" | null;
+  validation_score: number | null;
+  student_decision: "USER_OVERRIDE_UNVALIDATED" | null;
+  terrain_validation: "IN_PROGRESS" | "DEFERRED" | "COMPLETED";
+  fangabase_active: boolean;
+  generation_allowed_with_warnings: boolean;
+  skipped_steps: Array<{ id: string; reason: string }>;
+  deferred_steps: string[];
+  unknown_information: string[];
+  warnings: string[];
+  technical_questionnaire_started: boolean;
+  exit_confirmation_pending: boolean;
   technical_answers: Record<string, string>;
   resolved_config: string | null;
   planned_destination: string | null;
@@ -242,6 +260,18 @@ export function newJourneySession(): JourneySession {
     completed_blocks: [],
     generated_documents: [],
     project_decision: null,
+    validation_decision: null,
+    validation_score: null,
+    student_decision: null,
+    terrain_validation: "IN_PROGRESS",
+    fangabase_active: true,
+    generation_allowed_with_warnings: false,
+    skipped_steps: [],
+    deferred_steps: [],
+    unknown_information: [],
+    warnings: [],
+    technical_questionnaire_started: false,
+    exit_confirmation_pending: false,
     technical_answers: {},
     resolved_config: null,
     planned_destination: null,
@@ -268,9 +298,10 @@ export async function readJourneySession(
   invocationDirectory: string,
 ): Promise<JourneySession | null> {
   try {
-    return JSON.parse(
+    const persisted = JSON.parse(
       await readFile(sessionPath(invocationDirectory), "utf8"),
-    ) as JourneySession;
+    ) as Partial<JourneySession>;
+    return { ...newJourneySession(), ...persisted };
   } catch (error) {
     const code = (error as NodeJS.ErrnoException).code;
     if (code === "ENOENT") return null;
@@ -345,13 +376,54 @@ export async function recordBriefReady(
 ): Promise<void> {
   const session = await readJourneySession(invocationDirectory);
   if (!session) return;
-  if (session.project_decision !== "GO_CONDITIONNEL")
+  if (
+    session.project_decision !== "GO_CONDITIONNEL" &&
+    session.student_decision !== "USER_OVERRIDE_UNVALIDATED"
+  )
     throw new Error(
-      "Le brief guidé exige une décision GO_CONDITIONNEL explicite.",
+      "Le brief guidé exige un GO conditionnel ou un override étudiant explicite.",
+    );
+  if (
+    session.student_decision === "USER_OVERRIDE_UNVALIDATED" &&
+    missingQuestions(session.technical_answers).length > 0
+  )
+    throw new Error(
+      "L’override exige le questionnaire technique complet avant le dry-run.",
     );
   session.resolved_config = configYaml;
   session.status = "READY_FOR_DRY_RUN";
   await writeJourneySession(invocationDirectory, session);
+}
+
+export async function recordTechnicalQuestionnaire(options: {
+  invocationDirectory: string;
+  answersPath?: string;
+  result: AgentQuestionnaireResult;
+}): Promise<void> {
+  const session = await readJourneySession(options.invocationDirectory);
+  if (!session?.technical_questionnaire_started) return;
+  if (options.answersPath) {
+    const answers = JSON.parse(
+      await readFile(
+        resolve(options.invocationDirectory, options.answersPath),
+        "utf8",
+      ),
+    ) as Record<string, unknown>;
+    session.technical_answers = Object.fromEntries(
+      Object.entries(answers).filter(
+        (entry): entry is [string, string] => typeof entry[1] === "string",
+      ),
+    );
+  }
+  if (options.result.status === "READY_FOR_DRY_RUN") {
+    session.status = "READY_FOR_DRY_RUN";
+    session.resolved_config = options.result.config_yaml ?? null;
+  } else if (options.result.status === "INVALID_ANSWERS") {
+    session.status = "INVALID_ANSWERS";
+  } else {
+    session.status = "NEEDS_TECHNICAL_ANSWERS";
+  }
+  await writeJourneySession(options.invocationDirectory, session);
 }
 
 export async function recordJourneyEvidence(options: {
@@ -395,8 +467,9 @@ export async function recordJourneyEvidence(options: {
   }
   const allowed = await completionClaimAllowed(session);
   if (allowed) {
-    session.status = "PASS";
-    session.final_status = "PASS";
+    const warning = session.student_decision === "USER_OVERRIDE_UNVALIDATED";
+    session.status = warning ? "PASS_WITH_WARNINGS" : "PASS";
+    session.final_status = warning ? "PASS_WITH_WARNINGS" : "PASS";
   }
   await writeJourneySession(options.invocationDirectory, session);
   return session;
@@ -408,11 +481,78 @@ export async function resumeJourney(options: {
   response?: string;
   validationAnswersPath?: string;
   decision?: "GO_CONDITIONNEL" | "PIVOT" | "NO_GO_TEMPORAIRE";
+  validationScore?: number;
+  skipStep?: string;
+  skipReason?: string;
+  deferTerrain?: string;
+  overrideUnvalidated?: boolean;
+  requestExit?: boolean;
+  confirmExit?: string;
   generatorVersion: string;
 }) {
   const session =
     (await readJourneySession(options.invocationDirectory)) ??
     newJourneySession();
+  if (options.requestExit) {
+    session.status = "EXIT_CONFIRMATION_REQUIRED";
+    session.exit_confirmation_pending = true;
+    await writeJourneySession(options.invocationDirectory, session);
+    return journeyResponse(
+      session,
+      options.invocationDirectory,
+      options.sourceRoot,
+      options.generatorVersion,
+    );
+  }
+  if (session.exit_confirmation_pending) {
+    const confirmation = (options.confirmExit ?? options.response ?? "")
+      .trim()
+      .toUpperCase();
+    if (confirmation === "QUITTER") {
+      session.status = "ABANDONED";
+      session.fangabase_active = false;
+      session.exit_confirmation_pending = false;
+    } else if (confirmation === "CONTINUER") {
+      session.status = session.student_decision
+        ? "NEEDS_TECHNICAL_ANSWERS"
+        : "PROJECT_VALIDATION_IN_PROGRESS";
+      session.exit_confirmation_pending = false;
+      session.fangabase_active = true;
+    }
+    await writeJourneySession(options.invocationDirectory, session);
+    return journeyResponse(
+      session,
+      options.invocationDirectory,
+      options.sourceRoot,
+      options.generatorVersion,
+    );
+  }
+  if (options.skipStep) {
+    const known = Object.values(validationBlocks)
+      .flat()
+      .some((item) => item.id === options.skipStep);
+    if (!known)
+      throw new Error(`Étape de validation inconnue: ${options.skipStep}.`);
+    if (!session.skipped_steps.some((item) => item.id === options.skipStep))
+      session.skipped_steps.push({
+        id: options.skipStep,
+        reason: options.skipReason?.trim() || "Information inconnue à ce stade",
+      });
+    if (!session.unknown_information.includes(options.skipStep))
+      session.unknown_information.push(options.skipStep);
+    session.status = "VALIDATION_STEP_SKIPPED";
+  }
+  if (options.deferTerrain) {
+    const step = options.deferTerrain.trim();
+    if (!step)
+      throw new Error("Le report terrain doit préciser l’étape concernée.");
+    if (!session.deferred_steps.includes(step))
+      session.deferred_steps.push(step);
+    session.terrain_validation = "DEFERRED";
+    session.status = "TERRAIN_VALIDATION_DEFERRED";
+    const warning = `Validation terrain reportée: ${step}`;
+    if (!session.warnings.includes(warning)) session.warnings.push(warning);
+  }
   if (options.validationAnswersPath) {
     const answers = JSON.parse(
       await readFile(
@@ -434,6 +574,13 @@ export async function resumeJourney(options: {
   }
   if (session.status === "NEEDS_PROJECT_VALIDATION")
     session.status = "PROJECT_VALIDATION_IN_PROGRESS";
+  if (
+    options.response &&
+    ["VALIDATION_STEP_SKIPPED", "TERRAIN_VALIDATION_DEFERRED"].includes(
+      session.status,
+    )
+  )
+    session.status = "PROJECT_VALIDATION_IN_PROGRESS";
   updateCompletedBlocks(session);
   if (options.decision) {
     if (
@@ -443,16 +590,37 @@ export async function resumeJourney(options: {
         "La décision exige la fin de tous les blocs de validation.",
       );
     session.project_decision = options.decision;
+    session.validation_decision = options.decision;
+    if (options.validationScore !== undefined)
+      session.validation_score = options.validationScore;
     session.status =
       options.decision === "GO_CONDITIONNEL"
         ? "NEEDS_TECHNICAL_ANSWERS"
         : options.decision === "PIVOT"
           ? "PROJECT_VALIDATION_IN_PROGRESS"
-          : "FAIL";
+          : "NEEDS_PROJECT_DECISION";
+    if (options.decision === "GO_CONDITIONNEL")
+      session.technical_questionnaire_started = true;
   } else if (
     session.completed_blocks.length === Object.keys(validationBlocks).length
   ) {
     session.status = "NEEDS_PROJECT_DECISION";
+  }
+  if (options.overrideUnvalidated) {
+    if (
+      !session.project_decision ||
+      session.project_decision === "GO_CONDITIONNEL"
+    )
+      throw new Error(
+        "L’override non validé exige une décision analytique NO_GO_TEMPORAIRE ou PIVOT.",
+      );
+    session.student_decision = "USER_OVERRIDE_UNVALIDATED";
+    session.generation_allowed_with_warnings = true;
+    session.technical_questionnaire_started = true;
+    session.status = "NEEDS_TECHNICAL_ANSWERS";
+    const warning =
+      "Marché non validé sur le terrain; développement volontaire malgré les preuves manquantes.";
+    if (!session.warnings.includes(warning)) session.warnings.push(warning);
   }
   await writeJourneySession(options.invocationDirectory, session);
   return journeyResponse(
@@ -466,7 +634,11 @@ export async function resumeJourney(options: {
 function updateCompletedBlocks(session: JourneySession): void {
   for (const [block, questions] of Object.entries(validationBlocks)) {
     if (
-      questions.every((question) => session.validation_answers[question.id]) &&
+      questions.every(
+        (question) =>
+          session.validation_answers[question.id] ||
+          session.skipped_steps.some((item) => item.id === question.id),
+      ) &&
       !session.completed_blocks.includes(block)
     )
       session.completed_blocks.push(block);
@@ -477,7 +649,13 @@ function currentValidationBlock(session: JourneySession): ValidationQuestion[] {
   const block = Object.keys(validationBlocks).find(
     (name) => !session.completed_blocks.includes(name),
   );
-  return block ? validationBlocks[block]! : [];
+  return block
+    ? validationBlocks[block]!.filter(
+        (question) =>
+          !session.validation_answers[question.id] &&
+          !session.skipped_steps.some((item) => item.id === question.id),
+      )
+    : [];
 }
 
 export async function completionClaimAllowed(
@@ -504,6 +682,20 @@ export async function completionClaimAllowed(
   }
   try {
     await access(session.final_report);
+    if (session.student_decision === "USER_OVERRIDE_UNVALIDATED") {
+      const report = await readFile(session.final_report, "utf8");
+      for (const marker of [
+        "Marché non validé sur le terrain",
+        "Développement volontaire",
+        "UAT terrain restante",
+      ])
+        if (
+          !report
+            .toLocaleLowerCase("fr")
+            .includes(marker.toLocaleLowerCase("fr"))
+        )
+          return false;
+    }
   } catch {
     return false;
   }
@@ -525,18 +717,35 @@ async function journeyResponse(
     project_generated: session.project_generated,
     generator_ready: true,
     student_project_ready: allowed,
+    fangabase_active: session.fangabase_active,
+    validation_decision: session.validation_decision,
+    validation_score: session.validation_score,
+    student_decision: session.student_decision,
+    terrain_validation: session.terrain_validation,
+    generation_allowed_with_warnings: session.generation_allowed_with_warnings,
+    skipped_steps: session.skipped_steps,
+    deferred_steps: session.deferred_steps,
+    unknown_information: session.unknown_information,
+    warnings: session.warnings,
+    technical_questionnaire_started: session.technical_questionnaire_started,
     workflow_file: resolve(sourceRoot, "Fanga_validation_projet.md"),
     session_file: sessionPath(invocationDirectory),
     must_continue_in_same_turn: !allowed,
     completion_claim_allowed: allowed,
     assistant_instruction:
-      session.status === "NEEDS_PROJECT_VALIDATION"
-        ? "Ne termine pas ta réponse. Lis maintenant intégralement workflow_file, puis pose immédiatement uniquement le premier bloc de questions."
-        : block.length > 0
-          ? "Ne termine pas ta réponse. Lis maintenant intégralement workflow_file, puis pose immédiatement uniquement le bloc de questions retourné."
-          : session.status === "NEEDS_PROJECT_DECISION"
-            ? "Présente les preuves, le score et demande une décision explicite GO_CONDITIONNEL, PIVOT ou NO_GO_TEMPORAIRE."
-            : "Poursuis immédiatement avec le questionnaire technique, une seule question à la fois.",
+      session.status === "EXIT_CONFIRMATION_REQUIRED"
+        ? "Tu demandes de quitter entièrement le parcours FangaBase. Réponds exactement QUITTER pour confirmer, ou CONTINUER pour rester dans FangaBase. Aucun projet de remplacement ne sera créé."
+        : session.status === "ABANDONED"
+          ? "Le parcours FangaBase est arrêté sans génération. La session reste disponible pour une reprise ultérieure. Ne crée aucun projet de remplacement."
+          : session.status === "NEEDS_PROJECT_VALIDATION"
+            ? "Ne termine pas ta réponse. Lis maintenant intégralement workflow_file, puis pose immédiatement uniquement le premier bloc de questions."
+            : block.length > 0
+              ? "Ne termine pas ta réponse. Lis maintenant intégralement workflow_file, puis pose immédiatement uniquement le bloc de questions retourné."
+              : session.status === "NEEDS_PROJECT_DECISION"
+                ? session.project_decision === "NO_GO_TEMPORAIRE"
+                  ? "Conserve le NO_GO_TEMPORAIRE et le score réel. Propose de poursuivre la validation, de la reporter, ou d’enregistrer un USER_OVERRIDE_UNVALIDATED sans quitter FangaBase."
+                  : "Présente les preuves, le score et demande une décision explicite GO_CONDITIONNEL, PIVOT ou NO_GO_TEMPORAIRE."
+                : "Poursuis immédiatement avec le questionnaire technique, une seule question à la fois.",
     first_question_block: block,
     forbidden_responses: [
       "Le projet est prêt.",
@@ -545,11 +754,15 @@ async function journeyResponse(
       "Revenez lorsque vous aurez préparé le cahier des charges.",
     ],
     next_expected_status:
-      block.length > 0
-        ? ("PROJECT_VALIDATION_IN_PROGRESS" as const)
-        : session.status === "NEEDS_PROJECT_DECISION"
-          ? ("NEEDS_TECHNICAL_ANSWERS" as const)
-          : ("READY_FOR_DRY_RUN" as const),
+      session.status === "EXIT_CONFIRMATION_REQUIRED"
+        ? ("EXIT_CONFIRMATION_REQUIRED" as const)
+        : session.status === "ABANDONED"
+          ? ("ABANDONED" as const)
+          : block.length > 0
+            ? ("PROJECT_VALIDATION_IN_PROGRESS" as const)
+            : session.status === "NEEDS_PROJECT_DECISION"
+              ? ("NEEDS_TECHNICAL_ANSWERS" as const)
+              : ("READY_FOR_DRY_RUN" as const),
   };
 }
 

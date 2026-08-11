@@ -10,7 +10,7 @@ Lorsqu’un utilisateur demande à Codex de créer un projet FangaBase :
 2. Si `stdin` n’est pas un TTY et qu’aucun brief explicite n’est fourni, lire la réponse JSON automatique `NEEDS_PROJECT_VALIDATION` et suivre intégralement `Fanga_validation_projet.md`.
 3. Ne pas terminer le tour : lire le chemin absolu `workflow_file`, expliquer que seul le générateur est installé, puis poser immédiatement les cinq questions de `first_question_block`.
 4. Reprendre `.fangabase/session.json` après tout message court de continuation; ne jamais traiter « OK » comme une validation finale.
-5. Après une décision `GO_CONDITIONNEL`, produire les documents obligatoires et un `FANGABASE_INPUT.md` contenant exactement un bloc `yaml fangabase` valide.
+5. Après une décision `GO_CONDITIONNEL`, produire les documents obligatoires et un `FANGABASE_INPUT.md` contenant exactement un bloc `yaml fangabase` valide. Après `NO_GO_TEMPORAIRE` ou `PIVOT`, conserver le score réel et proposer validation supplémentaire, report terrain ou `USER_OVERRIDE_UNVALIDATED`; ne jamais déduire une sortie de FangaBase.
 6. Relancer en interne avec le brief; lire la prochaine question technique et son identifiant stable.
 7. Dire « Je vais te poser les questions FangaBase une par une. » puis afficher uniquement la question actuelle et ses choix.
 8. Ne jamais choisir une réponse à la place de l’utilisateur, même lorsqu’une valeur par défaut existe.
@@ -24,6 +24,9 @@ Lorsqu’un utilisateur demande à Codex de créer un projet FangaBase :
 16. Supprimer ensuite le fichier temporaire, à condition qu’il ne contienne aucun secret.
 17. Ne jamais créer le projet à l’intérieur du dépôt FangaBase.
 18. Après génération, poursuivre avec setup, doctor, migrations et smoke selon les commandes du projet ; ne jamais utiliser `--force` sans demande explicite.
+19. Une petite étape sautée devient `VALIDATION_STEP_SKIPPED`; un report terrain devient `TERRAIN_VALIDATION_DEFERRED`. Les autres questions pertinentes continuent.
+20. Un override explicite passe à `NEEDS_TECHNICAL_ANSWERS` sans préremplir architecture, backend, frontend, base, service ou design.
+21. Quitter exige `QUITTER FANGABASE`, puis `QUITTER`. La sortie arrête seulement le parcours et n’autorise aucun starter extérieur.
 
 ## États du protocole
 
@@ -31,5 +34,6 @@ Lorsqu’un utilisateur demande à Codex de créer un projet FangaBase :
 - `NEEDS_TECHNICAL_ANSWERS` retourne uniquement la prochaine question visible qui n’a pas encore de réponse.
 - `INVALID_ANSWERS` retourne des erreurs rattachées précisément à leurs identifiants.
 - `READY_FOR_DRY_RUN` retourne le YAML résolu et un résumé des choix, fonctionnalités et composants.
+- `USER_OVERRIDE_UNVALIDATED` sépare la décision volontaire du score et de la décision analytique, autorise uniquement la suite FangaBase avec avertissements et conduit finalement à `PASS_WITH_WARNINGS` si toutes les gates sont vertes.
 
 Sans TTY, `pnpm create:project` produit exactement la même réponse que `pnpm create:project --agent --json`. Le mode automatique ne s’active pas avec `--config`, `--brief`, `--answers` ou une génération explicitement demandée. `--agent` reste disponible pour les tests et la CI et exige `--json`. Le questionnaire PowerShell interactif, `--brief`, `--product-docs`, `--config`, `--destination`, `--dry-run`, `--yes` et la génération atomique restent disponibles sans changement de parcours.

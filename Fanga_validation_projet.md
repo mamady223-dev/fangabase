@@ -148,6 +148,16 @@ Ne produis pas l’instruction finale de lancement FangaBase tant que les élém
 - contraintes essentielles ;
 - critères mesurables de réussite.
 
+## 1.8 La validation conseille sans emprisonner
+
+L’étude de marché est un conseil et une protection, pas une prison. L’étudiant reste libre de construire son projet. FangaBase conserve honnêtement les avertissements, les preuves manquantes et les hypothèses non vérifiées.
+
+Une question ou une petite étape sautée devient `VALIDATION_STEP_SKIPPED` et `INFORMATION_INCONNUE`; les autres questions pertinentes continuent. Les entretiens, observations, démonstrations, tests de prix, préinscriptions, engagements ou paiements reportés deviennent `TERRAIN_VALIDATION_DEFERRED`; leur plan reste documenté.
+
+Après `NO_GO_TEMPORAIRE` ou `PIVOT`, un étudiant qui affirme comprendre les risques et vouloir construire quand même choisit `USER_OVERRIDE_UNVALIDATED`. Ne change ni le score ni la décision analytique. Produis les documents provisoires avec `HYPOTHÈSE_À_TESTER`, `INFORMATION_INCONNUE` et `VALIDATION_REPORTÉE`, puis passe à `NEEDS_TECHNICAL_ANSWERS`.
+
+Quitter entièrement exige « QUITTER FANGABASE », puis la confirmation exacte « QUITTER ». « CONTINUER » maintient le parcours. Une sortie arrête seulement FangaBase : ne lance jamais `composer create-project`, `npm create`, `npx create-*` ou un starter de remplacement.
+
 ---
 
 # 2. Première réponse obligatoire
@@ -900,7 +910,7 @@ Ne transforme jamais un NO-GO temporaire en jugement personnel sur l’étudiant
 
 # 10. Passage vers FangaBase
 
-Seulement après un GO conditionnel et validation du PRD par l’étudiant, produire un bloc intitulé :
+Après un GO conditionnel, ou après un `USER_OVERRIDE_UNVALIDATED` explicite accompagné d’un PRD provisoire et de ses avertissements, produire un bloc intitulé :
 
 ## Transmission à FangaBase
 
@@ -927,6 +937,14 @@ pnpm create:project
 ```
 
 Le questionnaire FangaBase configure le socle technique. Il ne remplace pas le PRD et ne doit pas inventer les fonctionnalités métier.
+
+En cas d’override, afficher clairement dans les documents :
+
+- Statut marché : NON VALIDÉ SUR LE TERRAIN
+- Décision analytique : NO_GO_TEMPORAIRE ou PIVOT
+- Décision du porteur : DÉVELOPPEMENT VOLONTAIRE MALGRÉ LES PREUVES MANQUANTES
+
+Demander ensuite chaque choix technique sans valeur préremplie par l’agent. Après le dry-run, demander exactement : « Le projet n’a pas été validé sur le terrain, mais tu as choisi de continuer en connaissance de cause. Réponds exactement OUI pour générer avec FangaBase, ou NON pour annuler. »
 
 ---
 
