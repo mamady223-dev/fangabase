@@ -1,0 +1,33 @@
+{
+  "name": "fangabase-laravel-inertia",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "setup": "pnpm install --frozen-lockfile && composer install --no-interaction --prefer-dist",
+    "doctor": "node tools/doctor.mjs",
+    "migrate": "php artisan migrate --force",
+    "dev": "concurrently --kill-others-on-fail -n server,vite,worker \"php artisan serve\" \"vite\" \"php artisan fangabase:mail-worker\"",
+    "lint": "tsc --noEmit && composer lint",
+    "typecheck": "tsc --noEmit",
+    "test": "composer test && vitest run",
+    "build": "vite build",
+    "smoke:auth": "node tools/smoke-auth.mjs"
+  },
+  "dependencies": {
+    "@inertiajs/react": "2.3.27",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.32",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@vitejs/plugin-react": "5.2.0",
+    "concurrently": "9.2.1",
+    "laravel-vite-plugin": "2.1.0",
+    "typescript": "5.8.3",
+    "vite": "7.0.0",
+    "vitest": "3.2.6"
+  }
+}

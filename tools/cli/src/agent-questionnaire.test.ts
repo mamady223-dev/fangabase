@@ -46,7 +46,7 @@ describe("questionnaire agent", () => {
     const { response } = await run();
     expect(response.status).toBe("NEEDS_ANSWERS");
     expect(response.protocol_version).toBe(1);
-    expect(response.generator_version).toMatch(/^0\.3\./);
+    expect(response.generator_version).toBe("0.4.0-rc.1");
   });
 
   it("produit une structure JSON sérialisable", async () => {
@@ -62,6 +62,7 @@ describe("questionnaire agent", () => {
       "product.type",
       "deployment.family",
       "architecture.vps_variant",
+      "architecture.shared_variant",
       "architecture.hybrid_frontend",
       "database.provider",
       "email.provider",
@@ -106,6 +107,37 @@ describe("questionnaire agent", () => {
     expect(isQuestionVisible(question, { "deployment.family": "vps" })).toBe(
       false,
     );
+  });
+
+  it("résout Laravel/Inertia comme une application VPS intégrée", () => {
+    const config = configFromAnswers(
+      complete({
+        "deployment.family": "vps",
+        "architecture.vps_variant": "laravel_inertia_react",
+        "database.provider": "postgres",
+      }),
+    );
+    expect(config.architecture).toEqual(
+      expect.objectContaining({
+        backend: "laravel",
+        frontend: "react",
+        ui: "inertia_react",
+        integration: "inertia",
+      }),
+    );
+    expect(config.frontend_connection).toBeUndefined();
+  });
+
+  it("résout Laravel/Inertia comme une application mutualisée intégrée", () => {
+    const config = configFromAnswers(
+      complete({
+        "deployment.family": "shared",
+        "architecture.shared_variant": "laravel_inertia_react",
+        "database.provider": "mysql",
+      }),
+    );
+    expect(config.architecture.integration).toBe("inertia");
+    expect(config.deployment?.family).toBe("shared");
   });
 
   it("retourne uniquement les questions manquantes après des réponses partielles", async () => {

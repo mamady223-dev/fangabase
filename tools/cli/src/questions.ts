@@ -2,7 +2,7 @@ import { stringify } from "yaml";
 import { configSchema, type FangaBaseConfig } from "./config.js";
 
 export const questionnaireProtocolVersion = 1;
-export const generatorVersion = "0.3.0-rc.1";
+export const generatorVersion = "0.4.0-rc.1";
 
 export type AnswerValue = string;
 export type Answers = Record<string, AnswerValue>;
@@ -103,13 +103,45 @@ export const questionRegistry: readonly QuestionDefinition[] = [
     conditions: [{ question_id: "deployment.family", equals: "vps" }],
     choices: [
       choice("next", "Next.js autonome", "1"),
-      choice("laravel", "Laravel / Blade", "2"),
-      choice("laravel_api_next", "Laravel API + Next.js", "3"),
-      choice("laravel_api_react", "Laravel API + React", "4"),
+      choice("laravel", "Laravel + Blade intégré — une seule application", "2"),
+      choice(
+        "laravel_inertia_react",
+        "Laravel + React intégré — Inertia/Vite, une seule application",
+        "3",
+      ),
+      choice(
+        "laravel_api_next",
+        "Laravel API + Next.js séparé — deux applications",
+        "4",
+      ),
+      choice(
+        "laravel_api_react",
+        "Laravel API + React/Vite séparé — deux applications",
+        "5",
+      ),
     ],
-    examples: ["next", "laravel_api_next"],
+    examples: ["next", "laravel_inertia_react", "laravel_api_next"],
     interactive_prompt: () =>
-      "Architecture VPS 1=Next.js autonome 2=Laravel/Blade 3=Laravel API+Next.js 4=Laravel API+React [1]: ",
+      "Architecture VPS 1=Next.js autonome 2=Laravel+Blade intégré 3=Laravel+React intégré (Inertia/Vite) 4=Laravel API+Next.js séparé 5=Laravel API+React/Vite séparé [1]: ",
+  },
+  {
+    id: "architecture.shared_variant",
+    label: "Architecture sur hébergement mutualisé",
+    type: "choice",
+    required: true,
+    default: "laravel",
+    conditions: [{ question_id: "deployment.family", equals: "shared" }],
+    choices: [
+      choice("laravel", "Laravel + Blade intégré — une seule application", "1"),
+      choice(
+        "laravel_inertia_react",
+        "Laravel + React intégré — Inertia/Vite, une seule application; React est compilé avant déploiement sans serveur Node permanent",
+        "2",
+      ),
+    ],
+    examples: ["laravel", "laravel_inertia_react"],
+    interactive_prompt: () =>
+      "Architecture mutualisée 1=Laravel+Blade intégré 2=Laravel+React intégré (Inertia/Vite, compilé avant déploiement) [1]: ",
   },
   {
     id: "architecture.hybrid_frontend",
@@ -118,10 +150,17 @@ export const questionRegistry: readonly QuestionDefinition[] = [
     required: true,
     default: "next",
     conditions: [{ question_id: "deployment.family", equals: "hybrid" }],
-    choices: [choice("next", "Next.js", "1"), choice("react", "React", "2")],
+    choices: [
+      choice("next", "Laravel API + Next.js séparé — deux applications", "1"),
+      choice(
+        "react",
+        "Laravel API + React/Vite séparé — deux applications",
+        "2",
+      ),
+    ],
     examples: ["next", "react"],
     interactive_prompt: () =>
-      "Frontend hybride 1=Next.js 2=React (backend Laravel) [1]: ",
+      "Architecture hybride 1=Laravel API+Next.js séparé 2=Laravel API+React/Vite séparé [1]: ",
   },
   {
     id: "database.provider",
@@ -336,6 +375,7 @@ export function configFromAnswers(answers: Answers): FangaBaseConfig {
   const family = answers["deployment.family"];
   const vps = answers["architecture.vps_variant"];
   const hybridFrontend = answers["architecture.hybrid_frontend"];
+  const shared = answers["architecture.shared_variant"];
   const provider = answers["database.provider"];
   const target =
     family === "cloud"
@@ -349,14 +389,19 @@ export function configFromAnswers(answers: Answers): FangaBaseConfig {
             : "vps_laravel";
   const backend =
     target === "cloud_vercel" || target === "vps_next" ? "next" : "laravel";
+  const inertia =
+    vps === "laravel_inertia_react" ||
+    (family === "shared" && shared === "laravel_inertia_react");
   const frontend =
-    target === "shared_laravel" || vps === "laravel"
+    (target === "shared_laravel" && !inertia) || vps === "laravel"
       ? "blade"
-      : family === "hybrid"
-        ? hybridFrontend
-        : vps === "laravel_api_react"
-          ? "react"
-          : "next";
+      : inertia
+        ? "react"
+        : family === "hybrid"
+          ? hybridFrontend
+          : vps === "laravel_api_react"
+            ? "react"
+            : "next";
   const databaseProvider =
     family === "cloud"
       ? provider
@@ -384,17 +429,24 @@ export function configFromAnswers(answers: Answers): FangaBaseConfig {
       country: "ML",
       default_currency: "XOF",
     },
-    architecture: { target, frontend, backend, ui: frontend },
+    architecture: {
+      target,
+      frontend,
+      backend,
+      ui: inertia ? "inertia_react" : frontend,
+      integration: inertia
+        ? "inertia"
+        : backend === "next"
+          ? "standalone"
+          : frontend === "blade"
+            ? "blade"
+            : "api",
+    },
     deployment: {
       family,
       docker: false,
       database: databaseEngine,
-      vps_variant:
-        family === "vps"
-          ? vps === "laravel_api_react"
-            ? "laravel_api_next"
-            : vps
-          : null,
+      vps_variant: family === "vps" ? vps : null,
     },
     database: { engine: databaseEngine, provider: databaseProvider },
     email: { provider: answers["email.provider"] },
@@ -418,14 +470,18 @@ export function configFromAnswers(answers: Answers): FangaBaseConfig {
       default_provider: payment === "none" ? null : payment,
     },
     design: { source: design },
-    frontend_connection: {
-      source: design,
-      frontend_origin: "http://localhost:3000",
-      backend_url: "http://localhost:8000/api/",
-      authentication: "cookie_session",
-      cors: { origins: ["http://localhost:3000"], credentials: true },
-      cookie_mode: "same_origin_lax",
-    },
+    ...(inertia
+      ? {}
+      : {
+          frontend_connection: {
+            source: design,
+            frontend_origin: "http://localhost:3000",
+            backend_url: "http://localhost:8000/api/",
+            authentication: "cookie_session",
+            cors: { origins: ["http://localhost:3000"], credentials: true },
+            cookie_mode: "same_origin_lax",
+          },
+        }),
     features: {
       organizations: true,
       marketplace: answers["product.type"] === "marketplace",

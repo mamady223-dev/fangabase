@@ -169,6 +169,17 @@ function validateCompatibility(answers: Answers): QuestionnaireError[] {
         "Cette réponse est autorisée uniquement pour deployment.family=hybrid.",
       ),
     );
+  if (
+    family &&
+    family !== "shared" &&
+    answers["architecture.shared_variant"] !== undefined
+  )
+    errors.push(
+      incompatible(
+        "architecture.shared_variant",
+        "Cette réponse est autorisée uniquement pour deployment.family=shared.",
+      ),
+    );
   return errors;
 }
 

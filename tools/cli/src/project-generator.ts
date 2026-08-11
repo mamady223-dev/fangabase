@@ -57,6 +57,12 @@ export const componentRegistry: Record<string, Component> = {
     ["generated:react-frontend"],
     ["vite", "react"],
   ),
+  inertia_react_frontend: component(
+    "inertia_react_frontend",
+    ["resources/js", "resources/views/app.blade.php", "vite.config.ts"],
+    ["@inertiajs/react", "react", "vite"],
+    ["inertiajs/inertia-laravel"],
+  ),
   blade_frontend: component("blade_frontend", ["apps/server/resources"]),
   deploy_cloud: component("deploy_cloud", ["generated:deployment/cloud"]),
   deploy_vps: component("deploy_vps", ["generated:deployment/vps"]),
@@ -152,7 +158,24 @@ export function planProject(
   const excluded = Object.keys(componentRegistry).filter(
     (id) => !included.includes(id),
   );
-  const files = included.flatMap((id) => componentRegistry[id]?.files ?? []);
+  const files = isInertia(config)
+    ? [
+        "app",
+        "bootstrap",
+        "config",
+        "database",
+        "public",
+        "resources/js",
+        "resources/views",
+        "routes",
+        "storage",
+        "tests",
+        "artisan",
+        "composer.json",
+        "package.json",
+        "vite.config.ts",
+      ]
+    : included.flatMap((id) => componentRegistry[id]?.files ?? []);
   const npm = unique(
     included.flatMap((id) => componentRegistry[id]?.npm ?? []),
   );
@@ -160,6 +183,7 @@ export function planProject(
     included.flatMap((id) => componentRegistry[id]?.composer ?? []),
   );
   const laravel = included.includes("laravel_backend");
+  const inertia = isInertia(config);
   const next = included.includes("next_backend");
   const frontend =
     included.includes("next_frontend") || included.includes("react_frontend");
@@ -172,14 +196,28 @@ export function planProject(
     packages: { npm, composer },
     commands: [
       ...(next || frontend ? ["pnpm install --frozen-lockfile"] : []),
-      ...(laravel ? ["composer install --working-dir=apps/server"] : []),
+      ...(laravel
+        ? [
+            inertia
+              ? "composer install"
+              : "composer install --working-dir=apps/server",
+          ]
+        : []),
       laravel
-        ? "php apps/server/artisan migrate --force"
+        ? inertia
+          ? "php artisan migrate --force"
+          : "php apps/server/artisan migrate --force"
         : "pnpm --filter @fangabase/backend-next migrate",
       ...(next || frontend
         ? ["pnpm lint", "pnpm typecheck", "pnpm test", "pnpm build"]
         : []),
-      ...(laravel ? ["composer --working-dir=apps/server test"] : []),
+      ...(laravel
+        ? [
+            inertia
+              ? "composer test"
+              : "composer --working-dir=apps/server test",
+          ]
+        : []),
     ],
     variables: envLines(config).map((line) => line.split("=")[0] ?? line),
     warnings: [
@@ -240,7 +278,7 @@ export async function generateProject(options: {
       join(staging, "generation-manifest.json"),
       `${JSON.stringify(
         {
-          generatorVersion: "0.3.0-rc.1",
+          generatorVersion: "0.4.0-rc.1",
           choices: options.config,
           files: generatedFiles,
         },
@@ -279,8 +317,10 @@ export function resolveComponents(config: FangaBaseConfig): string[] {
   if (config.architecture.backend === "next") ids.add("next_backend");
   else ids.add("laravel_backend");
   if (config.architecture.backend === "laravel") {
-    if (config.architecture.frontend === "next") ids.add("next_frontend");
-    if (config.architecture.frontend === "react") ids.add("react_frontend");
+    if (isInertia(config)) ids.add("inertia_react_frontend");
+    else if (config.architecture.frontend === "next") ids.add("next_frontend");
+    else if (config.architecture.frontend === "react")
+      ids.add("react_frontend");
     if (config.architecture.frontend === "blade") ids.add("blade_frontend");
   }
   ids.add(`deploy_${config.deployment?.family ?? family(config)}`);
@@ -321,11 +361,21 @@ async function materialize(
     await filterNextProviders(staging, config.payments.providers);
   }
   if (plan.included.includes("laravel_backend")) {
-    await copyTree(
-      join(sourceRoot, "apps/server"),
-      join(staging, "apps/server"),
-    );
-    await filterLaravelProviders(staging, config.payments.providers);
+    if (isInertia(config)) {
+      await copyTree(join(sourceRoot, "apps/server"), staging);
+      await cleanIntegratedRuntimeArtifacts(staging);
+      await filterLaravelProviders(staging, config.payments.providers, true);
+      await copyTree(
+        join(sourceRoot, "tools/cli/templates/laravel-inertia"),
+        staging,
+      );
+    } else {
+      await copyTree(
+        join(sourceRoot, "apps/server"),
+        join(staging, "apps/server"),
+      );
+      await filterLaravelProviders(staging, config.payments.providers);
+    }
   }
   if (plan.included.includes("next_frontend"))
     await writeNextFrontend(staging, config);
@@ -352,6 +402,7 @@ async function writeGeneratedTooling(
 ): Promise<void> {
   const packagePath = join(staging, "package.json");
   const laravel = config.architecture.backend === "laravel";
+  const inertia = isInertia(config);
   const frontend = config.architecture.frontend !== "blade";
   const current = (await exists(packagePath))
     ? (JSON.parse(await readFile(packagePath, "utf8")) as {
@@ -363,20 +414,32 @@ async function writeGeneratedTooling(
         private: true,
         packageManager: "pnpm@11.9.0",
       };
+  current.name = config.product.slug;
   current.scripts = {
     ...(current.scripts ?? {}),
     setup: laravel
-      ? frontend
-        ? "pnpm install --frozen-lockfile && composer install --working-dir=apps/server --no-interaction --prefer-dist"
-        : "composer install --working-dir=apps/server --no-interaction --prefer-dist"
+      ? inertia
+        ? "pnpm install --frozen-lockfile && composer install --no-interaction --prefer-dist"
+        : frontend
+          ? "pnpm install --frozen-lockfile && composer install --working-dir=apps/server --no-interaction --prefer-dist"
+          : "composer install --working-dir=apps/server --no-interaction --prefer-dist"
       : "pnpm install --frozen-lockfile",
     doctor: "node tools/doctor.mjs",
     migrate: laravel
-      ? "php apps/server/artisan migrate --force"
+      ? inertia
+        ? "php artisan migrate --force"
+        : "php apps/server/artisan migrate --force"
       : "pnpm --filter @fangabase/backend-next migrate",
     "smoke:auth": "node tools/smoke-auth.mjs",
   };
-  if (laravel && !frontend) {
+  if (inertia) {
+    current.scripts.dev =
+      'concurrently --kill-others-on-fail -n server,vite,worker "php artisan serve" "vite" "php artisan fangabase:mail-worker"';
+    current.scripts.lint = "tsc --noEmit && composer lint";
+    current.scripts.typecheck = "tsc --noEmit";
+    current.scripts.test = "composer test && vitest run";
+    current.scripts.build = "vite build";
+  } else if (laravel && !frontend) {
     current.scripts.dev = "composer --working-dir=apps/server run dev";
     current.scripts.test = "composer --working-dir=apps/server test";
     current.scripts.build =
@@ -391,11 +454,12 @@ async function writeGeneratedTooling(
   await writeFile(join(staging, "tools/doctor.mjs"), generatedDoctor(config));
   await writeFile(
     join(staging, "tools/smoke-auth.mjs"),
-    generatedAuthSmoke(config),
+    generatedAuthSmoke(config).replaceAll("x-fangabase-csrf", "x-csrf-token"),
   );
 }
 
 function generatedDoctor(config: FangaBaseConfig): string {
+  if (isInertia(config)) return generatedInertiaDoctorV2();
   const tools =
     config.architecture.backend === "laravel"
       ? ["node", "pnpm", "php", "composer"]
@@ -403,15 +467,43 @@ function generatedDoctor(config: FangaBaseConfig): string {
   return `import{spawnSync}from"node:child_process";import{readFileSync,existsSync}from"node:fs";const checks=[];for(const name of ${JSON.stringify(tools)}){const command=name==="node"?process.execPath:name;const result=spawnSync(command,["--version"],{encoding:"utf8",shell:process.platform==="win32"});checks.push({name,status:result.status===0?"PASS":"FAIL"});}try{const config=readFileSync("fangabase.config.yaml","utf8");if(!config.includes("version: 1"))throw new Error();checks.push({name:"configuration",status:"PASS"});}catch{checks.push({name:"configuration",status:"FAIL"});}checks.push({name:"environment",status:existsSync(".env")?"PASS":"WARNING",explanation:".env reste local et hors Git"});const status=checks.some(c=>c.status==="FAIL")?"FAIL":checks.some(c=>c.status==="WARNING")?"WARNING":"PASS";console.log(JSON.stringify({status,checks},null,2));if(status==="FAIL")process.exitCode=1;\n`;
 }
 
+function generatedInertiaDoctorV2(): string {
+  return `import{spawnSync}from"node:child_process";
+import{accessSync,constants,existsSync,readFileSync}from"node:fs";
+const checks=[];
+const add=(name,status,explanation)=>checks.push({name,status,explanation});
+const run=(name,args=[])=>spawnSync(name,args,{encoding:"utf8",shell:process.platform==="win32"});
+for(const name of ["git","php","composer","node","pnpm"]){const result=run(name,["--version"]);add(name,result.status===0?"PASS":"FAIL",result.status===0?"Disponible.":"Outil requis.");}
+const modules=run("php",["-m"]);for(const extension of ["pdo","openssl","mbstring"]){add("php:"+extension,modules.status===0&&modules.stdout.toLowerCase().split(/\\r?\\n/).includes(extension)?"PASS":"FAIL","Extension PHP requise.");}
+for(const path of ["artisan","composer.lock","pnpm-lock.yaml","resources/js/app.tsx","vite.config.ts","storage","bootstrap/cache"]){add("file:"+path,existsSync(path)?"PASS":"FAIL","Élément du profil intégré.");}
+for(const path of ["storage","bootstrap/cache"]){try{accessSync(path,constants.R_OK|constants.W_OK);add("permissions:"+path,"PASS","Lecture et écriture disponibles.");}catch{add("permissions:"+path,"FAIL","Lecture et écriture requises.");}}
+const hasEnv=existsSync(".env");add("environment",hasEnv?"PASS":"WARNING",".env reste local et hors Git.");
+if(hasEnv){const entries=Object.fromEntries(readFileSync(".env","utf8").split(/\\r?\\n/).filter(line=>line&&!line.startsWith("#")&&line.includes("=")).map(line=>{const index=line.indexOf("=");return[line.slice(0,index),line.slice(index+1)];}));add("app-key",entries.APP_KEY?"PASS":"FAIL","APP_KEY doit être défini localement.");add("database-config",entries.DATABASE_URL||entries.DB_CONNECTION?"PASS":"FAIL","Connexion DB requise.");const unsafe=Object.keys(entries).filter(name=>name.startsWith("VITE_")&&/(secret|password|private.?key|token|client.?secret)/i.test(name));add("vite-public-secrets",unsafe.length?"FAIL":"PASS",unsafe.length?"Nom VITE potentiellement secret.":"Aucun nom de secret exposé par Vite.");const migrations=run("php",["artisan","migrate:status","--no-interaction"]);add("database-migrations",migrations.status===0?"PASS":"FAIL","Connexion DB et table des migrations.");}
+const composer=run("composer",["show","inertiajs/inertia-laravel"]);add("composer-dependencies",composer.status===0?"PASS":"FAIL","Adaptateur Inertia Laravel installé.");
+const frontend=run("pnpm",["list","@inertiajs/react","--depth","0"]);add("frontend-dependencies",frontend.status===0?"PASS":"FAIL","Adaptateur Inertia React installé.");
+add("vite-manifest",existsSync("public/build/.vite/manifest.json")||existsSync("public/build/manifest.json")?"PASS":"WARNING","Exécutez pnpm build avant déploiement.");
+const status=checks.some(check=>check.status==="FAIL")?"FAIL":checks.some(check=>check.status==="WARNING")?"WARNING":"PASS";
+console.log(JSON.stringify({status,checks},null,2));if(status==="FAIL")process.exitCode=1;
+`;
+}
+
+function generatedInertiaDoctor(): string {
+  return `import{spawnSync}from"node:child_process";import{existsSync,readFileSync}from"node:fs";const checks=[];const add=(name,status,explanation)=>checks.push({name,status,explanation});const tool=(name,args=["--version"])=>{const result=spawnSync(name,args,{encoding:"utf8",shell:process.platform==="win32"});add(name,result.status===0?"PASS":"FAIL",result.status===0?name+" est disponible.":name+" est requis.");return result;};tool("git");tool("php");tool("composer");tool("node");tool("pnpm");const modules=tool("php",["-m"]);for(const extension of ["pdo","openssl","mbstring"]){add("php:"+extension,modules.status===0&&modules.stdout.toLowerCase().split(/\\r?\\n/).includes(extension)?"PASS":"FAIL","Extension PHP requise.");}for(const path of ["artisan","composer.lock","pnpm-lock.yaml","resources/js/app.tsx","vite.config.ts","storage","bootstrap/cache"]){add("file:"+path,existsSync(path)?"PASS":"FAIL","Élément du profil intégré.");}add("environment",existsSync(".env")?"PASS":"WARNING",".env reste local et hors Git; APP_KEY et DATABASE_URL doivent être configurés.");if(existsSync(".env")){const names=readFileSync(".env","utf8").split(/\\r?\\n/).map(line=>line.split("=")[0]??"");const unsafe=names.filter(name=>name.startsWith("VITE_")&&/(secret|password|private.?key|token|client.?secret)/i.test(name));add("vite-public-secrets",unsafe.length?"FAIL":"PASS",unsafe.length?"Nom de variable VITE potentiellement secret détecté.":"Aucun nom de secret exposé par Vite.");}add("vite-manifest",existsSync("public/build/.vite/manifest.json")||existsSync("public/build/manifest.json")?"PASS":"WARNING","Exécutez pnpm build avant déploiement.");const status=checks.some(c=>c.status==="FAIL")?"FAIL":checks.some(c=>c.status==="WARNING")?"WARNING":"PASS";console.log(JSON.stringify({status,checks},null,2));if(status==="FAIL")process.exitCode=1;\n`;
+}
+
 function generatedAuthSmoke(config: FangaBaseConfig): string {
+  if (isInertia(config)) {
+    return `import{spawnSync}from"node:child_process";const production=(process.env.NODE_ENV??"").toLowerCase()==="production"||(process.env.APP_ENV??"").toLowerCase()==="production";if(production)throw new Error("smoke:auth refuse la production");const origin=(process.env.FANGABASE_SMOKE_URL??"http://127.0.0.1:8000/api").replace(/\\\/$/,"");const email=\`smoke-\${Date.now()}-\${crypto.randomUUID()}@example.invalid\`;const password=\`Smoke!\${crypto.randomUUID()}aA1\`;let cookies={};async function call(path,method="GET",body){const headers={accept:"application/json"};if(body){headers["content-type"]="application/json";headers["x-fangabase-csrf"]=cookies.fangabase_csrf??"";}if(Object.keys(cookies).length)headers.cookie=Object.entries(cookies).map(([k,v])=>\`\${k}=\${v}\`).join("; ");const response=await fetch(origin+path,{method,headers,body:body?JSON.stringify(body):undefined});for(const value of response.headers.getSetCookie?.()??[]){const[pair]=value.split(";");const[key,...rest]=pair.split("=");cookies[key]=rest.join("=");}const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(\`\${method} \${path}: HTTP \${response.status} \${data?.error?.code??""}\`);return data;}let failure;try{await call("/health");await call("/auth/register","POST",{name:"Smoke Auth",email,password});await call("/auth/email/verification/request","POST",{email});const tokenResult=spawnSync("php",["tools/smoke-token.php",email],{encoding:"utf8"});const token=tokenResult.status===0?tokenResult.stdout.trim():"";if(!token)throw new Error("Jeton local absent");await call("/auth/email/verification/confirm","POST",{token});await call("/auth/login","POST",{email,password});await call("/auth/me");await call("/auth/refresh","POST",{});await call("/auth/logout","POST",{});const denied=await fetch(origin+"/auth/me",{headers:{cookie:Object.entries(cookies).map(([k,v])=>\`\${k}=\${v}\`).join("; ")}});if(denied.status!==401)throw new Error("Session encore active après logout");}catch(error){failure=error;}finally{const cleanup=spawnSync("php",["tools/smoke-cleanup.php",email],{stdio:"inherit"});if(cleanup.status!==0&&!failure)failure=new Error("Nettoyage smoke échoué");}if(failure)throw failure;console.log(JSON.stringify({status:"PASS",backend:"laravel",cleanup:"PASS"}));\n`;
+  }
   return `const production=(process.env.NODE_ENV??"").toLowerCase()==="production"||(process.env.APP_ENV??"").toLowerCase()==="production";if(production)throw new Error("smoke:auth refuse de s'exécuter en production");const origin=(process.env.FANGABASE_SMOKE_URL??"http://127.0.0.1:${config.architecture.backend === "laravel" ? "8000/api" : "3000/api"}").replace(/\\/$/,"");const email=\`smoke-\${Date.now()}-\${crypto.randomUUID()}@example.invalid\`;const password=\`Smoke!\${crypto.randomUUID()}aA1\`;let cookies={};async function call(path,method="GET",body){const headers={accept:"application/json"};if(body){headers["content-type"]="application/json";headers["x-fangabase-csrf"]=cookies.fangabase_csrf??"";}if(Object.keys(cookies).length)headers.cookie=Object.entries(cookies).map(([k,v])=>\`\${k}=\${v}\`).join("; ");const response=await fetch(origin+path,{method,headers,body:body?JSON.stringify(body):undefined});for(const value of response.headers.getSetCookie?.()??[]){const [pair]=value.split(";");const [key,...rest]=pair.split("=");cookies[key]=rest.join("=");}const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(\`\${method} \${path}: HTTP \${response.status} \${data?.error?.code??""}\`);return data;}await call("/health");const registered=await call("/auth/register","POST",{name:"Smoke Auth",email,password});const token=registered.verificationToken??registered.verification_token;if(!token)throw new Error("Jeton de vérification local absent; activez uniquement le fournisseur de test local");await call("/auth/email/verification/confirm","POST",{token});await call("/auth/login","POST",{email,password});await call("/auth/me");await call("/auth/refresh","POST",{});await call("/auth/logout","POST",{});const denied=await fetch(origin+"/auth/me",{headers:{cookie:Object.entries(cookies).map(([k,v])=>\`\${k}=\${v}\`).join("; ")}});if(denied.status!==401)throw new Error("La session reste utilisable après logout");console.log(JSON.stringify({status:"PASS",backend:${JSON.stringify(config.architecture.backend)},email:"utilisateur de test unique supprimable"}));\n`;
 }
 
 async function filterLaravelProviders(
   root: string,
   providers: readonly string[],
+  integrated = false,
 ): Promise<void> {
-  const appRoot = join(root, "apps/server");
+  const appRoot = integrated ? root : join(root, "apps/server");
   const providerPath = join(appRoot, "app/Providers/AppServiceProvider.php");
   let provider = await readFile(providerPath, "utf8");
   const routesPath = join(appRoot, "routes/api.php");
@@ -847,7 +939,9 @@ async function writeDeployment(
   await mkdir(root, { recursive: true });
   await writeFile(
     join(root, "README.md"),
-    `# Déploiement ${kind}\n\nExécutez les migrations explicitement avant le démarrage. Injectez les secrets au runtime et vérifiez health/readiness.\n`,
+    isInertia(config)
+      ? inertiaDeploymentGuide(kind)
+      : `# Déploiement ${kind}\n\nExécutez les migrations explicitement avant le démarrage. Injectez les secrets au runtime et vérifiez health/readiness.\n`,
   );
   if (kind === "cloud")
     await writeFile(join(root, "vercel.json"), '{"framework":"nextjs"}\n');
@@ -865,14 +959,16 @@ async function writeDeployment(
     );
     await writeFile(
       join(root, "nginx/fangabase.conf.example"),
-      "server { listen 443 ssl; server_name example.invalid; }\n",
+      isInertia(config)
+        ? "server { listen 443 ssl; server_name example.invalid; root /srv/fangabase/public; index index.php; location / { try_files $uri $uri/ /index.php?$query_string; } location ~ \\.php$ { include fastcgi_params; fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; fastcgi_pass unix:/run/php/php-fpm.sock; } }\n"
+        : "server { listen 443 ssl; server_name example.invalid; }\n",
     );
   }
 }
 
 function envLines(config: FangaBaseConfig): string[] {
   const lines = [
-    `APP_NAME=${config.product.name}`,
+    `APP_NAME=${JSON.stringify(config.product.name)}`,
     "APP_ENV=local",
     `DATABASE_ENGINE=${config.database.engine}`,
     "DATABASE_URL=",
@@ -928,7 +1024,9 @@ async function writeDocs(
   );
   await writeFile(
     join(staging, "ARCHITECTURE.md"),
-    `# Architecture\n\nProfil : \`${config.architecture.target}\`.\nBackend d'autorité : \`${config.architecture.backend}\`.\nFrontend : \`${config.architecture.frontend}\`.\nBase : \`${config.database.engine}\`.\n`,
+    isInertia(config)
+      ? `# Architecture\n\nCette application utilise Laravel comme backend et React avec Inertia comme frontend intégré. Elle constitue une seule application et n’utilise pas une architecture frontend/backend séparée.\n\n- Laravel + Blade : rendu intégré sans React.\n- Laravel + React/Inertia : application intégrée actuelle.\n- Laravel API + React séparé : deux applications et deux cycles de déploiement.\n- Laravel API + Next.js séparé : deux applications avec un serveur Node.\n\nBase : \`${config.database.engine}\`. SSR Inertia n’est pas activé.\n`
+      : `# Architecture\n\nProfil : \`${config.architecture.target}\`.\nBackend d'autorité : \`${config.architecture.backend}\`.\nFrontend : \`${config.architecture.frontend}\`.\nBase : \`${config.database.engine}\`.\n`,
   );
   await writeFile(
     join(staging, "NEXT_STEPS.md"),
@@ -938,6 +1036,8 @@ async function writeDocs(
     join(staging, "CONFIGURATION_SERVICES.md"),
     serviceDocumentation(config),
   );
+  if (isInertia(config) && config.design.source === "stitch")
+    await writeFile(join(staging, "STITCH_INERTIA.md"), stitchInertiaGuide());
 }
 
 function serviceDocumentation(config: FangaBaseConfig): string {
@@ -1002,6 +1102,14 @@ function serviceSection(
   return `## ${title}\n\n- But : ${purpose}\n- Statut : ${status}\n- Variables : ${variables.length ? variables.map((item) => `\`${item}\``).join(", ") : "aucune variable distante"}\n- Source et endpoints : À confirmer dans le contrat officiel du fournisseur.\n- Absence de configuration : le service distant reste désactivé ou le doctor signale un avertissement.\n- Vérification : \`pnpm doctor\`, puis UAT sandbox avant production.\n- Sécurité : secrets au runtime, erreurs fournisseur nettoyées, callbacks HTTPS vérifiés.`;
 }
 
+function inertiaDeploymentGuide(kind: string): string {
+  return `# Déploiement ${kind} Laravel/Inertia\n\nL’application est servie par Laravel/PHP-FPM depuis \`public/\`. Exécutez \`pnpm build\` avant le déploiement afin de produire \`public/build\`; aucun serveur Node permanent ni SSR Inertia n’est requis en production.\n\n1. Installez Composer et pnpm avec les lockfiles.\n2. Compilez les assets puis déployez le code et \`public/build\`.\n3. Injectez le fichier \`.env\` hors Git et générez \`APP_KEY\` sur l’environnement cible.\n4. Exécutez les migrations sous verrou et les caches Laravel.\n5. Configurez le document root sur \`public/\`, PHP-FPM, les permissions de \`storage/\` et \`bootstrap/cache/\`.\n6. Sur VPS, exécutez worker et scheduler sous supervision; en mutualisé, utilisez des tâches cron bornées.\n7. Vérifiez sauvegarde, restauration, health, smoke auth et rollback.\n`;
+}
+
+function stitchInertiaGuide(): string {
+  return `# Intégrer explicitement un design Stitch avec Inertia\n\nStitch n’est pas lancé pendant la génération et aucune clé n’est demandée. Utilisez uniquement une source Stitch réellement fournie.\n\n| Source Stitch | Destination |\n| --- | --- |\n| Pages | \`resources/js/pages\` |\n| Composants | \`resources/js/components\` |\n| Layouts | \`resources/js/layouts\` |\n| Types | \`resources/js/types\` |\n| Utilitaires | \`resources/js/lib\` |\n| Assets publics | \`public/\` |\n| Assets compilés | \`resources/\` |\n\nTransformez les liens en \`Link\` Inertia et les formulaires avec \`useForm\`. Les routes, validations et permissions restent dans Laravel; affichez ses erreurs sans exposer de secret ni de donnée d’une autre organisation. Vérifiez responsive, accessibilité, autorisations et tests avant livraison.\n`;
+}
+
 async function validateGenerated(
   root: string,
   config: FangaBaseConfig,
@@ -1023,6 +1131,38 @@ async function validateGenerated(
     files.some((path) => path.startsWith("packages/backend-next/"))
   )
     throw new Error("Le backend Next.js a été inclus dans un profil Laravel.");
+  if (isInertia(config)) {
+    for (const required of [
+      "artisan",
+      "composer.json",
+      "package.json",
+      "vite.config.ts",
+      "resources/js/app.tsx",
+      "resources/views/app.blade.php",
+    ])
+      if (!files.includes(required))
+        throw new Error(`Fichier Inertia obligatoire absent: ${required}.`);
+    if (
+      files.some(
+        (path) =>
+          path.startsWith("apps/server/") ||
+          path.startsWith("apps/web/") ||
+          path.startsWith("frontend/"),
+      )
+    )
+      throw new Error(
+        "Le profil Inertia doit rester une seule application Laravel.",
+      );
+    const env = await readFile(join(root, ".env.example"), "utf8");
+    if (
+      /^(?:VITE_.*(?:SECRET|PASSWORD|TOKEN|PRIVATE_KEY)|NEXT_PUBLIC_|CORS_ALLOWED_ORIGINS|FRONTEND_ORIGIN)=/im.test(
+        env,
+      )
+    )
+      throw new Error(
+        "Variable frontend ou cross-origin interdite dans le profil Inertia.",
+      );
+  }
   const env = await readFile(join(root, ".env.example"), "utf8");
   const providerPrefixes: Record<string, string> = {
     stripe: "STRIPE_",
@@ -1069,6 +1209,16 @@ async function copyTree(source: string, destination: string): Promise<void> {
             part.endsWith(".tsbuildinfo"),
         ),
   });
+}
+
+async function cleanIntegratedRuntimeArtifacts(root: string): Promise<void> {
+  await rm(join(root, "storage/app/private"), { recursive: true, force: true });
+  await rm(join(root, "storage/logs/laravel.log"), { force: true });
+  await rm(join(root, "bootstrap/cache/packages.php"), { force: true });
+  await rm(join(root, "bootstrap/cache/services.php"), { force: true });
+  await rm(join(root, "database/database.sqlite"), { force: true });
+  await mkdir(join(root, "storage/app/private"), { recursive: true });
+  await writeFile(join(root, "storage/app/private/.gitkeep"), "");
 }
 
 async function copyFile(
@@ -1120,6 +1270,10 @@ function family(config: FangaBaseConfig): string {
   if (config.architecture.target === "shared_laravel") return "shared";
   if (config.architecture.target === "hybrid") return "hybrid";
   return "vps";
+}
+
+function isInertia(config: FangaBaseConfig): boolean {
+  return config.architecture.integration === "inertia";
 }
 
 function unique(values: string[]): string[] {

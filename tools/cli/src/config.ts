@@ -45,7 +45,8 @@ export const configSchema = z
       target: z.enum(architectureTargets),
       frontend: z.enum(["next", "react", "blade"]),
       backend: z.enum(["next", "laravel"]),
-      ui: z.enum(["next", "react", "blade"]),
+      ui: z.enum(["next", "react", "blade", "inertia_react"]),
+      integration: z.enum(["standalone", "blade", "inertia", "api"]).optional(),
     }),
     deployment: z
       .object({
@@ -53,7 +54,13 @@ export const configSchema = z
         docker: z.boolean().default(false),
         database: z.enum(["postgres", "mysql"]),
         vps_variant: z
-          .enum(["next", "laravel", "laravel_api_next"])
+          .enum([
+            "next",
+            "laravel",
+            "laravel_inertia_react",
+            "laravel_api_next",
+            "laravel_api_react",
+          ])
           .nullable()
           .default(null),
       })
@@ -179,6 +186,30 @@ export const configSchema = z
         code: z.ZodIssueCode.custom,
         path: ["architecture", "backend"],
         message: "vps_laravel exige Laravel",
+      });
+    }
+    if (
+      value.architecture.integration === "inertia" &&
+      (value.architecture.backend !== "laravel" ||
+        value.architecture.frontend !== "react" ||
+        value.architecture.ui !== "inertia_react" ||
+        !["vps_laravel", "shared_laravel"].includes(value.architecture.target))
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["architecture", "integration"],
+        message:
+          "inertia exige une seule application Laravel avec React intégré sur VPS ou mutualisé",
+      });
+    }
+    if (
+      value.architecture.ui === "inertia_react" &&
+      value.architecture.integration !== "inertia"
+    ) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["architecture", "ui"],
+        message: "inertia_react exige architecture.integration=inertia",
       });
     }
     if (

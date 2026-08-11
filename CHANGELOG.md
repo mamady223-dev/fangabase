@@ -1,5 +1,12 @@
 # Journal des changements
 
+## 0.4.0-rc.1 - en préparation
+
+- Ajout des profils VPS et mutualisé `laravel_inertia_react`, constitués d’une seule application Laravel avec React 19, Inertia 2, TypeScript et Vite 7.
+- Questionnaire commun étendu sans casser les anciens identifiants : les architectures intégrées et séparées sont désormais explicites.
+- Génération racine, environnement unique, contrôles Vite publics, documentation et déploiements PHP-FPM/Apache adaptés.
+- Matrice portée à dix profils et CI dédiée à l’installation, aux tests et au build des deux nouveaux profils.
+
 ## Stabilisation finale de 0.3.0-rc.1
 
 - Bascule automatiquement `pnpm create:project` vers le protocole agent lorsque stdin n’est pas un TTY et qu’aucune génération explicite n’est demandée.

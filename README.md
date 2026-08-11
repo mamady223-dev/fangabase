@@ -1,6 +1,6 @@
 # FangaBase
 
-> Version en préparation : `0.3.0-rc.1`.
+> Version en préparation : `0.4.0-rc.1`.
 
 FangaBase est un générateur de socles applicatifs headless. Il produit un projet indépendant avec une seule autorité backend : Next.js autonome (`cloud_vercel`, `vps_next`) ou Laravel (`vps_laravel`, `shared_laravel`, `hybrid`). Il n’impose ni métier, ni thème, ni identité graphique.
 
@@ -31,6 +31,8 @@ Un brief produit conforme peut être fourni avec `--brief FANGABASE_INPUT.md`. I
 La destination doit être extérieure au dépôt source. Elle est construite dans un dossier temporaire, validée, inventoriée avec SHA-256 puis déplacée atomiquement. `.git`, dépendances installées, builds, fichiers `.env` locaux et secrets sont exclus.
 
 Chaque projet généré expose `pnpm setup`, `pnpm doctor`, `pnpm migrate`, `pnpm dev`, `pnpm test`, `pnpm build` et `pnpm smoke:auth` lorsque l’identité est disponible. Consultez [le démarrage rapide](docs/getting-started/quickstart.md) et [les profils](docs/architecture/profiles.md).
+
+Le profil `laravel_inertia_react` produit une seule application Laravel à la racine : React et TypeScript vivent dans `resources/js`, Inertia relie les routes Laravel aux pages React et Vite compile vers `public/build`. Il est disponible sur VPS et hébergement mutualisé, sans serveur Node permanent ni SSR en production. Les profils Laravel API + Next.js/React séparés restent inchangés.
 
 ## Services et paiements
 

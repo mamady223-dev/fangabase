@@ -1,0 +1,38 @@
+{
+  "name": "fangabase/laravel-inertia-app",
+  "description": "Application Laravel avec React intégré par Inertia",
+  "type": "project",
+  "require": {
+    "php": "^8.2",
+    "google/apiclient": "2.15",
+    "inertiajs/inertia-laravel": "^2.0.24",
+    "laravel/framework": "^12.0",
+    "laravel/tinker": "^2.10"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "FangaBase\\": "app/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "FangaBase\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "php vendor/bin/phpunit",
+    "lint": "php -l routes/api.php && php -l routes/web.php",
+    "dev": "php artisan serve"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": false
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

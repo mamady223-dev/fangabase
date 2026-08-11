@@ -172,7 +172,7 @@ describe("CLI FangaBase", () => {
     expect(first.status, first.stderr).toBe(0);
     expect(JSON.parse(first.stdout).changed).toBe(true);
     expect(await readFile(output, "utf8")).toContain(
-      "generator_version: 0.3.0-rc.1",
+      "generator_version: 0.4.0-rc.1",
     );
     const second = run();
     expect(second.status, second.stderr).toBe(0);

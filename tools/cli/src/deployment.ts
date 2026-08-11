@@ -78,7 +78,10 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
           },
         ]
       : []),
-    ...(config.architecture.frontend === "react" ? reactFrontend() : []),
+    ...(config.architecture.frontend === "react" &&
+    config.architecture.integration !== "inertia"
+      ? reactFrontend()
+      : []),
   ];
   if (family === "cloud") {
     return [
@@ -98,7 +101,7 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
       },
       {
         path: "public-root.md",
-        content: `${header}Point the document root to apps/server/public. If the host fixes public_html, keep application and secrets above it and expose only Laravel public files. Never copy .env into public_html.\n`,
+        content: `${header}Point the document root to ${config.architecture.integration === "inertia" ? "public" : "apps/server/public"}. If the host fixes public_html, keep application and secrets above it and expose only Laravel public files. Build Inertia assets before upload; no permanent Node process is required. Never copy .env into public_html.\n`,
       },
     ];
   }
@@ -107,18 +110,30 @@ export function deploymentFiles(config: FangaBaseConfig): DeploymentFile[] {
       path: "systemd/fangabase-web.service",
       content:
         config.architecture.backend === "laravel"
-          ? systemd("web", "php artisan serve --host=127.0.0.1 --port=8000")
+          ? systemd(
+              "web",
+              "php artisan serve --host=127.0.0.1 --port=8000",
+              config.architecture.integration === "inertia",
+            )
           : systemd("web", "pnpm --filter @fangabase/web start"),
     },
     ...(config.architecture.backend === "laravel"
       ? [
           {
             path: "systemd/fangabase-worker.service",
-            content: systemd("worker", "php artisan fangabase:outbox-work"),
+            content: systemd(
+              "worker",
+              "php artisan fangabase:outbox-work",
+              config.architecture.integration === "inertia",
+            ),
           },
           {
             path: "systemd/fangabase-scheduler.service",
-            content: systemd("scheduler", "php artisan schedule:work"),
+            content: systemd(
+              "scheduler",
+              "php artisan schedule:work",
+              config.architecture.integration === "inertia",
+            ),
           },
         ]
       : [
@@ -258,10 +273,12 @@ createRoot(document.getElementById("root")!).render(<App />);
   ];
 }
 
-function systemd(name: string, command: string): string {
+function systemd(name: string, command: string, integrated = false): string {
   const directory = command.startsWith("pnpm")
     ? "/srv/fangabase"
-    : "/srv/fangabase/apps/server";
+    : integrated
+      ? "/srv/fangabase"
+      : "/srv/fangabase/apps/server";
   return `${header}[Unit]\nDescription=FangaBase ${name}\nAfter=network.target\n[Service]\nUser=fangabase\nWorkingDirectory=${directory}\nEnvironmentFile=/etc/fangabase/server.env\nExecStart=/usr/bin/${command}\nRestart=on-failure\nTimeoutStopSec=30\nNoNewPrivileges=true\n[Install]\nWantedBy=multi-user.target\n`;
 }
 
@@ -324,7 +341,9 @@ function runbook(config: FangaBaseConfig, family: string): string {
   const migration =
     config.architecture.backend === "next"
       ? "pnpm --filter @fangabase/backend-next migrate"
-      : "php apps/server/artisan migrate --force";
+      : config.architecture.integration === "inertia"
+        ? "php artisan migrate --force"
+        : "php apps/server/artisan migrate --force";
   const limitations =
     family === "cloud"
       ? "Laravel is not deployed on Vercel by this profile. Use Hybrid when Laravel is the backend. Serverless runtimes cannot host persistent workers."

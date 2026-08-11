@@ -5,6 +5,8 @@ FangaBase ne copie aucun code de kit tiers. Il utilise les dépendances publiée
 | Dépendances                           | Usage                      | Licence publiée |
 | ------------------------------------- | -------------------------- | --------------- |
 | Next.js, React, React DOM             | Application web            | MIT             |
+| Inertia.js (Laravel et React)         | Liaison Laravel/React      | MIT             |
+| Vite et Laravel Vite Plugin           | Compilation des assets     | MIT             |
 | Playwright                            | Tests navigateur           | Apache-2.0      |
 | Zod, Commander, Prettier, Vitest, tsx | Validation, CLI et qualité | MIT             |
 | yaml                                  | Lecture/ecriture YAML      | ISC             |

@@ -1,5 +1,19 @@
 # Progression FangaBase
 
+## Architecture Laravel + React/Inertia `0.4.0-rc.1`
+
+État : **PASS local avec avertissements, CI requise avant toute publication**.
+
+Deux profils intégrés s’ajoutent sans remplacer les huit profils historiques : `vps_laravel_inertia_react` et `shared_laravel_inertia_react`. Ils génèrent une seule application Laravel à la racine, React/TypeScript dans `resources/js`, une vue Blade racine et les assets Vite dans `public/build`. Inertia n’est proposé ni sur Cloud/Vercel ni en hybride.
+
+Le questionnaire commun expose exactement cinq choix VPS et deux choix mutualisés. Les anciennes configurations restent valides ; `integration: inertia` et `ui: inertia_react` rendent le nouveau choix non ambigu. Les guides, le doctor ciblé, le smoke avec nettoyage, les déploiements PHP-FPM/mutualisé et la matrice de dix profils sont couverts par les tests.
+
+Première UAT générée : installations Composer/pnpm vertes, migration SQLite des 13 migrations verte, 96 tests Laravel (641 assertions), 1 test React, typecheck, build Vite (777 modules), doctor ciblé et smoke auth avec nettoyage verts. PostgreSQL/MySQL restent couverts par les gates Laravel existantes et la CI.
+
+Gates finales : 104 tests CLI, 107 tests Laravel (667 assertions), toutes les suites JS/TS, format, lint, typecheck, builds, 2 E2E et `release:check` verts. Le package vérifié contient 439 entrées, dont les templates Inertia ; son SHA-256 final est publié dans le rapport d’exécution.
+
+Prochain bloc exact : créer le commit dédié, pousser `main`, puis vérifier les workflows obligatoires sans tag ni modification de `stable`.
+
 ## Stabilisation du générateur `0.3.0-rc.1`
 
 Correctif post-RC : le harnais de conformité ne choisit plus un port pseudo-aléatoire et ne masque plus la sortie de `artisan serve`. Il désactive le rechargement automatique, détecte les arrêts prématurés et restitue les logs Laravel sans réessayer ni affaiblir un scénario métier.

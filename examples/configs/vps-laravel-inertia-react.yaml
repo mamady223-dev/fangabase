@@ -1,0 +1,36 @@
+version: 1
+product:
+  name: VPS Laravel Inertia React
+  slug: vps-laravel-inertia-react
+  type: saas
+  description: Profil intégré Laravel React Inertia pour VPS
+  locale: fr
+  timezone: Africa/Bamako
+  country: ML
+  default_currency: XOF
+architecture:
+  target: vps_laravel
+  frontend: react
+  backend: laravel
+  ui: inertia_react
+  integration: inertia
+deployment:
+  family: vps
+  docker: false
+  database: postgres
+  vps_variant: laravel_inertia_react
+database: { engine: postgres, provider: postgres }
+email: { provider: local_log }
+storage: { provider: local_private }
+queue: { provider: database }
+cache: { provider: database }
+billing: { modes: [credits, subscription] }
+payments: { providers: [], default_provider: null }
+design: { source: headless }
+features:
+  organizations: true
+  marketplace: false
+  admin: true
+  audit_log: true
+  notifications: true
+  uploads: true

@@ -113,6 +113,25 @@ const profiles: Array<
     },
   ],
   [
+    "vps-laravel-react-separated",
+    {
+      architecture: {
+        target: "vps_laravel",
+        frontend: "react",
+        backend: "laravel",
+        ui: "react",
+        integration: "api",
+      },
+      deployment: {
+        family: "vps",
+        docker: false,
+        database: "postgres",
+        vps_variant: "laravel_api_react",
+      },
+      database: { engine: "postgres", provider: "postgres" },
+    },
+  ],
+  [
     "vps-laravel",
     {
       architecture: {
@@ -138,6 +157,44 @@ const profiles: Array<
         frontend: "blade",
         backend: "laravel",
         ui: "blade",
+      },
+      deployment: {
+        family: "shared",
+        docker: false,
+        database: "mysql",
+        vps_variant: null,
+      },
+      database: { engine: "mysql", provider: "mysql" },
+    },
+  ],
+  [
+    "vps-laravel-inertia-react",
+    {
+      architecture: {
+        target: "vps_laravel",
+        frontend: "react",
+        backend: "laravel",
+        ui: "inertia_react",
+        integration: "inertia",
+      },
+      deployment: {
+        family: "vps",
+        docker: false,
+        database: "postgres",
+        vps_variant: "laravel_inertia_react",
+      },
+      database: { engine: "postgres", provider: "postgres" },
+    },
+  ],
+  [
+    "shared-laravel-inertia-react",
+    {
+      architecture: {
+        target: "shared_laravel",
+        frontend: "react",
+        backend: "laravel",
+        ui: "inertia_react",
+        integration: "inertia",
       },
       deployment: {
         family: "shared",
@@ -242,6 +299,69 @@ describe("générateur de projet ciblé", () => {
             "utf8",
           ),
         ).rejects.toThrow();
+        if (config.architecture.integration === "inertia") {
+          expect(rootFiles).toEqual(
+            expect.arrayContaining([
+              "app",
+              "bootstrap",
+              "config",
+              "database",
+              "public",
+              "resources",
+              "routes",
+              "storage",
+              "tests",
+              "artisan",
+              "composer.json",
+              "vite.config.ts",
+            ]),
+          );
+          expect(rootFiles).not.toContain("apps");
+          expect(rootFiles).not.toContain("frontend");
+          expect(await readdir(join(destination, "resources/js"))).toEqual(
+            expect.arrayContaining([
+              "components",
+              "hooks",
+              "layouts",
+              "lib",
+              "pages",
+              "types",
+              "app.tsx",
+            ]),
+          );
+          expect(
+            await readFile(join(destination, "resources/js/app.tsx"), "utf8"),
+          ).toContain("createInertiaApp");
+          expect(
+            await readFile(join(destination, "composer.json"), "utf8"),
+          ).toContain("inertiajs/inertia-laravel");
+          expect(
+            await readFile(join(destination, "ARCHITECTURE.md"), "utf8"),
+          ).toContain("une seule application");
+          const environment = await readFile(
+            join(destination, ".env.example"),
+            "utf8",
+          );
+          expect(environment).not.toMatch(
+            /NEXT_PUBLIC_|CORS_ALLOWED_ORIGINS|FRONTEND_ORIGIN/,
+          );
+          expect(environment.match(/^APP_NAME=/gm)).toHaveLength(1);
+          expect(environment).not.toMatch(
+            /^VITE_.*(?:SECRET|PASSWORD|TOKEN|PRIVATE_KEY)/im,
+          );
+          const smoke = await readFile(
+            join(destination, "tools/smoke-auth.mjs"),
+            "utf8",
+          );
+          expect(smoke).toContain("x-csrf-token");
+          expect(smoke).toContain("smoke-cleanup.php");
+          await expect(
+            readFile(join(destination, "storage/logs/laravel.log"), "utf8"),
+          ).rejects.toThrow();
+          await expect(
+            readFile(join(destination, "database/database.sqlite"), "utf8"),
+          ).rejects.toThrow();
+        }
       }
       expect(
         result.generatedFiles.every(
@@ -251,6 +371,19 @@ describe("générateur de projet ciblé", () => {
     },
     30_000,
   );
+
+  it("génère le profil Inertia dans un chemin Windows avec espaces et accents", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-chemin-"));
+    const destination = join(directory, "Projet étudiant intégré");
+    const overrides = profiles.find(
+      ([name]) => name === "vps-laravel-inertia-react",
+    )?.[1];
+    const config = configSchema.parse({ ...base, ...overrides });
+    await generateProject({ config, destination, sourceRoot, confirmed: true });
+    expect(
+      await readFile(join(destination, "resources/js/app.tsx"), "utf8"),
+    ).toContain("createInertiaApp");
+  });
 
   it("dry-run n'écrit rien et décrit packages, commandes, inclusions et exclusions", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-plan-"));
