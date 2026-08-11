@@ -142,6 +142,25 @@ Les comptes sandbox Stripe/FedaPay, les contrats payout, Moneroo, les fournisseu
 
 Les étudiants autorisés peuvent modifier FangaBase et commercialiser les applications qu'ils créent. Le partage, la redistribution et la revente de FangaBase restent interdits. Les composants tiers demeurent soumis à leurs propres licences. La licence ne constitue pas un avis juridique professionnel.
 
+## Correctif de génération guidée Codex
+
+Le questionnaire possède maintenant une source unique utilisée par le parcours
+PowerShell et le protocole JSON non interactif. `create:project --agent --json`
+est sans écriture, expose des identifiants stables, les conditions et les règles
+de compatibilité, puis accepte des réponses partielles avec `--answers`. Une
+configuration complète produit le même objet que le parcours interactif et
+doit encore passer par le dry-run, la destination séparée et la confirmation
+explicite avant génération. Aucun backend, paiement, design ou artefact de
+déploiement n’a été modifié. Aucun tag ni mouvement de `stable` n’est prévu.
+
+Preuves locales du 2026-08-11 : 87 tests CLI verts, matrice des sept profils
+verte, suite JS/TS complète verte, lint, typecheck, six builds, contrôle
+documentaire et `pnpm release:check` verts. Le test de processus lance
+réellement le mode agent sans TTY et vérifie un dossier de travail vide après
+exécution. La recherche des signatures de secrets du packageur ne retourne
+aucune correspondance dans le périmètre modifié. Gitleaks reste assuré par la
+CI, son exécutable n’étant pas installé localement.
+
 ## Décision
 
 La décision est `PASS_WITH_WARNINGS` car toutes les portes automatisables locales passent et seules des UAT externes explicitement documentées restent ouvertes. Le tag RC sera créé uniquement après succès des workflows du commit final ; aucune release stable ne sera publiée.

@@ -274,7 +274,7 @@ export async function generateProject(options: {
   }
 }
 
-function resolveComponents(config: FangaBaseConfig): string[] {
+export function resolveComponents(config: FangaBaseConfig): string[] {
   const ids = new Set<string>(["contracts"]);
   if (config.architecture.backend === "next") ids.add("next_backend");
   else ids.add("laravel_backend");

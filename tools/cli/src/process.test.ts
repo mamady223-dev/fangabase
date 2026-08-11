@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -8,6 +8,71 @@ const root = resolve(import.meta.dirname, "../../..");
 const example = join(root, "fangabase.config.example.yaml");
 
 describe("CLI FangaBase", () => {
+  it("expose le questionnaire JSON sans TTY et sans écriture", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-agent-cli-"));
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve(import.meta.dirname, "index.ts"),
+        "create",
+        "--agent",
+        "--json",
+      ],
+      {
+        encoding: "utf8",
+        env: { ...process.env, INIT_CWD: directory },
+      },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(
+      expect.objectContaining({ status: "NEEDS_ANSWERS", protocol_version: 1 }),
+    );
+    expect(await readdir(directory)).toEqual([]);
+  });
+
+  it("résout un fichier de réponses complet sans générer de projet", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-agent-ready-"));
+    const answers = join(directory, "answers.json");
+    await writeFile(
+      answers,
+      JSON.stringify({
+        "product.name": "Campus Mali",
+        "product.description": "Gestion universitaire",
+        "product.type": "saas",
+        "deployment.family": "cloud",
+        "database.provider": "neon",
+        "email.provider": "local_log",
+        "payments.provider": "none",
+        "billing.mode": "none",
+        "design.source": "headless",
+      }),
+    );
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve(import.meta.dirname, "index.ts"),
+        "create",
+        "--agent",
+        "--json",
+        "--answers",
+        answers,
+      ],
+      { encoding: "utf8", env: { ...process.env, INIT_CWD: directory } },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(
+      expect.objectContaining({
+        status: "READY",
+        config_yaml: expect.any(String),
+      }),
+    );
+    expect(await readdir(directory)).toEqual(["answers.json"]);
+  });
+
   it("produit un manifeste puis reste idempotent", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-cli-"));
     const output = join(directory, "fangabase.config.yaml");

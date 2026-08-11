@@ -2,6 +2,9 @@
 
 ## Stabilisation finale de 0.3.0-rc.1
 
+- Ajoute le protocole non interactif `create:project --agent --json`, son registre de questions partagé et la reprise progressive par fichier de réponses, sans écriture avant confirmation.
+- Documente le parcours guidé Codex tout en conservant le questionnaire PowerShell et les sept profils existants.
+
 - Stabilise le harnais de conformité Laravel avec `--no-reload`, un port système libre et des diagnostics de processus complets en cas de rupture réseau.
 - Désactive la réutilisation keep-alive dans le client de conformité pour respecter le comportement de fermeture du serveur PHP de développement.
 

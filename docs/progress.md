@@ -136,6 +136,23 @@ Publier l'intégration Orange Money Mali, attendre tous les workflows, puis
 créer `v0.2.0-rc.2` s'ils sont verts. Aucune release stable n'est prévue à ce
 stade.
 
+## Génération guidée sans TTY
+
+Le CLI utilise désormais un registre unique pour le questionnaire PowerShell,
+le protocole agent, les tests et la résolution de configuration. La commande
+`pnpm create:project --agent --json` retourne les questions ordonnées et
+`--answers` permet une reprise déterministe avec les états `NEEDS_ANSWERS`,
+`INVALID_ANSWERS` et `READY`. Le mode agent ne crée aucun fichier de projet.
+Le parcours complet est documenté dans
+`docs/getting-started/codex-guided-generation.md`. Le prochain bloc exact est
+la validation CI de ce correctif ; aucun tag ni mouvement de `stable` n’est
+prévu.
+
+Contrôles locaux du 2026-08-11 : 87 tests CLI, dont les sept profils et le
+processus non-TTY, puis lint, typecheck, builds, tests JS/TS complets,
+documentation et `pnpm release:check` verts. La recherche avec les signatures
+du packageur officiel ne trouve aucun secret dans les fichiers modifiés.
+
 ## Règle durable du jalon 9
 
 Le jalon 9 ne construit aucun design FangaBase. Il fournit uniquement le workflow d'intégration du design choisi par l'étudiant. Banani et les exemples frontend restent facultatifs. Responsive, accessibilité et tests s'appliquent seulement au design effectivement choisi ou fourni.

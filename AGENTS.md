@@ -20,3 +20,8 @@ Construire et maintenir une base applicative originale pour les profils Cloud, V
 - Les interfaces de démonstration restent dans `examples`.
 - Un design n’est implémenté que sur demande explicite ou depuis une maquette fournie.
 - Chaque projet généré doit pouvoir avoir une identité visuelle totalement différente.
+- En environnement sans TTY, ne jamais lancer directement le questionnaire interactif : utiliser `pnpm create:project --agent --json`.
+- Un agent pose les questions retournées une par une, respecte leurs conditions et ne choisit jamais à la place de l’utilisateur.
+- Avant toute génération, un agent exécute un dry-run JSON, présente les composants inclus et exclus, puis attend une confirmation explicite.
+- Le dossier de destination est demandé séparément ; il ne peut pas se trouver dans le dépôt FangaBase.
+- `--force` n’est jamais utilisé sans demande explicite de l’utilisateur.

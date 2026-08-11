@@ -26,8 +26,8 @@ import { backup, restore } from "./recovery.js";
 import { generateProject, planProject } from "./project-generator.js";
 import { runDoctor } from "./doctor.js";
 import { readBrief } from "./brief.js";
-
-const generatorVersion = "0.3.0-rc.1";
+import { runAgentQuestionnaire } from "./agent-questionnaire.js";
+import { generatorVersion } from "./questions.js";
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -135,6 +135,8 @@ program
   });
 program
   .command("create")
+  .option("--agent", "questionnaire JSON en lecture seule pour un agent", false)
+  .option("--answers <path>", "réponses JSON du questionnaire agent")
   .option("--brief <path>", "brief Markdown contenant un bloc yaml fangabase")
   .option("--product-docs <path>", "dossier de documents produit Markdown")
   .option("--destination <path>", "nouveau dossier indépendant")
@@ -147,6 +149,50 @@ program
   .action(async (options, command) => {
     options = { ...command.optsWithGlobals(), ...options };
     const invocationDirectory = process.env.INIT_CWD ?? process.cwd();
+    if (options.answers && !options.agent)
+      throw new Error("--answers est disponible uniquement avec --agent.");
+    if (options.agent) {
+      if (!options.json)
+        throw new Error(
+          "--agent exige --json afin de garantir un protocole stable.",
+        );
+      const incompatible = [
+        "config",
+        "brief",
+        "productDocs",
+        "destination",
+        "force",
+        "yes",
+        "dryRun",
+      ].filter((name) => options[name]);
+      if (incompatible.length) {
+        process.stdout.write(
+          `${JSON.stringify({
+            protocol_version: 1,
+            generator_version: generatorVersion,
+            status: "INVALID_ANSWERS",
+            questions: [],
+            errors: incompatible.map((name) => ({
+              question_id: "$",
+              code: "INCOMPATIBLE_OPTION",
+              message: `L’option ${name} ne peut pas être utilisée avec --agent.`,
+            })),
+            next_action:
+              "Relancez le questionnaire agent sans option de génération ni d’écriture.",
+          })}\n`,
+        );
+        return;
+      }
+      process.stdout.write(
+        `${JSON.stringify(
+          await runAgentQuestionnaire({
+            invocationDirectory,
+            ...(options.answers ? { answersPath: options.answers } : {}),
+          }),
+        )}\n`,
+      );
+      return;
+    }
     let config;
     if (options.config && options.brief)
       throw new Error("Utilisez soit --config, soit --brief, jamais les deux.");
