@@ -35,17 +35,37 @@ describe("CLI FangaBase", () => {
       expect.objectContaining({
         status: "NEEDS_PROJECT_VALIDATION",
         protocol_version: 1,
-        workflow_file: "Fanga_validation_projet.md",
+        project_generated: false,
+        generator_ready: true,
+        student_project_ready: false,
+        must_continue_in_same_turn: true,
+        completion_claim_allowed: false,
       }),
     );
+    expect(response.first_question_block).toHaveLength(5);
+    expect(response.workflow_file).toBe(
+      join(root, "Fanga_validation_projet.md"),
+    );
     expect(response).not.toHaveProperty("config_yaml");
-    expect(response.next_action).toContain("blocs de cinq questions maximum");
+    expect(response.assistant_instruction).toContain(
+      "Ne termine pas ta réponse",
+    );
     expect(automatic.stdout).not.toContain("Dossier de destination:");
     expect(automatic.stdout).not.toContain(
       "What destination path should I use?",
     );
     expect(automatic.stderr).not.toContain("Dossier de destination:");
-    expect(await readdir(directory)).toEqual([]);
+    expect(await readdir(directory)).toEqual([".fangabase"]);
+    const resumed = command(["--agent", "--json", "--resume", "OK"]);
+    expect(resumed.status, resumed.stderr).toBe(0);
+    expect(JSON.parse(resumed.stdout)).toEqual(
+      expect.objectContaining({
+        status: "PROJECT_VALIDATION_IN_PROGRESS",
+        project_generated: false,
+        completion_claim_allowed: false,
+        first_question_block: expect.any(Array),
+      }),
+    );
   });
 
   it("préserve le parcours create non interactif avec une configuration", async () => {
@@ -75,6 +95,37 @@ describe("CLI FangaBase", () => {
       expect.objectContaining({ destination, generatedFiles: [] }),
     );
     expect(await readdir(directory)).toEqual([]);
+  });
+
+  it("refuse la génération avant validation, dry-run et confirmation", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-blocked-cli-"));
+    const destination = join(directory, "generated");
+    const invoke = (args: string[]) =>
+      spawnSync(
+        process.execPath,
+        [
+          "--import",
+          "tsx",
+          resolve(import.meta.dirname, "index.ts"),
+          "create",
+          ...args,
+        ],
+        {
+          encoding: "utf8",
+          env: { ...process.env, INIT_CWD: directory },
+        },
+      );
+    expect(invoke([]).status).toBe(0);
+    const blocked = invoke([
+      "--config",
+      example,
+      "--destination",
+      destination,
+      "--yes",
+    ]);
+    expect(blocked.status).toBe(1);
+    expect(blocked.stderr).toContain("NEEDS_PROJECT_VALIDATION");
+    await expect(readdir(destination)).rejects.toThrow();
   });
 
   it("préserve le parcours create non interactif avec un brief", async () => {

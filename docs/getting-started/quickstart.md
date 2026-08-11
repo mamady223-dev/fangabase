@@ -11,6 +11,8 @@ pnpm create:project
 
 Ces quatre commandes lancent le [parcours étudiant officiel](student-journey.md). Sans TTY et sans brief explicite, la première réponse machine est `NEEDS_PROJECT_VALIDATION`; les questions techniques ne commencent qu’après une décision `GO_CONDITIONNEL` et un brief produit valide.
 
+Le dossier `FangaBase` cloné est seulement le générateur. Le JSON retourne immédiatement le chemin absolu du workflow et les cinq premières questions. Codex doit les poser dans le même tour et reprendre `.fangabase/session.json` après « OK » ou « continue »; il ne peut annoncer un projet prêt que lorsque `completion_claim_allowed` vaut `true`.
+
 Node.js 22 et pnpm 11 sont communs à tous les profils. PHP 8.2 et Composer 2.8 ne sont requis que pour Laravel ou un profil hybride. Docker est facultatif.
 
 Le questionnaire choisit le déploiement, l’autorité backend, le frontend, la base, l’e-mail, les paiements, la facturation et la source frontend. Le type de produit reste descriptif. Avant toute écriture, le CLI affiche la destination, les inclusions, les exclusions, les commandes et les avertissements.
@@ -22,7 +24,7 @@ pnpm create:project --config fangabase.config.example.yaml --destination ../mon-
 pnpm create:project --config fangabase.config.example.yaml --destination ../mon-projet --yes
 cd ../mon-projet
 pnpm setup
-pnpm doctor
+pnpm run doctor
 pnpm migrate
 pnpm test
 pnpm build

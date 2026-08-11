@@ -19,3 +19,4 @@ orange-money-integration.md
 apps/web/test-results/
 apps/web/playwright-report/
 dist/release/
+.fangabase/

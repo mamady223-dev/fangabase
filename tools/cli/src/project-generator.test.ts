@@ -278,6 +278,14 @@ describe("générateur de projet ciblé", () => {
         }),
       );
       expect(
+        await readFile(join(destination, "NEXT_STEPS.md"), "utf8"),
+      ).toContain("pnpm run doctor");
+      if (config.architecture.ui === "inertia_react") {
+        expect(
+          await readFile(join(destination, "tools/doctor.mjs"), "utf8"),
+        ).toContain('migrations.status===0?"PASS":"WARNING"');
+      }
+      expect(
         await readFile(join(destination, "fangabase.config.yaml"), "utf8"),
       ).toContain(config.product.name);
       if (config.architecture.backend === "next") {
@@ -517,5 +525,19 @@ describe("générateur de projet ciblé", () => {
         "utf8",
       ),
     ).toContain("ne créent automatiquement ni métier, ni entité, ni table");
+  });
+
+  it("autorise explicitement le build esbuild des frontends générés", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-pnpm-build-"));
+    const destination = join(directory, "application");
+    await generateProject({
+      config: base,
+      destination,
+      sourceRoot,
+      confirmed: true,
+    });
+    expect(
+      await readFile(join(destination, "pnpm-workspace.yaml"), "utf8"),
+    ).toContain("allowBuilds:\n  esbuild: true");
   });
 });

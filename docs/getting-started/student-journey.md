@@ -2,6 +2,10 @@
 
 Les quatre commandes publiques sont les seules que l’étudiant doit connaître. Codex orchestre les options internes, pose les questions une par une, ne choisit aucune valeur et ne demande la destination qu’après validation du brief et des choix techniques.
 
+Le dossier cloné `FangaBase` contient le générateur : ce n’est jamais le projet étudiant. Le premier appel crée un état local ignoré par Git dans `.fangabase/session.json`. Un message court comme « OK », « continue », « reprendre » ou « vas-y » demande de reprendre cet état et ne prouve aucun achèvement.
+
+`NEEDS_PROJECT_VALIDATION` fournit un chemin absolu existant vers le workflow, les cinq questions du bloc A, `project_generated: false`, `student_project_ready: false`, `must_continue_in_same_turn: true` et `completion_claim_allowed: false`. L’agent doit lire le workflow et poser le bloc dans le même tour.
+
 ```text
 Idée → validation → recherche et cahier des charges → choix techniques → dry-run → confirmation → génération → configuration → smoke auth → design facultatif → validation → rapport
 ```
@@ -29,3 +33,5 @@ Idée → validation → recherche et cahier des charges → choix techniques �
 | `FAIL`                           | Donner l’erreur exacte et la correction ciblée.                                                      | preuve de la gate                       | Décision seulement si action externe indispensable.            | Ne jamais masquer ni affaiblir un test.                                 |
 
 Après `GO_CONDITIONNEL`, le dossier produit contient `PRD.md`, `CAHIER_DES_CHARGES.md`, `RECHERCHE_MARCHE.md`, `MVP.md`, `PARCOURS_UTILISATEURS.md`, `BACKLOG_MVP.md`, `RISQUES_ET_HYPOTHESES.md` et `FANGABASE_INPUT.md`. Ce dernier contient exactement un bloc `yaml fangabase` validé par le schéma. Les documents orientent le futur métier mais ne le génèrent jamais implicitement.
+
+Une affirmation « projet prêt » n’est autorisée que si l’état persistant prouve la destination générée, `generation-manifest.json`, `fangabase.config.yaml`, setup, doctor sans FAIL, migrations, tests, build, smoke auth lorsqu’il existe et rapport final. Le CLI interne `journey` enregistre ces preuves après leur exécution réelle; il ne les déduit jamais d’un message de confirmation.

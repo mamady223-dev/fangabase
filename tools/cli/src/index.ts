@@ -30,9 +30,15 @@ import { runAgentQuestionnaire } from "./agent-questionnaire.js";
 import { generatorVersion } from "./questions.js";
 import { shouldUseAutomaticAgentMode } from "./create-mode.js";
 import {
+  assertGenerationAllowed,
   journeyQuestionnaireResult,
   needsProjectValidation,
+  readJourneySession,
+  recordBriefReady,
+  recordGeneration,
+  recordJourneyEvidence,
   readyFromBrief,
+  resumeJourney,
 } from "./student-journey.js";
 
 async function exists(path: string): Promise<boolean> {
@@ -143,6 +149,15 @@ program
   .command("create")
   .option("--agent", "questionnaire JSON en lecture seule pour un agent", false)
   .option("--answers <path>", "réponses JSON du questionnaire agent")
+  .option("--resume <text>", "reprend la session guidée (usage agent interne)")
+  .option(
+    "--validation-answers <path>",
+    "réponses JSON de validation (usage agent interne)",
+  )
+  .option(
+    "--decision <decision>",
+    "GO_CONDITIONNEL, PIVOT ou NO_GO_TEMPORAIRE (usage agent interne)",
+  )
   .option("--brief <path>", "brief Markdown contenant un bloc yaml fangabase")
   .option("--product-docs <path>", "dossier de documents produit Markdown")
   .option("--destination <path>", "nouveau dossier indépendant")
@@ -155,6 +170,7 @@ program
   .action(async (options, command) => {
     options = { ...command.optsWithGlobals(), ...options };
     const invocationDirectory = process.env.INIT_CWD ?? process.cwd();
+    const sourceRoot = resolve(import.meta.dirname, "../../..");
     if (options.answers && !options.agent)
       throw new Error("--answers est disponible uniquement avec --agent.");
     const automaticAgent = shouldUseAutomaticAgentMode(
@@ -194,9 +210,39 @@ program
         );
         return;
       }
+      if (options.resume || options.validationAnswers || options.decision) {
+        if (
+          options.decision &&
+          !["GO_CONDITIONNEL", "PIVOT", "NO_GO_TEMPORAIRE"].includes(
+            options.decision,
+          )
+        )
+          throw new Error("Décision de projet invalide.");
+        process.stdout.write(
+          `${JSON.stringify(
+            await resumeJourney({
+              invocationDirectory,
+              sourceRoot,
+              generatorVersion,
+              ...(options.resume ? { response: options.resume } : {}),
+              ...(options.validationAnswers
+                ? { validationAnswersPath: options.validationAnswers }
+                : {}),
+              ...(options.decision ? { decision: options.decision } : {}),
+            }),
+          )}\n`,
+        );
+        return;
+      }
       if (!options.answers && !options.brief) {
         process.stdout.write(
-          `${JSON.stringify(needsProjectValidation(generatorVersion))}\n`,
+          `${JSON.stringify(
+            await needsProjectValidation(
+              generatorVersion,
+              invocationDirectory,
+              sourceRoot,
+            ),
+          )}\n`,
         );
         return;
       }
@@ -204,6 +250,7 @@ program
         const config = await readBrief(
           resolve(invocationDirectory, options.brief),
         );
+        await recordBriefReady(invocationDirectory, stringify(config));
         process.stdout.write(
           `${JSON.stringify(readyFromBrief(config, generatorVersion))}\n`,
         );
@@ -244,7 +291,6 @@ program
       invocationDirectory,
       options.destination ?? (await promptDestination()),
     );
-    const sourceRoot = resolve(import.meta.dirname, "../../..");
     const plan = planProject(config, destination, sourceRoot);
     if (!options.json) {
       process.stdout.write(
@@ -268,6 +314,7 @@ program
       options.dryRun ||
       options.yes ||
       (!options.config && (await promptConfirmation()));
+    await assertGenerationAllowed(invocationDirectory);
     const result = await generateProject({
       config,
       destination,
@@ -279,12 +326,63 @@ program
         ? { productDocs: resolve(invocationDirectory, options.productDocs) }
         : {}),
     });
+    await recordGeneration({
+      invocationDirectory,
+      destination,
+      dryRun: options.dryRun,
+      generated: !options.dryRun,
+      configYaml: stringify(config),
+    });
     process.stdout.write(
       options.json
         ? `${JSON.stringify(result)}\n`
         : options.dryRun
           ? `Dry-run: ${result.files.length} sources prévues, aucune écriture.\n`
           : `Projet créé: ${result.destination}\nCommandes:\n${result.commands.join("\n")}\n`,
+    );
+  });
+program
+  .command("journey")
+  .description("état persistant du parcours guidé (usage agent interne)")
+  .option("--status", "affiche l’état courant")
+  .option(
+    "--record <step>",
+    "enregistre setup, doctor, migrations, tests, build, smoke ou report",
+  )
+  .option("--result <result>", "pass, fail ou not_available")
+  .option("--report-path <path>", "rapport final réellement produit")
+  .action(async (options) => {
+    const invocationDirectory = process.env.INIT_CWD ?? process.cwd();
+    if (options.status) {
+      process.stdout.write(
+        `${JSON.stringify(await readJourneySession(invocationDirectory))}\n`,
+      );
+      return;
+    }
+    if (!options.record || !options.result)
+      throw new Error("journey exige --status ou --record avec --result.");
+    if (
+      ![
+        "setup",
+        "doctor",
+        "migrations",
+        "tests",
+        "build",
+        "smoke",
+        "report",
+      ].includes(options.record) ||
+      !["pass", "fail", "not_available"].includes(options.result)
+    )
+      throw new Error("Étape ou résultat de parcours invalide.");
+    process.stdout.write(
+      `${JSON.stringify(
+        await recordJourneyEvidence({
+          invocationDirectory,
+          step: options.record,
+          result: options.result,
+          ...(options.reportPath ? { reportPath: options.reportPath } : {}),
+        }),
+      )}\n`,
     );
   });
 program

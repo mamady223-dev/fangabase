@@ -450,6 +450,11 @@ async function writeGeneratedTooling(
     current.scripts["dev:frontend"] = "pnpm --dir frontend dev";
   }
   await writeFile(packagePath, `${JSON.stringify(current, null, 2)}\n`);
+  if (frontend)
+    await writeFile(
+      join(staging, "pnpm-workspace.yaml"),
+      "packages:\n  - .\nallowBuilds:\n  esbuild: true\n",
+    );
   await mkdir(join(staging, "tools"), { recursive: true });
   await writeFile(join(staging, "tools/doctor.mjs"), generatedDoctor(config));
   await writeFile(
@@ -478,7 +483,7 @@ const modules=run("php",["-m"]);for(const extension of ["pdo","openssl","mbstrin
 for(const path of ["artisan","composer.lock","pnpm-lock.yaml","resources/js/app.tsx","vite.config.ts","storage","bootstrap/cache"]){add("file:"+path,existsSync(path)?"PASS":"FAIL","Élément du profil intégré.");}
 for(const path of ["storage","bootstrap/cache"]){try{accessSync(path,constants.R_OK|constants.W_OK);add("permissions:"+path,"PASS","Lecture et écriture disponibles.");}catch{add("permissions:"+path,"FAIL","Lecture et écriture requises.");}}
 const hasEnv=existsSync(".env");add("environment",hasEnv?"PASS":"WARNING",".env reste local et hors Git.");
-if(hasEnv){const entries=Object.fromEntries(readFileSync(".env","utf8").split(/\\r?\\n/).filter(line=>line&&!line.startsWith("#")&&line.includes("=")).map(line=>{const index=line.indexOf("=");return[line.slice(0,index),line.slice(index+1)];}));add("app-key",entries.APP_KEY?"PASS":"FAIL","APP_KEY doit être défini localement.");add("database-config",entries.DATABASE_URL||entries.DB_CONNECTION?"PASS":"FAIL","Connexion DB requise.");const unsafe=Object.keys(entries).filter(name=>name.startsWith("VITE_")&&/(secret|password|private.?key|token|client.?secret)/i.test(name));add("vite-public-secrets",unsafe.length?"FAIL":"PASS",unsafe.length?"Nom VITE potentiellement secret.":"Aucun nom de secret exposé par Vite.");const migrations=run("php",["artisan","migrate:status","--no-interaction"]);add("database-migrations",migrations.status===0?"PASS":"FAIL","Connexion DB et table des migrations.");}
+if(hasEnv){const entries=Object.fromEntries(readFileSync(".env","utf8").split(/\\r?\\n/).filter(line=>line&&!line.startsWith("#")&&line.includes("=")).map(line=>{const index=line.indexOf("=");return[line.slice(0,index),line.slice(index+1)];}));add("app-key",entries.APP_KEY?"PASS":"FAIL","APP_KEY doit être défini localement.");add("database-config",entries.DATABASE_URL||entries.DB_CONNECTION?"PASS":"FAIL","Connexion DB requise.");const unsafe=Object.keys(entries).filter(name=>name.startsWith("VITE_")&&/(secret|password|private.?key|token|client.?secret)/i.test(name));add("vite-public-secrets",unsafe.length?"FAIL":"PASS",unsafe.length?"Nom VITE potentiellement secret.":"Aucun nom de secret exposé par Vite.");const migrations=run("php",["artisan","migrate:status","--no-interaction"]);add("database-migrations",migrations.status===0?"PASS":"WARNING",migrations.status===0?"Connexion DB et table des migrations disponibles.":"Exécutez pnpm migrate, puis relancez pnpm run doctor.");}
 const composer=run("composer",["show","inertiajs/inertia-laravel"]);add("composer-dependencies",composer.status===0?"PASS":"FAIL","Adaptateur Inertia Laravel installé.");
 const frontend=run("pnpm",["list","@inertiajs/react","--depth","0"]);add("frontend-dependencies",frontend.status===0?"PASS":"FAIL","Adaptateur Inertia React installé.");
 add("vite-manifest",existsSync("public/build/.vite/manifest.json")||existsSync("public/build/manifest.json")?"PASS":"WARNING","Exécutez pnpm build avant déploiement.");
@@ -1030,7 +1035,7 @@ async function writeDocs(
   );
   await writeFile(
     join(staging, "NEXT_STEPS.md"),
-    `# Prochaines étapes\n\n1. Copiez \`.env.example\` vers \`.env\` sans le commiter.\n2. Lancez \`pnpm setup\`, \`pnpm doctor\` puis \`pnpm migrate\`.\n3. Démarrez les processus indiqués dans le README.\n4. Lancez \`pnpm smoke:auth\` en environnement local.\n5. Intégrez votre métier et votre design explicitement choisi.\n`,
+    `# Prochaines étapes\n\n1. Copiez \`.env.example\` vers \`.env\` sans le commiter.\n2. Lancez \`pnpm setup\`, \`pnpm run doctor\`, \`pnpm migrate\`, puis \`pnpm run doctor\` à nouveau.\n3. Démarrez les processus indiqués dans le README.\n4. Lancez \`pnpm smoke:auth\` en environnement local.\n5. Intégrez votre métier et votre design explicitement choisi.\n`,
   );
   await writeFile(
     join(staging, "CONFIGURATION_SERVICES.md"),
@@ -1168,7 +1173,7 @@ function serviceSection(
   variables: string[],
   purpose: string,
 ): string {
-  return `## ${title}\n\n- But : ${purpose}\n- Statut : ${status}\n- Variables : ${variables.length ? variables.map((item) => `\`${item}\``).join(", ") : "aucune variable distante"}\n- Source et endpoints : À confirmer dans le contrat officiel du fournisseur.\n- Absence de configuration : le service distant reste désactivé ou le doctor signale un avertissement.\n- Vérification : \`pnpm doctor\`, puis UAT sandbox avant production.\n- Sécurité : secrets au runtime, erreurs fournisseur nettoyées, callbacks HTTPS vérifiés.`;
+  return `## ${title}\n\n- But : ${purpose}\n- Statut : ${status}\n- Variables : ${variables.length ? variables.map((item) => `\`${item}\``).join(", ") : "aucune variable distante"}\n- Source et endpoints : À confirmer dans le contrat officiel du fournisseur.\n- Absence de configuration : le service distant reste désactivé ou le doctor signale un avertissement.\n- Vérification : \`pnpm run doctor\`, puis UAT sandbox avant production.\n- Sécurité : secrets au runtime, erreurs fournisseur nettoyées, callbacks HTTPS vérifiés.`;
 }
 
 function inertiaDeploymentGuide(kind: string): string {

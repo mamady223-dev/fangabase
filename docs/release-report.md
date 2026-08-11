@@ -218,3 +218,17 @@ La décision est `PASS_WITH_WARNINGS` car toutes les portes automatisables local
 - Branche `stable` : ne pas modifier.
 - Version stable : ne pas publier.
 - Tag `v0.4.0-rc.1` : autorisé uniquement après push du commit final et CI entièrement verte.
+
+# Correctif post-`v0.4.0-rc.1` — continuité du parcours agent
+
+Décision locale : **PASS_WITH_WARNINGS, CI requise avant clôture**.
+
+Cause exacte : le premier protocole `NEEDS_PROJECT_VALIDATION` décrivait une action future, mais ne fournissait pas le bloc A, n’écrivait aucun état persistant et n’exposait aucune preuve machine interdisant une conclusion prématurée. Le dépôt du générateur pouvait être confondu avec un projet étudiant.
+
+Correction : le JSON distingue désormais `generator_ready` et `student_project_ready`, impose la continuation dans le même tour, fournit le workflow absolu et les cinq questions, persiste le parcours dans `.fangabase/session.json`, bloque toute génération prématurée et calcule `completion_claim_allowed` uniquement depuis les artefacts et gates réellement enregistrés.
+
+Preuve réelle : un profil Laravel/Inertia a été généré hors du dépôt puis a passé `pnpm setup`, 13 migrations SQLite, le doctor final, 96 tests Laravel (641 assertions), 1 test frontend, le build Vite (777 modules) et le smoke d’authentification avec nettoyage. La session n’a retourné `PASS` qu’après enregistrement du rapport final existant. Le générateur autorise explicitement le build d’`esbuild` avec `allowBuilds` sous pnpm 11 et les guides utilisent `pnpm run doctor` pour éviter la commande interne homonyme de pnpm.
+
+Gates du dépôt : 122 tests CLI et 107 tests Laravel (667 assertions), suites JS/TS, lint, typecheck, builds et `release:check` verts. Aucun secret réel n’a été détecté. Les audits conservent uniquement deux avis pnpm modérés et l’avis Composer faible transitive `firebase/php-jwt` déjà documenté; aucun avis haut ou critique.
+
+Le tag `v0.4.0-rc.1` est préservé et ne sera jamais déplacé. Aucun `v0.4.0-rc.2` ne sera créé dans ce lot sans test réel complet, CI verte et confirmation explicite de l’utilisateur. La branche `stable` reste inchangée.

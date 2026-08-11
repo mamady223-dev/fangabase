@@ -193,3 +193,21 @@ Le jalon 9 ne construit aucun design FangaBase. Il fournit uniquement le workflo
 - [ ] Commit, push, CI du commit final et tag annoté `v0.4.0-rc.1`.
 
 Prochain point exact : créer le commit du parcours guidé, pousser `main`, attendre toutes les gates CI, puis créer le tag RC uniquement si elles sont vertes.
+
+# 2026-08-11 — Correctif de continuité du parcours agent
+
+- [x] Incident utilisateur classé FAIL du protocole, sans faute attribuée à l’étudiant.
+- [x] `NEEDS_PROJECT_VALIDATION` distingue explicitement générateur prêt et projet étudiant non généré.
+- [x] Chemin absolu du workflow, premier bloc de cinq questions, instruction de continuation et réponses interdites inclus dans le JSON.
+- [x] Session locale `.fangabase/session.json` persistante et ignorée par Git.
+- [x] « OK », « continue », « reprendre » ou « vas-y » reprennent l’état; ils ne prouvent jamais l’achèvement.
+- [x] Décisions, blocs A à H, réponses techniques, destination et preuves des gates représentés dans la session.
+- [x] Génération guidée bloquée avant GO conditionnel, configuration, dry-run et confirmation.
+- [x] Gate de vérité fondée sur la destination, le manifeste, la configuration, setup, doctor, migrations, tests, build, smoke et rapport final.
+- [x] Tests de régression CLI ajoutés; dix profils préservés.
+- [x] Parcours réel complet : génération hors dépôt, setup, 13 migrations, doctor final PASS, 96 tests Laravel (641 assertions), 1 test frontend, build Vite (777 modules), smoke auth et nettoyage PASS.
+- [x] Gates locales : 122 tests CLI, 107 tests Laravel (667 assertions), suites JS/TS, lint, typecheck, builds et `release:check` verts.
+- [x] Sécurité : aucun secret détecté, aucune vulnérabilité haute/critique; deux avis pnpm modérés et l’avis Composer faible transitive déjà documentés.
+- [ ] Commit `fix: enforce continuous guided student journey`, push de `main` et CI.
+
+Prochain point exact : publier uniquement le commit correctif sur `main`, attendre la CI, sans créer de tag ni modifier `stable`.
