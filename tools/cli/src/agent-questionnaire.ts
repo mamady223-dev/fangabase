@@ -27,7 +27,10 @@ export type AgentQuestionnaireResult = {
   errors: QuestionnaireError[];
   config_yaml?: string;
   summary?: Record<string, unknown>;
-  next_action: string;
+  next_action: {
+    actor: "coding_agent";
+    instruction: string;
+  };
 };
 
 export async function runAgentQuestionnaire(options: {
@@ -95,8 +98,11 @@ export async function runAgentQuestionnaire(options: {
         included_components: included,
         excluded_components: excluded,
       },
-      next_action:
-        "Enregistrez config_yaml dans un fichier, vérifiez le résumé avec l’étudiant, puis lancez pnpm create:project --config <fichier> --destination <dossier> --yes.",
+      next_action: {
+        actor: "coding_agent",
+        instruction:
+          "Le statut est READY. Demandez maintenant le dossier de destination, construisez le fichier YAML temporaire, exécutez un dry-run JSON, présentez le résumé, puis attendez OUI avant toute génération.",
+      },
     };
   } catch (error) {
     return result(
@@ -182,12 +188,15 @@ function result(
     status,
     questions: questions.map((question) => publicQuestion(question, answers)),
     errors,
-    next_action:
-      status === "NEEDS_ANSWERS"
-        ? "Posez uniquement les questions retournées, enregistrez les réponses par identifiant stable, puis relancez avec --answers <file.json>."
-        : status === "INVALID_ANSWERS"
-          ? "Corrigez uniquement les erreurs indiquées puis relancez avec --answers <file.json>."
-          : "",
+    next_action: {
+      actor: "coding_agent",
+      instruction:
+        status === "NEEDS_ANSWERS"
+          ? "Posez à l’utilisateur une seule question à la fois. N’exécutez aucune génération et ne demandez pas encore la destination. Enregistrez les réponses, puis validez-les avec le protocole answers."
+          : status === "INVALID_ANSWERS"
+            ? "Corrigez uniquement les erreurs indiquées avec l’utilisateur, puis relancez le protocole answers. Ne demandez pas encore la destination."
+            : "Attendez le statut READY avant de demander la destination.",
+    },
   };
 }
 

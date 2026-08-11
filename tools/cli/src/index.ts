@@ -28,6 +28,7 @@ import { runDoctor } from "./doctor.js";
 import { readBrief } from "./brief.js";
 import { runAgentQuestionnaire } from "./agent-questionnaire.js";
 import { generatorVersion } from "./questions.js";
+import { shouldUseAutomaticAgentMode } from "./create-mode.js";
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -151,8 +152,12 @@ program
     const invocationDirectory = process.env.INIT_CWD ?? process.cwd();
     if (options.answers && !options.agent)
       throw new Error("--answers est disponible uniquement avec --agent.");
-    if (options.agent) {
-      if (!options.json)
+    const automaticAgent = shouldUseAutomaticAgentMode(
+      process.stdin.isTTY === true,
+      options,
+    );
+    if (options.agent || automaticAgent) {
+      if (!options.json && !automaticAgent)
         throw new Error(
           "--agent exige --json afin de garantir un protocole stable.",
         );
@@ -177,8 +182,11 @@ program
               code: "INCOMPATIBLE_OPTION",
               message: `L’option ${name} ne peut pas être utilisée avec --agent.`,
             })),
-            next_action:
-              "Relancez le questionnaire agent sans option de génération ni d’écriture.",
+            next_action: {
+              actor: "coding_agent",
+              instruction:
+                "Relancez le questionnaire agent sans option de génération ni d’écriture.",
+            },
           })}\n`,
         );
         return;

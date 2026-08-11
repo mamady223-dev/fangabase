@@ -148,10 +148,17 @@ Le parcours complet est documenté dans
 la validation CI de ce correctif ; aucun tag ni mouvement de `stable` n’est
 prévu.
 
-Contrôles locaux du 2026-08-11 : 87 tests CLI, dont les sept profils et le
-processus non-TTY, puis lint, typecheck, builds, tests JS/TS complets,
-documentation et `pnpm release:check` verts. La recherche avec les signatures
-du packageur officiel ne trouve aucun secret dans les fichiers modifiés.
+`pnpm create:project` détecte désormais automatiquement l’absence de TTY et
+retourne `NEEDS_ANSWERS` sans option étudiante, sans destination et sans
+écriture. La réponse est identique au mode agent explicite et ordonne à l’agent
+de poser une seule question à la fois. Les parcours explicites `--config`,
+`--brief`, `--answers` et génération restent séparés.
+
+Contrôles locaux du 2026-08-11 : 97 tests CLI, dont les sept profils, la
+sélection TTY/non-TTY et les processus réels config, brief et answers. Lint,
+typecheck, builds, tests JS/TS complets, documentation et `pnpm release:check`
+sont verts. La recherche avec les signatures du packageur officiel ne trouve
+aucun secret dans les fichiers modifiés.
 
 ## Règle durable du jalon 9
 

@@ -153,13 +153,21 @@ doit encore passer par le dry-run, la destination séparée et la confirmation
 explicite avant génération. Aucun backend, paiement, design ou artefact de
 déploiement n’a été modifié. Aucun tag ni mouvement de `stable` n’est prévu.
 
-Preuves locales du 2026-08-11 : 87 tests CLI verts, matrice des sept profils
+Preuves locales du 2026-08-11 : 97 tests CLI verts, matrice des sept profils
 verte, suite JS/TS complète verte, lint, typecheck, six builds, contrôle
 documentaire et `pnpm release:check` verts. Le test de processus lance
 réellement le mode agent sans TTY et vérifie un dossier de travail vide après
 exécution. La recherche des signatures de secrets du packageur ne retourne
 aucune correspondance dans le périmètre modifié. Gitleaks reste assuré par la
 CI, son exécutable n’étant pas installé localement.
+
+Le correctif suivant rend le protocole transparent pour l’étudiant : la
+commande nue `pnpm create:project` retourne automatiquement `NEEDS_ANSWERS`
+sans TTY, exactement comme `--agent --json`. Elle ne résout aucune valeur par
+défaut, n’écrit rien et ne demande pas la destination. `next_action` impose une
+seule question à la fois et reporte la destination après `READY`. Les tests CLI
+passent désormais à 97, avec détection TTY/non-TTY, égalité des deux sorties et
+régressions process pour config, brief, answers et les sept profils.
 
 ## Décision
 

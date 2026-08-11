@@ -8,8 +8,50 @@ const root = resolve(import.meta.dirname, "../../..");
 const example = join(root, "fangabase.config.example.yaml");
 
 describe("CLI FangaBase", () => {
-  it("expose le questionnaire JSON sans TTY et sans écriture", async () => {
+  it("bascule automatiquement vers le même questionnaire JSON sans TTY", async () => {
     const directory = await mkdtemp(join(tmpdir(), "fangabase-agent-cli-"));
+    const command = (args: string[]) =>
+      spawnSync(
+        process.execPath,
+        [
+          "--import",
+          "tsx",
+          resolve(import.meta.dirname, "index.ts"),
+          "create",
+          ...args,
+        ],
+        {
+          encoding: "utf8",
+          env: { ...process.env, INIT_CWD: directory },
+        },
+      );
+    const automatic = command([]);
+    const explicit = command(["--agent", "--json"]);
+    expect(automatic.status, automatic.stderr).toBe(0);
+    expect(explicit.status, explicit.stderr).toBe(0);
+    const response = JSON.parse(automatic.stdout);
+    expect(response).toEqual(JSON.parse(explicit.stdout));
+    expect(response).toEqual(
+      expect.objectContaining({ status: "NEEDS_ANSWERS", protocol_version: 1 }),
+    );
+    expect(response).not.toHaveProperty("config_yaml");
+    expect(response.next_action).toEqual(
+      expect.objectContaining({
+        actor: "coding_agent",
+        instruction: expect.stringContaining("une seule question à la fois"),
+      }),
+    );
+    expect(automatic.stdout).not.toContain("Dossier de destination:");
+    expect(automatic.stdout).not.toContain(
+      "What destination path should I use?",
+    );
+    expect(automatic.stderr).not.toContain("Dossier de destination:");
+    expect(await readdir(directory)).toEqual([]);
+  });
+
+  it("préserve le parcours create non interactif avec une configuration", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-config-cli-"));
+    const destination = join(directory, "generated");
     const result = spawnSync(
       process.execPath,
       [
@@ -17,7 +59,11 @@ describe("CLI FangaBase", () => {
         "tsx",
         resolve(import.meta.dirname, "index.ts"),
         "create",
-        "--agent",
+        "--config",
+        example,
+        "--destination",
+        destination,
+        "--dry-run",
         "--json",
       ],
       {
@@ -27,9 +73,40 @@ describe("CLI FangaBase", () => {
     );
     expect(result.status, result.stderr).toBe(0);
     expect(JSON.parse(result.stdout)).toEqual(
-      expect.objectContaining({ status: "NEEDS_ANSWERS", protocol_version: 1 }),
+      expect.objectContaining({ destination, generatedFiles: [] }),
     );
     expect(await readdir(directory)).toEqual([]);
+  });
+
+  it("préserve le parcours create non interactif avec un brief", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "fangabase-brief-cli-"));
+    const brief = join(directory, "brief.md");
+    await writeFile(
+      brief,
+      `# Brief étudiant\n\n\`\`\`yaml fangabase\n${await readFile(example, "utf8")}\`\`\`\n`,
+    );
+    const destination = join(directory, "generated");
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        resolve(import.meta.dirname, "index.ts"),
+        "create",
+        "--brief",
+        brief,
+        "--destination",
+        destination,
+        "--dry-run",
+        "--json",
+      ],
+      { encoding: "utf8", env: { ...process.env, INIT_CWD: directory } },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual(
+      expect.objectContaining({ destination, generatedFiles: [] }),
+    );
+    expect(await readdir(directory)).toEqual(["brief.md"]);
   });
 
   it("résout un fichier de réponses complet sans générer de projet", async () => {

@@ -2,6 +2,8 @@
 
 ## Stabilisation finale de 0.3.0-rc.1
 
+- Bascule automatiquement `pnpm create:project` vers le protocole agent lorsque stdin n’est pas un TTY et qu’aucune génération explicite n’est demandée.
+- Structure `next_action` pour imposer une seule question à la fois et reporter la destination après `READY`.
 - Ajoute le protocole non interactif `create:project --agent --json`, son registre de questions partagé et la reprise progressive par fichier de réponses, sans écriture avant confirmation.
 - Documente le parcours guidé Codex tout en conservant le questionnaire PowerShell et les sept profils existants.
 
