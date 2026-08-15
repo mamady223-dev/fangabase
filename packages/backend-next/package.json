@@ -14,11 +14,11 @@
   },
   "dependencies": {
     "@fangabase/contracts": "workspace:*",
-    "postgres": "3.4.7"
+    "postgres": "3.4.9"
   },
   "devDependencies": {
     "@types/node": "22.15.32",
-    "tsx": "4.20.6",
+    "tsx": "4.23.12",
     "typescript": "5.8.3",
     "vitest": "3.2.6"
   }
